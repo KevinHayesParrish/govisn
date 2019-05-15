@@ -1,80 +1,77 @@
 package main
 
 import (
-	"encoding/xml"
+	"database/sql"
+	"flag"
 	"fmt"
-	"io/ioutil"
-	"os"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
+//ViewnetVersion is the file version number
+const ViewnetVersion = "0.1.0"
+
+//DbName is the name of the discovered network database file
+var DbName = "kpnetviz.db"
+
+// The flag package provides a default help printer via -h switch
+var versionFlag = flag.Bool("v", false, "Print the version number.")
+var debugFlag = flag.Bool("d", false, "Print Debug statements.")
+
+// DiscoveredNetwork is the network that was discovered and the subject of the visualization.
 type DiscoveredNetwork struct {
-	XMLName xml.Name `xml:"Discovered_Network"`
-	Routers Router[]	`xml:"Router"`
+	Routers []Router
 }
-type Router  struct {
-		Text   string `xml:",chardata"`
-		System struct {
-			Text        string `xml:",chardata"`
-			Name        string `xml:"Name"`
-			Description string `xml:"Description"`
-			UpTime      string `xml:"Up_Time"`
-			Contact     string `xml:"Contact"`
-			Location    string `xml:"Location"`
-			GPS         struct {
-				Text      string `xml:",chardata"`
-				Latitude  string `xml:"Latitude"`
-				Longitude string `xml:"Longitude"`
-				Altitude  string `xml:"Altitude"`
-			} `xml:"GPS"`
-		} `xml:"System"`
-		Addresses struct {
-			Text             string `xml:",chardata"`
-			NetworkAddresses struct {
-				Text      string   `xml:",chardata"`
-				IPAddress []string `xml:"IP_Address"`
-			} `xml:"Network_Addresses"`
-			MediaAddresses struct {
-				Text         string `xml:",chardata"`
-				MediaAddress string `xml:"Media_Address"`
-			} `xml:"Media_Addresses"`
-		} `xml:"Addresses"`
-		Neighbors struct {
-			Text     string `xml:",chardata"`
-			Neighbor []struct {
-				Text               string `xml:",chardata"`
-				DestinationAddress string `xml:"Destination_Address"`
-				NextHop            string `xml:"Next_Hop"`
-			} `xml:"Neighbor"`
-		} `xml:"Neighbors"`
-	} `xml:"Router"`
+
+// Router is the structure representing a network router
+type Router struct {
+	System struct {
+		Text        string
+		Name        string
+		Description string
+		UpTime      string
+		Contact     string
+		Location    string
+		GPS         struct {
+			Text      string
+			Latitude  string
+			Longitude string
+			Altitude  string
+		}
+	}
+	Addresses struct {
+		Text             string
+		NetworkAddresses struct {
+			Text      string
+			IPAddress []string
+		}
+		MediaAddresses struct {
+			Text         string
+			MediaAddress string
+		}
+	}
+	Neighbors struct {
+		Text     string
+		Neighbor []struct {
+			Text               string
+			DestinationAddress string
+			NextHop            string
+		}
+	}
 }
 
 func main() {
-
-	// Open the network xmlFile
-	xmlFile, err := os.Open("V15N-GPS-5.xml")
-	// if os.Open returns an error then handle it
-	if err != nil {
-		fmt.Println(err)
+	flag.Parse() // Scan the arguments list
+	fmt.Println("viewnet version:", ViewnetVersion)
+	if *versionFlag {
+		return
+	}
+	if *debugFlag {
+		fmt.Println("Debug option selected")
 	}
 
-	fmt.Println("Successfully Opened V15N-GPS-5.xml")
-	// defer the closing of our xmlFile so that we can parse it later on
-	defer xmlFile.Close()
+	// Open the database containing the discovered network
+	database, _ := sql.Open("sqlite3", DbName)
+	rows, _ := database.Query("SELECT id, firstname, lastname FROM people")
 
-	// read our opened xmlFile as a byte array.
-	byteValue, _ := ioutil.ReadAll(xmlFile)
-
-	// we initialize our Users array
-	var network DiscoveredNetwork
-	// we unmarshal our byteArray which contains our
-	// xmlFiles content into 'netework' which we defined above
-	xml.Unmarshal(byteValue, &network)
-
-	// we iterate through every user within our users array and
-	// print out the user Type, their name, and their facebook url
-	// as just an example
-	for i := 0; i < len(network.DiscoveredNetwork.Router); i++ {
-		fmt.Println("Router Name: " + network.Router[i].System.Name)
-	}
 }
