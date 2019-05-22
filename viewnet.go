@@ -4,13 +4,14 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"log"
 	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.1"
+const ViewnetVersion = "0.1.2"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -72,8 +73,16 @@ func main() {
 	}
 
 	// Open the database containing the discovered network
-	database, _ := sql.Open("sqlite3", *DbName)
-	routers, _ := database.Query("SELECT RouterID, SystemName, SystemDesc FROM Routers")
+	database, openErr := sql.Open("sqlite3", *DbName)
+	if openErr != nil {
+		fmt.Println("Error opening database", *DbName)
+		log.Fatal(openErr)
+	}
+	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc FROM Routers")
+	if queryErr != nil {
+		fmt.Println("Database Query error", queryErr)
+		log.Fatal(openErr)
+	}
 
 	var RouterID int
 	var SystemName string
