@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -11,12 +12,12 @@ import (
 //ViewnetVersion is the file version number
 const ViewnetVersion = "0.1.0"
 
-//DbName is the name of the discovered network database file
-var DbName = "kpnetviz.db"
-
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
 var debugFlag = flag.Bool("d", false, "Print Debug statements.")
+
+//DbName is the name of the discovered network database file
+var DbName = flag.String("f", "kpnetviz.db", "Name of the discovered network database")
 
 // DiscoveredNetwork is the network that was discovered and the subject of the visualization.
 type DiscoveredNetwork struct {
@@ -71,7 +72,17 @@ func main() {
 	}
 
 	// Open the database containing the discovered network
-	database, _ := sql.Open("sqlite3", DbName)
-	rows, _ := database.Query("SELECT id, firstname, lastname FROM people")
+	database, _ := sql.Open("sqlite3", *DbName)
+	routers, _ := database.Query("SELECT RouterID, SystemName, SystemDesc FROM Routers")
+
+	var RouterID int
+	var SystemName string
+	var SystemDesc string
+	if *debugFlag {
+		for routers.Next() {
+			routers.Scan(&RouterID, &SystemName, &SystemDesc)
+			fmt.Println(strconv.Itoa(RouterID) + ": " + SystemName + " " + SystemDesc)
+		}
+	}
 
 }
