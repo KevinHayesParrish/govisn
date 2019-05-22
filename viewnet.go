@@ -10,14 +10,14 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.0"
+const ViewnetVersion = "0.1.1"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
 var debugFlag = flag.Bool("d", false, "Print Debug statements.")
 
 //DbName is the name of the discovered network database file
-var DbName = flag.String("f", "kpnetviz.db", "Name of the discovered network database")
+var DbName = flag.String("f", "samplenetwork.db", "Name of the discovered network database")
 
 // DiscoveredNetwork is the network that was discovered and the subject of the visualization.
 type DiscoveredNetwork struct {
