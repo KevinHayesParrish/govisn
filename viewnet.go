@@ -10,7 +10,7 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.3"
+const ViewnetVersion = "0.1.4"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -19,43 +19,31 @@ var debugFlag = flag.Bool("d", false, "Print Debug statements.")
 //DbName is the name of the discovered network database file
 var DbName = flag.String("f", "samplenetwork.db", "Name of the discovered network database")
 
-// DiscoveredNetwork is the network that was discovered and the subject of the visualization.
-//type DiscoveredNetwork struct {
-//	Routers []Router
-//}
-
 // Router is the structure representing a network router
 type Router struct {
 	System struct {
-		RouterID int
-		//		Text        string
+		RouterID    int
 		Name        string
 		Description string
 		UpTime      string
 		Contact     string
 		Location    string
 		GPS         struct {
-			//			Text      string
 			Latitude  string
 			Longitude string
 			Altitude  string
 		}
 	}
 	Addresses struct {
-		//		Text             string
 		NetworkAddresses struct {
-			//			Text      string
 			IPAddress []string
 		}
 		MediaAddresses struct {
-			//			Text         string
 			MediaAddress string
 		}
 	}
 	Neighbors struct {
-		//		Text     string
 		Neighbor []struct {
-			//			Text               string
 			DestinationAddress string
 			NextHop            string
 		}
@@ -93,9 +81,7 @@ func main() {
 	var GpsLat string
 	var GpsLong string
 	var GpsAlt string
-	//	var discoveredNetwork DiscoveredNetwork
 	var router Router
-	i := 0
 
 	for routers.Next() {
 		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
@@ -112,8 +98,6 @@ func main() {
 			//			fmt.Println(strconv.Itoa(RouterID) + ": " + SystemName + " " + SystemDesc + " " + UpTime)
 			fmt.Println("router =", router)
 		}
-
-		i++
 	}
 
 }
