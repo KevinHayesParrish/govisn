@@ -66,6 +66,7 @@ func main() {
 		fmt.Println("Error opening database", *DbName)
 		log.Fatal(openErr)
 	}
+	// Retrieve the Routers table
 	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
 	if queryErr != nil {
 		fmt.Println("Database Query error", queryErr)
@@ -98,6 +99,14 @@ func main() {
 			//			fmt.Println(strconv.Itoa(RouterID) + ": " + SystemName + " " + SystemDesc + " " + UpTime)
 			fmt.Println("router =", router)
 		}
+
+		// Retrieve the Router IP Addresses table
+		IpAddresses, queryErr := database.Query("SELECT RouterID, IpAddr FROM RouterIp")
+		if queryErr != nil {
+			fmt.Println("Database Query error", queryErr)
+			log.Fatal(openErr)
+		}
+
 	}
 
 }
