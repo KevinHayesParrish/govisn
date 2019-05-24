@@ -6,11 +6,17 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/g3n/engine/geometry"
+	"github.com/g3n/engine/graphic"
+	"github.com/g3n/engine/light"
+	"github.com/g3n/engine/material"
+	"github.com/g3n/engine/math32"
+	"github.com/g3n/engine/util/application"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.4"
+const ViewnetVersion = "0.1.5"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -73,6 +79,34 @@ func main() {
 		log.Fatal(openErr)
 	}
 
+	// Initialize the 3D space
+	app, appErr := application.Create(application.Options{
+		Title:  "GoVisn - 3D Network Visualization",
+		Width:  1200,
+		Height: 1000,
+	})
+	if appErr != nil {
+		fmt.Println("Error Creating 3D g3n app", *DbName)
+		log.Fatal(openErr)
+	}
+	// Add lights to the scene
+	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 0.8)
+	app.Scene().Add(ambientLight)
+	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
+	pointLight.SetPosition(1, 0, 2)
+	app.Scene().Add(pointLight)
+	// Add an axis helper to the scene
+	axis := graphic.NewAxisHelper(0.5)
+	app.Scene().Add(axis)
+
+	app.CameraPersp().SetPosition(0, 0, 3)
+
+	// Create a blue torus and add it to the scene
+	geom := geometry.NewTorus(1, .4, 12, 32, math32.Pi*2)
+	mat := material.NewPhong(math32.NewColor("DarkBlue"))
+	torusMesh := graphic.NewMesh(geom, mat)
+	app.Scene().Add(torusMesh)
+
 	var RouterID int
 	var SystemName string
 	var SystemDesc string
@@ -100,17 +134,5 @@ func main() {
 			fmt.Println("router =", router)
 		}
 	}
-
-	// Retrieve the Router IP Addresses table
-	IpAddresses, queryErr := database.Query("SELECT RouterID, IpAddr FROM RouterIp")
-	if queryErr != nil {
-		fmt.Println("Database Query error", queryErr)
-		log.Fatal(openErr)
-	}
-
-	for IpAddresses.Next() {
-		IpAddresses.Scan(&RouterID, &IpAddr)
-
-		router.Addresses.NetworkAddresses
-	}
+	app.Run()
 }
