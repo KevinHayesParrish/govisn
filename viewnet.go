@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 
 	"github.com/g3n/engine/geometry"
 	"github.com/g3n/engine/graphic"
@@ -16,7 +17,7 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.5"
+const ViewnetVersion = "0.1.6"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -89,23 +90,6 @@ func main() {
 		fmt.Println("Error Creating 3D g3n app", *DbName)
 		log.Fatal(openErr)
 	}
-	// Add lights to the scene
-	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 0.8)
-	app.Scene().Add(ambientLight)
-	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
-	pointLight.SetPosition(1, 0, 2)
-	app.Scene().Add(pointLight)
-	// Add an axis helper to the scene
-	axis := graphic.NewAxisHelper(0.5)
-	app.Scene().Add(axis)
-
-	app.CameraPersp().SetPosition(0, 0, 3)
-
-	// Create a blue torus and add it to the scene
-	geom := geometry.NewTorus(1, .4, 12, 32, math32.Pi*2)
-	mat := material.NewPhong(math32.NewColor("DarkBlue"))
-	torusMesh := graphic.NewMesh(geom, mat)
-	app.Scene().Add(torusMesh)
 
 	var RouterID int
 	var SystemName string
@@ -117,6 +101,28 @@ func main() {
 	var GpsLong string
 	var GpsAlt string
 	var router Router
+	var x float32
+	var y float32 = 1.0
+	var z float32 = 1.0
+
+	// Add lights to the scene
+	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 0.8)
+	app.Scene().Add(ambientLight)
+	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
+	pointLight.SetPosition(1, 0, 2)
+	app.Scene().Add(pointLight)
+	// Add an axis helper to the scene
+	axis := graphic.NewAxisHelper(0.5)
+	app.Scene().Add(axis)
+
+	app.CameraPersp().SetPosition(4, 0, 15)
+
+	// Create a sphere representing the globe
+	globe3D := geometry.NewSphere(1, 16, 16, 0, math.Pi*2, 0, math.Pi)
+	globeMat := material.NewPhong(&math32.Color{R: 0.5, G: 0.5, B: 0.5})
+	globeMesh := graphic.NewMesh(globe3D, globeMat)
+	globeMesh.SetPosition(-1, -1, -1)
+	app.Scene().Add(globeMesh)
 
 	for routers.Next() {
 		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
@@ -133,6 +139,13 @@ func main() {
 			//			fmt.Println(strconv.Itoa(RouterID) + ": " + SystemName + " " + SystemDesc + " " + UpTime)
 			fmt.Println("router =", router)
 		}
+		// Create a blue cylinder to represent the router and adds it to the scene
+		rtr3D := geometry.NewCylinder(1.0, 1.0, 0.5, 16, 2, 0, 2*math.Pi, true, true)
+		mat := material.NewPhong(math32.NewColor("DarkBlue"))
+		cylinderMesh := graphic.NewMesh(rtr3D, mat)
+		cylinderMesh.SetPosition(x, y, z)
+		app.Scene().Add(cylinderMesh)
+		x = x + 2.0
 	}
 	app.Run()
 }
