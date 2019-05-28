@@ -17,7 +17,7 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.6"
+const ViewnetVersion = "0.1.7"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -101,6 +101,7 @@ func main() {
 	var GpsLong string
 	var GpsAlt string
 	var router Router
+	var globeRadius float64 = 1
 	var x float32
 	var y float32 = 1.0
 	var z float32 = 1.0
@@ -118,7 +119,7 @@ func main() {
 	app.CameraPersp().SetPosition(4, 0, 15)
 
 	// Create a sphere representing the globe
-	globe3D := geometry.NewSphere(1, 16, 16, 0, math.Pi*2, 0, math.Pi)
+	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
 	globeMat := material.NewPhong(&math32.Color{R: 0.5, G: 0.5, B: 0.5})
 	globeMesh := graphic.NewMesh(globe3D, globeMat)
 	globeMesh.SetPosition(-1, -1, -1)
