@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"strconv"
 
 	"github.com/g3n/engine/geometry"
 	"github.com/g3n/engine/graphic"
@@ -17,7 +18,7 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.8"
+const ViewnetVersion = "0.1.9"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -144,9 +145,23 @@ func main() {
 		rtr3D := geometry.NewCylinder(1.0, 1.0, 0.5, 16, 2, 0, 2*math.Pi, true, true)
 		mat := material.NewPhong(math32.NewColor("DarkBlue"))
 		cylinderMesh := graphic.NewMesh(rtr3D, mat)
+		/*
+		 * Set coordinates and altitude
+		 */
+		x = (float32)(globeRadius * math.Sin(Rad(strconv.ParseFloat(GpsLat, 64))) * math.Cos(Rad(strconv.ParseFloat(GpsLong, 64))))
+		y = (float32)(globeRadius * math.Sin(Rad(strconv.ParseFloat(GpsLat, 64))) * math.Sin(Rad(strconv.ParseFloat(GpsLong, 64))))
+
 		cylinderMesh.SetPosition(x, y, z)
 		app.Scene().Add(cylinderMesh)
 		x = x + 2.0
 	}
 	app.Run()
 }
+
+const constX = math.Pi / 180
+
+// Rad converts degrees to radians
+func Rad(d float64) float64 { return d * constX }
+
+// Deg converts radians to degrees
+func Deg(r float64) float64 { return r / constX }
