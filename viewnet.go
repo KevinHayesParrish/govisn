@@ -147,6 +147,7 @@ func main() {
 		cylinderMesh := graphic.NewMesh(rtr3D, mat)
 		/*
 		 * Set coordinates and altitude
+		 *** Needs separate radians conversion on separate line.***
 		 */
 		x = (float32)(globeRadius * math.Sin(Rad(strconv.ParseFloat(GpsLat, 64))) * math.Cos(Rad(strconv.ParseFloat(GpsLong, 64))))
 		y = (float32)(globeRadius * math.Sin(Rad(strconv.ParseFloat(GpsLat, 64))) * math.Sin(Rad(strconv.ParseFloat(GpsLong, 64))))
