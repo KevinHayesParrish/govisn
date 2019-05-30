@@ -147,7 +147,8 @@ func main() {
 		cylinderMesh := graphic.NewMesh(rtr3D, mat)
 		/*
 		 * Set coordinates and altitude
-		 *** Needs separate radians conversion on separate line.***
+		 *** Needs z coordinate calculation***
+		 *** Needs altitude calculation ***
 		 */
 		GpsLatFloat64, parseErr := strconv.ParseFloat(GpsLat, 64)
 		if parseErr != nil {
