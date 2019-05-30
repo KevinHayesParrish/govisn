@@ -18,7 +18,7 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.10"
+const ViewnetVersion = "0.1.11"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -166,6 +166,11 @@ func main() {
 		yRadianLat := Rad(GpsLatFloat64)
 		yRadianLong := Rad(GpsLongFloat64)
 		y = (float32)(globeRadius * math.Sin(yRadianLat) * math.Sin(yRadianLong))
+
+		GpsAltFloat64, parseErr := strconv.ParseFloat(GpsAlt, 64)
+		//		zRadianAlt := Rad(GpsAltFloat64)
+		//		z = (float)(radius * (java.lang.Math.cos(java.lang.Math.toRadians(Float.valueOf(routerLatitude))))) + (Float.valueOf(routerAltitude));
+		z = (float32)(globeRadius*(math.Cos(yRadianLat)) + GpsAltFloat64)
 
 		cylinderMesh.SetPosition(x, y, z)
 		app.Scene().Add(cylinderMesh)
