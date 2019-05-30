@@ -18,7 +18,7 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.9"
+const ViewnetVersion = "0.1.10"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -149,8 +149,22 @@ func main() {
 		 * Set coordinates and altitude
 		 *** Needs separate radians conversion on separate line.***
 		 */
-		x = (float32)(globeRadius * math.Sin(Rad(strconv.ParseFloat(GpsLat, 64))) * math.Cos(Rad(strconv.ParseFloat(GpsLong, 64))))
-		y = (float32)(globeRadius * math.Sin(Rad(strconv.ParseFloat(GpsLat, 64))) * math.Sin(Rad(strconv.ParseFloat(GpsLong, 64))))
+		GpsLatFloat64, parseErr := strconv.ParseFloat(GpsLat, 64)
+		if parseErr != nil {
+			fmt.Println("Error parsing GpsLat", GpsLat)
+			log.Fatal(openErr)
+		}
+		xRadianLat := Rad(GpsLatFloat64)
+		GpsLongFloat64, parseErr := strconv.ParseFloat(GpsLong, 64)
+		if parseErr != nil {
+			fmt.Println("Error parsing GpsLong", GpsLong)
+			log.Fatal(openErr)
+		}
+		xRadianLong := Rad(GpsLongFloat64)
+		x = (float32)(globeRadius * math.Sin(xRadianLat) * math.Cos(xRadianLong))
+		yRadianLat := Rad(GpsLatFloat64)
+		yRadianLong := Rad(GpsLongFloat64)
+		y = (float32)(globeRadius * math.Sin(yRadianLat) * math.Sin(yRadianLong))
 
 		cylinderMesh.SetPosition(x, y, z)
 		app.Scene().Add(cylinderMesh)
