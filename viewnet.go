@@ -18,7 +18,7 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.11"
+const ViewnetVersion = "0.1.12"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -26,6 +26,12 @@ var debugFlag = flag.Bool("d", false, "Print Debug statements.")
 
 //DbName is the name of the discovered network database file
 var DbName = flag.String("f", "samplenetwork.db", "Name of the discovered network database")
+
+//routerRadius is the radius of the 3D object representing a network router
+const routerRadius float64 = 0.5
+
+//globeRadius is the radius of the 3D object representing the earth
+var globeRadius float64 = 1.5
 
 // Router is the structure representing a network router
 type Router struct {
@@ -102,7 +108,7 @@ func main() {
 	var GpsLong string
 	var GpsAlt string
 	var router Router
-	var globeRadius float64 = 1
+	//	var globeRadius float64 = 1
 	var x float32
 	var y float32 = 1.0
 	var z float32 = 1.0
@@ -117,7 +123,9 @@ func main() {
 	axis := graphic.NewAxisHelper(0.5)
 	app.Scene().Add(axis)
 
-	app.CameraPersp().SetPosition(4, 0, 15)
+	// Set initial camera position, i.e. viewing point
+	//	app.CameraPersp().SetPosition(4, 0, 15)
+	app.CameraPersp().SetPosition(3, 5, 30)
 
 	// Create a sphere representing the globe
 	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
@@ -142,7 +150,8 @@ func main() {
 			fmt.Println("router =", router)
 		}
 		// Create a blue cylinder to represent the router and adds it to the scene
-		rtr3D := geometry.NewCylinder(1.0, 1.0, 0.5, 16, 2, 0, 2*math.Pi, true, true)
+		//		rtr3D := geometry.NewCylinder(1.0, 1.0, 0.5, 16, 2, 0, 2*math.Pi, true, true)
+		rtr3D := geometry.NewCylinder(routerRadius, routerRadius, 0.5, 16, 2, 0, 2*math.Pi, true, true)
 		mat := material.NewPhong(math32.NewColor("DarkBlue"))
 		cylinderMesh := graphic.NewMesh(rtr3D, mat)
 		/*
