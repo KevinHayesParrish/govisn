@@ -18,7 +18,7 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.12"
+const ViewnetVersion = "0.1.13"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -31,7 +31,8 @@ var DbName = flag.String("f", "samplenetwork.db", "Name of the discovered networ
 const routerRadius float64 = 0.5
 
 //globeRadius is the radius of the 3D object representing the earth
-var globeRadius float64 = 1.5
+//const globeRadius float64 = 1.5
+const globeRadius float64 = 65.0
 
 // Router is the structure representing a network router
 type Router struct {
@@ -108,7 +109,6 @@ func main() {
 	var GpsLong string
 	var GpsAlt string
 	var router Router
-	//	var globeRadius float64 = 1
 	var x float32
 	var y float32 = 1.0
 	var z float32 = 1.0
@@ -117,7 +117,9 @@ func main() {
 	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 0.8)
 	app.Scene().Add(ambientLight)
 	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
-	pointLight.SetPosition(1, 0, 2)
+	//	pointLight.SetPosition(1, 0, 2)
+	//	pointLight.SetPosition(10, 10, 20)
+	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
 	app.Scene().Add(pointLight)
 	// Add an axis helper to the scene
 	axis := graphic.NewAxisHelper(0.5)
@@ -125,7 +127,8 @@ func main() {
 
 	// Set initial camera position, i.e. viewing point
 	//	app.CameraPersp().SetPosition(4, 0, 15)
-	app.CameraPersp().SetPosition(3, 5, 30)
+	//	app.CameraPersp().SetPosition(0, 0, (float32)(globeRadius+40))
+	app.CameraPersp().SetPosition(0, 0, (float32)(globeRadius*3.0))
 
 	// Create a sphere representing the globe
 	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
@@ -137,6 +140,7 @@ func main() {
 	for routers.Next() {
 		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
 
+		// Load router struct from DB fields
 		router.System.RouterID = RouterID
 		router.System.Name = SystemName
 		router.System.UpTime = UpTime
@@ -183,7 +187,8 @@ func main() {
 
 		cylinderMesh.SetPosition(x, y, z)
 		app.Scene().Add(cylinderMesh)
-		x = x + 2.0
+
+		//x = x + 2.0
 	}
 	app.Run()
 }
