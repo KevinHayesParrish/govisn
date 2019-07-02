@@ -3,7 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"strconv"
+
+	//	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -38,7 +39,7 @@ func main() {
 	var router1 string
 	var router2 string
 	for rows.Next() {
-		rows.Scan(&id, &router1, &router2)
-		fmt.Println(strconv.Itoa(int(iduint32) + ": " + router1 + " " + router2)
+		rows.Scan(&iduint32, &router1, &router2)
+		fmt.Println(iduint32 + ": " + router1 + " " + router2)
 	}
 }
