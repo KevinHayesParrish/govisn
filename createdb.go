@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 
 	//	"strconv"
 
@@ -29,17 +30,25 @@ func createdb() {
 
 func main() {
 	database, _ := sql.Open("sqlite3", "./hashed.db")
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS people (id TEXT PRIMARY KEY, router1 TEXT, router2 TEXT)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, router1 TEXT, router2 TEXT)")
 	statement.Exec()
 	statement, _ = database.Prepare("INSERT INTO people (router1, router2) VALUES (?, ?)")
+
+	//	idUint32 := crc32.ChecksumIEEE([]byte("routerId1"))
 	statement.Exec("media", "router")
+	//	idUint32 = crc32.ChecksumIEEE([]byte("routerId2"))
+	statement.Exec("home", "wan")
+
 	rows, _ := database.Query("SELECT id, router1, router2 FROM people")
-	//var iduint32 uint32
-	iduint32 := ChecksumIEEE(1)
+
+	// print contents of the db
+	var id int
 	var router1 string
 	var router2 string
 	for rows.Next() {
-		rows.Scan(&iduint32, &router1, &router2)
-		fmt.Println(iduint32 + ": " + router1 + " " + router2)
+		//		rows.Scan(&idUint32, &router1, &router2)
+		//		fmt.Println(idUint32 + ": " + router1 + " " + router2)
+		rows.Scan(&id, &router1, &router2)
+		fmt.Println(strconv.Itoa(id) + ": " + router1 + " " + router2)
 	}
 }
