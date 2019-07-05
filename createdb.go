@@ -29,38 +29,51 @@ func createdb() {
 }
 */
 
-func createdb() {
+func main() {
 	database, _ := sql.Open("sqlite3", "./hashed.db")
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS people (linkId INTEGER PRIMARY KEY, router1 TEXT, router2 TEXT)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS links (linkID INTEGER PRIMARY KEY, fromrouter TEXT, torouter TEXT)")
 	statement.Exec()
-	//	statement, _ = database.Prepare("INSERT INTO people (router1, router2) VALUES (?, ?)")
-	statement, _ = database.Prepare("INSERT INTO people (linkId, router1, router2) VALUES (?, ?, ?)")
+	statement, _ = database.Prepare("INSERT INTO links (linkID, fromrouter, torouter) VALUES (?, ?, ?)")
 
-	//	statement.Exec("media", "router")
+	// Add a set of links to the database
 	var dest string
 	var nextHop string
 	dest = "media"
 	nextHop = "router"
-	linkIDUint32 := crc32.ChecksumIEEE([]byte(dest)) + crc32.ChecksumIEEE([]byte(nextHop))
-	statement.Exec(strconv.Itoa(int(linkIDUint32)), dest, nextHop)
+	destToNextHopLinkStr := dest + nextHop // directional link from dest to nextHop
+	nextHopToDestStr := nextHop + dest     // directional link from nextHop to dest
 
-	//	idUint32 = crc32.ChecksumIEEE([]byte("routerId2"))
-	//statement.Exec("home", "wan")
+	// add direction link from dest to nextHop to the database
+	destToNextHopLinkUint32 := crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
+	statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), dest, nextHop)
+
+	// add direction link from nextHop to dest to the database
+	nextHopToDestUint32 := crc32.ChecksumIEEE([]byte(nextHopToDestStr))
+	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
+
+	// Add a second set of links to the database
 	dest = "home"
 	nextHop = "wan"
-	linkIDUint32 = crc32.ChecksumIEEE([]byte(dest)) + crc32.ChecksumIEEE([]byte(nextHop))
-	statement.Exec(strconv.Itoa(int(linkIDUint32)), dest, nextHop)
+	// add direction link from dest to nextHop to the database
+	destToNextHopLinkStr = dest + nextHop // directional link from dest to nextHop
+	nextHopToDestStr = nextHop + dest     // directional link from nextHop to dest
 
-	rows, _ := database.Query("SELECT linkId, router1, router2 FROM people")
+	destToNextHopLinkUint32 = crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
+	statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), dest, nextHop)
+
+	// add direction link from nextHop to dest to the database
+	nextHopToDestUint32 = crc32.ChecksumIEEE([]byte(nextHopToDestStr))
+	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
 
 	// print contents of the db
-	var id int
-	var router1 string
-	var router2 string
+	rows, _ := database.Query("SELECT linkID, fromrouter, torouter FROM links")
+
+	var linkID int
+	var fromrouter string
+	var torouter string
 	for rows.Next() {
-		//		rows.Scan(&idUint32, &router1, &router2)
-		//		fmt.Println(idUint32 + ": " + router1 + " " + router2)
-		rows.Scan(&id, &router1, &router2)
-		fmt.Println(strconv.Itoa(id) + ": " + router1 + " " + router2)
+		//		fmt.Println(idUint32 + ": " + fromrouter + " " + torouter)
+		rows.Scan(&linkID, &fromrouter, &torouter)
+		fmt.Println(strconv.Itoa(linkID) + ": " + fromrouter + " " + torouter)
 	}
 }
