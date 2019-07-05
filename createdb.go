@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"hash/crc32"
 	"strconv"
 
 	//	"strconv"
@@ -28,18 +29,29 @@ func createdb() {
 }
 */
 
-func main() {
+func createdb() {
 	database, _ := sql.Open("sqlite3", "./hashed.db")
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, router1 TEXT, router2 TEXT)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS people (linkId INTEGER PRIMARY KEY, router1 TEXT, router2 TEXT)")
 	statement.Exec()
-	statement, _ = database.Prepare("INSERT INTO people (router1, router2) VALUES (?, ?)")
+	//	statement, _ = database.Prepare("INSERT INTO people (router1, router2) VALUES (?, ?)")
+	statement, _ = database.Prepare("INSERT INTO people (linkId, router1, router2) VALUES (?, ?, ?)")
 
-	//	idUint32 := crc32.ChecksumIEEE([]byte("routerId1"))
-	statement.Exec("media", "router")
+	//	statement.Exec("media", "router")
+	var dest string
+	var nextHop string
+	dest = "media"
+	nextHop = "router"
+	linkIDUint32 := crc32.ChecksumIEEE([]byte(dest)) + crc32.ChecksumIEEE([]byte(nextHop))
+	statement.Exec(strconv.Itoa(int(linkIDUint32)), dest, nextHop)
+
 	//	idUint32 = crc32.ChecksumIEEE([]byte("routerId2"))
-	statement.Exec("home", "wan")
+	//statement.Exec("home", "wan")
+	dest = "home"
+	nextHop = "wan"
+	linkIDUint32 = crc32.ChecksumIEEE([]byte(dest)) + crc32.ChecksumIEEE([]byte(nextHop))
+	statement.Exec(strconv.Itoa(int(linkIDUint32)), dest, nextHop)
 
-	rows, _ := database.Query("SELECT id, router1, router2 FROM people")
+	rows, _ := database.Query("SELECT linkId, router1, router2 FROM people")
 
 	// print contents of the db
 	var id int
