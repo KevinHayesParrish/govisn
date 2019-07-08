@@ -35,7 +35,7 @@ func createdb() {
 func createsampledb() {
 	database, _ := sql.Open("sqlite3", "./samplenetwork.db")
 	/*
-	 *	Add router table to DB
+	 *	Add Routers table to DB
 	 */
 
 	/*
