@@ -18,14 +18,15 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.1.13"
+const ViewnetVersion = "0.2.1"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
 var debugFlag = flag.Bool("d", false, "Print Debug statements.")
+var sampleNetworkDB = flag.String("c", "samplenetwork.db", "Create a sample database.")
 
 //DbName is the name of the discovered network database file
-var DbName = flag.String("f", "samplenetwork.db", "Name of the discovered network database")
+var DbName = flag.String("f", "discoverednetwork.db", "Name of the discovered network database")
 
 //routerRadius is the radius of the 3D object representing a network router
 const routerRadius float64 = 0.5
