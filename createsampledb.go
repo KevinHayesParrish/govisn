@@ -12,7 +12,7 @@ import (
 )
 
 //createdsampledbVersion is the file version number
-const createsampledbVersion = "0.1.2"
+const createsampledbVersion = "0.1.3"
 
 /*
 func createdb() {
@@ -34,11 +34,20 @@ func createdb() {
 
 func createsampledb() {
 	database, _ := sql.Open("sqlite3", "./samplenetwork.db")
+	/*
+	 *	Add router table to DB
+	 */
+
+	/*
+	 *	Add links table to DB
+	 */
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS links (linkID INTEGER PRIMARY KEY, fromrouter TEXT, torouter TEXT)")
 	statement.Exec()
 	statement, _ = database.Prepare("INSERT INTO links (linkID, fromrouter, torouter) VALUES (?, ?, ?)")
 
-	// Add a set of links to the database
+	/*
+	 * Add a set of links to the database
+	 */
 	var dest string
 	var nextHop string
 	dest = "media"
@@ -54,9 +63,11 @@ func createsampledb() {
 	nextHopToDestUint32 := crc32.ChecksumIEEE([]byte(nextHopToDestStr))
 	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
 
-	// Add a second set of links to the database
-	dest = "home"
-	nextHop = "wan"
+	/*
+	 * Add another set of links to the database
+	 */
+	dest = "router"
+	nextHop = "wan router"
 	// add direction link from dest to nextHop to the database
 	destToNextHopLinkStr = dest + nextHop // directional link from dest to nextHop
 	nextHopToDestStr = nextHop + dest     // directional link from nextHop to dest
@@ -68,7 +79,73 @@ func createsampledb() {
 	nextHopToDestUint32 = crc32.ChecksumIEEE([]byte(nextHopToDestStr))
 	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
 
-	// print contents of the db
+	/*
+	 * Add another set of links to the database
+	 */
+	dest = "wan router"
+	nextHop = "hub"
+	// add direction link from dest to nextHop to the database
+	destToNextHopLinkStr = dest + nextHop // directional link from dest to nextHop
+	nextHopToDestStr = nextHop + dest     // directional link from nextHop to dest
+
+	destToNextHopLinkUint32 = crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
+	statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), dest, nextHop)
+
+	// add direction link from nextHop to dest to the database
+	nextHopToDestUint32 = crc32.ChecksumIEEE([]byte(nextHopToDestStr))
+	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
+
+	/*
+	 * Add another set of links to the database
+	 */
+	dest = "wan router"
+	nextHop = "old-country-road"
+	// add direction link from dest to nextHop to the database
+	destToNextHopLinkStr = dest + nextHop // directional link from dest to nextHop
+	nextHopToDestStr = nextHop + dest     // directional link from nextHop to dest
+
+	destToNextHopLinkUint32 = crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
+	statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), dest, nextHop)
+
+	// add direction link from nextHop to dest to the database
+	nextHopToDestUint32 = crc32.ChecksumIEEE([]byte(nextHopToDestStr))
+	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
+
+	/*
+	 * Add another set of links to the database
+	 */
+	dest = "wan router"
+	nextHop = "fukui"
+	// add direction link from dest to nextHop to the database
+	destToNextHopLinkStr = dest + nextHop // directional link from dest to nextHop
+	nextHopToDestStr = nextHop + dest     // directional link from nextHop to dest
+
+	destToNextHopLinkUint32 = crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
+	statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), dest, nextHop)
+
+	// add direction link from nextHop to dest to the database
+	nextHopToDestUint32 = crc32.ChecksumIEEE([]byte(nextHopToDestStr))
+	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
+
+	/*
+	 * Add another set of links to the database
+	 */
+	dest = "wan router"
+	nextHop = "amsterdam"
+	// add direction link from dest to nextHop to the database
+	destToNextHopLinkStr = dest + nextHop // directional link from dest to nextHop
+	nextHopToDestStr = nextHop + dest     // directional link from nextHop to dest
+
+	destToNextHopLinkUint32 = crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
+	statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), dest, nextHop)
+
+	// add direction link from nextHop to dest to the database
+	nextHopToDestUint32 = crc32.ChecksumIEEE([]byte(nextHopToDestStr))
+	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
+
+	/*
+	* print contents of the db
+	 */
 	rows, _ := database.Query("SELECT linkID, fromrouter, torouter FROM links")
 
 	var linkID int
