@@ -39,6 +39,18 @@ func createsampledb() {
 	 */
 
 	/*
+	 *	Add RouteTable table to DB
+	 */
+
+	/*
+	 *	Add RouterIP table to DB
+	 */
+
+	/*
+	 *	Add RouterMac table to DB
+	 */
+
+	/*
 	 *	Add links table to DB
 	 */
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS links (linkID INTEGER PRIMARY KEY, fromrouter TEXT, torouter TEXT)")
