@@ -11,8 +11,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-//createdbVersion is the file version number
-const createdbVersion = "0.1.2"
+//createdsampledbVersion is the file version number
+const createsampledbVersion = "0.1.2"
 
 /*
 func createdb() {
@@ -32,8 +32,8 @@ func createdb() {
 }
 */
 
-func createdbsampledb() {
-	database, _ := sql.Open("sqlite3", "./hashed.db")
+func createsampledb() {
+	database, _ := sql.Open("sqlite3", "./samplenetwork.db")
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS links (linkID INTEGER PRIMARY KEY, fromrouter TEXT, torouter TEXT)")
 	statement.Exec()
 	statement, _ = database.Prepare("INSERT INTO links (linkID, fromrouter, torouter) VALUES (?, ?, ?)")

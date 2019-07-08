@@ -23,7 +23,7 @@ const ViewnetVersion = "0.2.1"
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
 var debugFlag = flag.Bool("d", false, "Print Debug statements.")
-var sampleNetworkDB = flag.String("c", "samplenetwork.db", "Create a sample database.")
+var sampleNetworkDB = flag.Bool("c", false, "Create a sample database.")
 
 //DbName is the name of the discovered network database file
 var DbName = flag.String("f", "discoverednetwork.db", "Name of the discovered network database")
@@ -74,6 +74,9 @@ func main() {
 	}
 	if *debugFlag {
 		fmt.Println("Debug option selected")
+	}
+	if *sampleNetworkDB {
+		createsampledb()
 	}
 
 	// Open the database containing the discovered network
