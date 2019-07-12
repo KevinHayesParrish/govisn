@@ -12,7 +12,7 @@ import (
 )
 
 //createdsampledbVersion is the file version number
-const createsampledbVersion = "0.1.3"
+const createsampledbVersion = "0.1.5"
 
 /*
 func createdb() {
@@ -33,32 +33,45 @@ func createdb() {
 */
 
 func createsampledb() {
+	fmt.Println("createdampledb version:", createsampledbVersion)
 	database, _ := sql.Open("sqlite3", "./samplenetwork.db")
 	/*
 	 *	Add Routers table to DB
 	 */
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat NUMERIC, GPSLong NUMERIC, GpsAlt NUMERIC)")
+	statement.Exec()
+	statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
 	/*
 	 *	Add RouteTable table to DB
 	 */
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, NextHop TEXT)")
+	statement.Exec()
+	statement, _ = database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, NextHop) VALUES (?, ?, ?)")
 
 	/*
 	 *	Add RouterIP table to DB
 	 */
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IpAddr TEXT)")
+	statement.Exec()
+	statement, _ = database.Prepare("INSERT INTO RouterIp (RouterID, IpAddr) VALUES (?, ?)")
 
 	/*
 	 *	Add RouterMac table to DB
 	 */
-
-	/*
-	 *	Add links table to DB
-	 */
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS links (linkID INTEGER PRIMARY KEY, fromrouter TEXT, torouter TEXT)")
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
 	statement.Exec()
-	statement, _ = database.Prepare("INSERT INTO links (linkID, fromrouter, torouter) VALUES (?, ?, ?)")
+	statement, _ = database.Prepare("INSERT INTO RouterMac (RourterID, MacAddr) VALUES (?, ?)")
 
 	/*
-	 * Add a set of links to the database
+	 *	Add Links table to DB
+	 */
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
+	statement.Exec()
+	statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
+
+	/*
+	 * Add a set of Links to the database
 	 */
 	var dest string
 	var nextHop string
@@ -76,7 +89,7 @@ func createsampledb() {
 	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
 
 	/*
-	 * Add another set of links to the database
+	 * Add another set of Links to the database
 	 */
 	dest = "router"
 	nextHop = "wan router"
@@ -92,7 +105,7 @@ func createsampledb() {
 	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
 
 	/*
-	 * Add another set of links to the database
+	 * Add another set of Links to the database
 	 */
 	dest = "wan router"
 	nextHop = "hub"
@@ -108,7 +121,7 @@ func createsampledb() {
 	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
 
 	/*
-	 * Add another set of links to the database
+	 * Add another set of Links to the database
 	 */
 	dest = "wan router"
 	nextHop = "old-country-road"
@@ -124,7 +137,7 @@ func createsampledb() {
 	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
 
 	/*
-	 * Add another set of links to the database
+	 * Add another set of Links to the database
 	 */
 	dest = "wan router"
 	nextHop = "fukui"
@@ -140,7 +153,7 @@ func createsampledb() {
 	statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
 
 	/*
-	 * Add another set of links to the database
+	 * Add another set of Links to the database
 	 */
 	dest = "wan router"
 	nextHop = "amsterdam"
@@ -158,14 +171,14 @@ func createsampledb() {
 	/*
 	* print contents of the db
 	 */
-	rows, _ := database.Query("SELECT linkID, fromrouter, torouter FROM links")
+	rows, _ := database.Query("SELECT LinkID, FromRouter, ToRouter FROM Links")
 
-	var linkID int
-	var fromrouter string
-	var torouter string
+	var LinkID int
+	var FromRouter string
+	var ToRouter string
 	for rows.Next() {
-		//		fmt.Println(idUint32 + ": " + fromrouter + " " + torouter)
-		rows.Scan(&linkID, &fromrouter, &torouter)
-		fmt.Println(strconv.Itoa(linkID) + ": " + fromrouter + " " + torouter)
+		//		fmt.Println(idUint32 + ": " + FromRouter + " " + ToRouter)
+		rows.Scan(&LinkID, &FromRouter, &ToRouter)
+		fmt.Println(strconv.Itoa(LinkID) + ": " + FromRouter + " " + ToRouter)
 	}
 }
