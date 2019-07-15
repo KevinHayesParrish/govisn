@@ -12,7 +12,7 @@ import (
 )
 
 //createdsampledbVersion is the file version number
-const createsampledbVersion = "0.1.5"
+const createsampledbVersion = "0.1.6"
 
 /*
 func createdb() {
@@ -41,6 +41,90 @@ func createsampledb() {
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat NUMERIC, GPSLong NUMERIC, GpsAlt NUMERIC)")
 	statement.Exec()
 	statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+
+	// add router to the database
+	SystemName := "media"
+	RouterIDUint32 := crc32.ChecksumIEEE([]byte(SystemName))
+	SystemDesc := "Hardware: x86 Family 15 Model 2 Stepping 7 AT/AT COMPATIBLE - Software: Windows Version 5.2 (Build 3790 Uniprocessor Free)"
+	UpTime := "18h 4m 9s 40"
+	Contact := "Kevin Parrish"
+	Location := "9218 Faxon Place, Elk Grove, CA 95624 USA"
+	GpsLat := "38.419471"
+	GpsLong := "-121.357212"
+	GpsAlt := "10.668"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+
+	// add another router to the database
+	SystemName = "router"
+	RouterIDUint32 = crc32.ChecksumIEEE([]byte(SystemName))
+	SystemDesc = "LinkSys WRT54G"
+	UpTime = "18h 4m 9s 40"
+	Contact = "Kevin Parrish"
+	Location = "9218 Faxon Place, Elk Grove, CA 95624 USA"
+	GpsLat = "38.419492"
+	GpsLong = "-121.357176"
+	GpsAlt = "10.668"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+
+	// add another router to the database
+	SystemName = "hub"
+	RouterIDUint32 = crc32.ChecksumIEEE([]byte(SystemName))
+	SystemDesc = "Cisco 2911"
+	UpTime = "18h 4m 9s 40"
+	Contact = "Kevin Parrish"
+	Location = "35 Hub Drive, Melville, NY 11747 USA"
+	GpsLat = "40.758262"
+	GpsLong = "-73.436362"
+	GpsAlt = "10.668"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+
+	// add another router to the database
+	SystemName = "wan-router"
+	RouterIDUint32 = crc32.ChecksumIEEE([]byte(SystemName))
+	SystemDesc = "Cisco 2911"
+	UpTime = "18h 4m 9s 40"
+	Contact = "Kevin Parrish"
+	Location = "Wichita, KS USA"
+	GpsLat = "37.665342"
+	GpsLong = "-97.431564"
+	GpsAlt = "396"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+
+	// add another router to the database
+	SystemName = "old-country-road"
+	RouterIDUint32 = crc32.ChecksumIEEE([]byte(SystemName))
+	SystemDesc = "Cisco 2911"
+	UpTime = "18h 4m 9s 40"
+	Contact = "Kevin Parrish"
+	Location = "201 Old Country Road, Melville, NY 11747 USA"
+	GpsLat = "40.795017"
+	GpsLong = "-73.41144"
+	GpsAlt = "13.716"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+
+	// add another router to the database
+	SystemName = "fukui"
+	RouterIDUint32 = crc32.ChecksumIEEE([]byte(SystemName))
+	SystemDesc = "Cisco 2911"
+	UpTime = "18h 4m 9s 40"
+	Contact = "Charlie Dowalo"
+	Location = "Fukui, Japan"
+	GpsLat = "36.063601"
+	GpsLong = "136.220856"
+	GpsAlt = "17"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+
+	// add another router to the database
+	SystemName = "amsterdam"
+	RouterIDUint32 = crc32.ChecksumIEEE([]byte(SystemName))
+	SystemDesc = "Cisco 2911"
+	UpTime = "18h 4m 9s 40"
+	Contact = "Charlie Dowalo"
+	Location = "Amsterdam, Netherlands"
+	GpsLat = "52.370359"
+	GpsLong = "4.894409"
+	GpsAlt = "-2"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
 
 	/*
 	 *	Add RouteTable table to DB
