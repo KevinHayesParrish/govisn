@@ -18,7 +18,7 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.2.1"
+const ViewnetVersion = "0.3.0"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -66,6 +66,13 @@ type Router struct {
 	}
 }
 
+// Link is the structure representing a network link between two routers
+type Link struct {
+	LinkID     int
+	FromRouter string
+	ToRouter   string
+}
+
 func main() {
 	flag.Parse() // Scan the arguments list
 	fmt.Println("viewnet version:", ViewnetVersion)
@@ -92,6 +99,13 @@ func main() {
 		log.Fatal(openErr)
 	}
 
+	// Retrieve the Links table
+	links, queryErr := database.Query("SELECT LinkID, FromRouter, ToRouter FROM Links")
+	if queryErr != nil {
+		fmt.Println("Database Query error", queryErr)
+		log.Fatal(openErr)
+	}
+
 	// Initialize the 3D space
 	app, appErr := application.Create(application.Options{
 		Title:  "GoVisn - 3D Network Visualization",
@@ -113,6 +127,10 @@ func main() {
 	var GpsLong string
 	var GpsAlt string
 	var router Router
+	var link Link
+	var LinkID int
+	var FromRouter string
+	var ToRouter string
 	var x float32
 	var y float32 = 1.0
 	var z float32 = 1.0
@@ -193,6 +211,20 @@ func main() {
 		app.Scene().Add(cylinderMesh)
 
 		//x = x + 2.0
+	}
+
+	for links.Next() {
+		links.Scan(&LinkID, &FromRouter, &ToRouter)
+		// Load link struct from DB fields
+		link.LinkID = LinkID
+		link.FromRouter = FromRouter
+		link.ToRouter = ToRouter
+		if *debugFlag {
+			fmt.Println("link =", link)
+		}
+
+		// TODO: capture router coordinates so we can place the link endpoints
+
 	}
 	app.Run()
 }
