@@ -18,7 +18,7 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.3.0"
+const ViewnetVersion = "0.3.1"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -48,6 +48,11 @@ type Router struct {
 			Latitude  string
 			Longitude string
 			Altitude  string
+		}
+		Coordinates struct {
+			X float32
+			Y float32
+			Z float32
 		}
 	}
 	Addresses struct {
@@ -171,10 +176,10 @@ func main() {
 		router.System.GPS.Latitude = GpsLat
 		router.System.GPS.Longitude = GpsLong
 		router.System.GPS.Altitude = GpsAlt
-		if *debugFlag {
-			//			fmt.Println(strconv.Itoa(RouterID) + ": " + SystemName + " " + SystemDesc + " " + UpTime)
-			fmt.Println("router =", router)
-		}
+		//		if *debugFlag {
+		//			//			fmt.Println(strconv.Itoa(RouterID) + ": " + SystemName + " " + SystemDesc + " " + UpTime)
+		//			fmt.Println("router =", router)
+		//		}
 		// Create a blue cylinder to represent the router and adds it to the scene
 		//		rtr3D := geometry.NewCylinder(1.0, 1.0, 0.5, 16, 2, 0, 2*math.Pi, true, true)
 		rtr3D := geometry.NewCylinder(routerRadius, routerRadius, 0.5, 16, 2, 0, 2*math.Pi, true, true)
@@ -198,14 +203,22 @@ func main() {
 		}
 		xRadianLong := Rad(GpsLongFloat64)
 		x = (float32)(globeRadius * math.Sin(xRadianLat) * math.Cos(xRadianLong))
+		router.System.Coordinates.X = x
 		yRadianLat := Rad(GpsLatFloat64)
 		yRadianLong := Rad(GpsLongFloat64)
 		y = (float32)(globeRadius * math.Sin(yRadianLat) * math.Sin(yRadianLong))
+		router.System.Coordinates.Y = y
 
 		GpsAltFloat64, parseErr := strconv.ParseFloat(GpsAlt, 64)
 		//		zRadianAlt := Rad(GpsAltFloat64)
 		//		z = (float)(radius * (java.lang.Math.cos(java.lang.Math.toRadians(Float.valueOf(routerLatitude))))) + (Float.valueOf(routerAltitude));
 		z = (float32)(globeRadius*(math.Cos(yRadianLat)) + GpsAltFloat64)
+		router.System.Coordinates.Z = z
+
+		if *debugFlag {
+			//			fmt.Println(strconv.Itoa(RouterID) + ": " + SystemName + " " + SystemDesc + " " + UpTime)
+			fmt.Println("router =", router)
+		}
 
 		cylinderMesh.SetPosition(x, y, z)
 		app.Scene().Add(cylinderMesh)
