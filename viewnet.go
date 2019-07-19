@@ -235,6 +235,7 @@ func main() {
 		if *debugFlag {
 			fmt.Println("link =", link)
 		}
+		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
 
 		// TODO: capture router coordinates so we can place the link endpoints
 
