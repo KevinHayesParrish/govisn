@@ -243,6 +243,14 @@ func main() {
 		}
 		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
 
+		// retrieve FromRouter coordinates from router struc
+		x = router.System.Coordinates.X
+		y = router.System.Coordinates.Y
+		z = router.System.Coordinates.Z
+		if *debugFlag {
+			fmt.Println("router coordinates =", router.System.Coordinates)
+		}
+
 	}
 	app.Run()
 }
