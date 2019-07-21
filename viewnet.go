@@ -249,7 +249,7 @@ func main() {
 		}
 
 		// retrieve FromRouter coordinates from router struc
-		routers, queryErr = database.Query("SELECT RouterID, SystemName FROM Routers WHERE SystemName =", FromRouter)
+		//		routers, queryErr = database.Query("SELECT RouterID, SystemName FROM Routers WHERE SystemName =", FromRouter)
 		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
 		x = router.System.Coordinates.X
 		y = router.System.Coordinates.Y
