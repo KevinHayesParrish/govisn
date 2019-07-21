@@ -17,6 +17,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+/*
+* TODO:
+*	1. Add the router's 3D coordinates to the Router table.
+*		This is for use when adding the links to the 3D scene.
+ */
+
 //ViewnetVersion is the file version number
 const ViewnetVersion = "0.3.2"
 
@@ -241,9 +247,10 @@ func main() {
 		if *debugFlag {
 			fmt.Println("link =", link)
 		}
-		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
 
 		// retrieve FromRouter coordinates from router struc
+		routers, queryErr = database.Query("SELECT RouterID, SystemName FROM Routers WHERE SystemName =", FromRouter)
+		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
 		x = router.System.Coordinates.X
 		y = router.System.Coordinates.Y
 		z = router.System.Coordinates.Z
