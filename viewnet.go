@@ -18,7 +18,7 @@ import (
 )
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.3.1"
+const ViewnetVersion = "0.3.2"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -164,6 +164,9 @@ func main() {
 	globeMesh.SetPosition(-1, -1, -1)
 	app.Scene().Add(globeMesh)
 
+	/*
+	* Add the routers to the 3D scene
+	 */
 	for routers.Next() {
 		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
 
@@ -226,6 +229,9 @@ func main() {
 		//x = x + 2.0
 	}
 
+	/*
+	* Add the links to the 3D scene
+	 */
 	for links.Next() {
 		links.Scan(&LinkID, &FromRouter, &ToRouter)
 		// Load link struct from DB fields
@@ -236,8 +242,6 @@ func main() {
 			fmt.Println("link =", link)
 		}
 		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
-
-		// TODO: capture router coordinates so we can place the link endpoints
 
 	}
 	app.Run()
