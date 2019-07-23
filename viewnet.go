@@ -212,21 +212,27 @@ func main() {
 		}
 		xRadianLong := Rad(GpsLongFloat64)
 		x = (float32)(globeRadius * math.Sin(xRadianLat) * math.Cos(xRadianLong))
-		router.System.Coordinates.X = x
+		router.System.Coordinates.X = x // update router struc with x coordinate
 		yRadianLat := Rad(GpsLatFloat64)
 		yRadianLong := Rad(GpsLongFloat64)
 		y = (float32)(globeRadius * math.Sin(yRadianLat) * math.Sin(yRadianLong))
-		router.System.Coordinates.Y = y
+		router.System.Coordinates.Y = y // update router struc with y coordinate
 
 		GpsAltFloat64, parseErr := strconv.ParseFloat(GpsAlt, 64)
 		//		zRadianAlt := Rad(GpsAltFloat64)
 		//		z = (float)(radius * (java.lang.Math.cos(java.lang.Math.toRadians(Float.valueOf(routerLatitude))))) + (Float.valueOf(routerAltitude));
 		z = (float32)(globeRadius*(math.Cos(yRadianLat)) + GpsAltFloat64)
-		router.System.Coordinates.Z = z
+		router.System.Coordinates.Z = z // update router struc with z coordinate
 
 		if *debugFlag {
 			//			fmt.Println(strconv.Itoa(RouterID) + ": " + SystemName + " " + SystemDesc + " " + UpTime)
 			fmt.Println("router =", router)
+
+			// TODO: write 3D coordinates to router DB row for later retrieval
+			var concatString []string
+			concatString = append(concatString, "UPDATE Routers SET X3D =", strconv.FormatFloat(x, "f", -1, 32), "Y3D = ", strconv.FormatFloat(y, "f", -1, 32), "Z3D =", strconv.FormatFloat(z, "f", -1, 32))
+			statement, _ := database.Prepare(concatString)
+
 		}
 
 		cylinderMesh.SetPosition(x, y, z)
