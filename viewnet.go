@@ -238,7 +238,7 @@ func main() {
 		var zFloat64 = float64(z)
 		//stringArray = append(stringArray, "UPDATE Routers SET X3D =", strconv.FormatFloat(xFloat64, 'f', -1, 32), "Y3D = ", strconv.FormatFloat(yFloat64, 'f', -1, 32), "Z3D =", strconv.FormatFloat(zFloat64, 'f', -1, 32))
 		//		concatString = string(concatStringArray)
-		updateStatement, _ := database.Prepare("UPDATE RoutersSET (X3D, Y3D, Z3D) WHERE SystemName = VALUES (?, ?, ?, ?)")
+		updateStatement, _ := database.Prepare("UPDATE Routers SET (X3D, Y3D, Z3D) WHERE SystemName= VALUES (?, ?, ?, ?)")
 		updateStatement.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64), SystemName)
 
 		cylinderMesh.SetPosition(x, y, z)
