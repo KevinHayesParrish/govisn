@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.3.2"
+const ViewnetVersion = "0.3.3"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -228,12 +228,18 @@ func main() {
 			//			fmt.Println(strconv.Itoa(RouterID) + ": " + SystemName + " " + SystemDesc + " " + UpTime)
 			fmt.Println("router =", router)
 
-			// TODO: write 3D coordinates to router DB row for later retrieval
-			var concatString []string
-			concatString = append(concatString, "UPDATE Routers SET X3D =", strconv.FormatFloat(x, "f", -1, 32), "Y3D = ", strconv.FormatFloat(y, "f", -1, 32), "Z3D =", strconv.FormatFloat(z, "f", -1, 32))
-			statement, _ := database.Prepare(concatString)
-
 		}
+
+		// TODO: write 3D coordinates to router DB row for later retrieval
+		//	var stringArray []string
+		//		var concatString []string
+		var xFloat64 = float64(x)
+		var yFloat64 = float64(y)
+		var zFloat64 = float64(z)
+		//stringArray = append(stringArray, "UPDATE Routers SET X3D =", strconv.FormatFloat(xFloat64, 'f', -1, 32), "Y3D = ", strconv.FormatFloat(yFloat64, 'f', -1, 32), "Z3D =", strconv.FormatFloat(zFloat64, 'f', -1, 32))
+		//		concatString = string(concatStringArray)
+		updateStatement, _ := database.Prepare("UPDATE RoutersSET (X3D, Y3D, Z3D) WHERE SystemName = VALUES (?, ?, ?, ?)")
+		updateStatement.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64), SystemName)
 
 		cylinderMesh.SetPosition(x, y, z)
 		app.Scene().Add(cylinderMesh)
