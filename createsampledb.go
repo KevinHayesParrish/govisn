@@ -12,25 +12,7 @@ import (
 )
 
 //createdsampledbVersion is the file version number
-const createsampledbVersion = "0.1.6"
-
-/*
-func createdb() {
-	database, _ := sql.Open("sqlite3", "./nraboy.db")
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, firstname TEXT, lastname TEXT)")
-	statement.Exec()
-	statement, _ = database.Prepare("INSERT INTO people (firstname, lastname) VALUES (?, ?)")
-	statement.Exec("Nic", "Raboy")
-	rows, _ := database.Query("SELECT id, firstname, lastname FROM people")
-	var id int
-	var firstname string
-	var lastname string
-	for rows.Next() {
-		rows.Scan(&id, &firstname, &lastname)
-		fmt.Println(strconv.Itoa(id) + ": " + firstname + " " + lastname)
-	}
-}
-*/
+const createsampledbVersion = "0.1.7"
 
 func createsampledb() {
 	fmt.Println("createdampledb version:", createsampledbVersion)
@@ -38,9 +20,9 @@ func createsampledb() {
 	/*
 	 *	Add Routers table to DB
 	 */
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat NUMERIC, GPSLong NUMERIC, GpsAlt NUMERIC)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL, X3D REAL, Y3D REAL, Z3D REAL)")
 	statement.Exec()
-	statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
 	// add router to the database
 	SystemName := "media"
@@ -52,7 +34,10 @@ func createsampledb() {
 	GpsLat := "38.419471"
 	GpsLong := "-121.357212"
 	GpsAlt := "10.668"
-	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+	X3D := "0.0"
+	Y3D := "0.0"
+	Z3D := "0.0"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D)
 
 	// add another router to the database
 	SystemName = "router"
@@ -64,7 +49,10 @@ func createsampledb() {
 	GpsLat = "38.419492"
 	GpsLong = "-121.357176"
 	GpsAlt = "10.668"
-	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+	X3D = "0.0"
+	Y3D = "0.0"
+	Z3D = "0.0"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D)
 
 	// add another router to the database
 	SystemName = "hub"
@@ -76,7 +64,10 @@ func createsampledb() {
 	GpsLat = "40.758262"
 	GpsLong = "-73.436362"
 	GpsAlt = "10.668"
-	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+	X3D = "0.0"
+	Y3D = "0.0"
+	Z3D = "0.0"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D)
 
 	// add another router to the database
 	SystemName = "wan-router"
@@ -88,7 +79,10 @@ func createsampledb() {
 	GpsLat = "37.665342"
 	GpsLong = "-97.431564"
 	GpsAlt = "396"
-	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+	X3D = "0.0"
+	Y3D = "0.0"
+	Z3D = "0.0"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D)
 
 	// add another router to the database
 	SystemName = "old-country-road"
@@ -100,7 +94,10 @@ func createsampledb() {
 	GpsLat = "40.795017"
 	GpsLong = "-73.41144"
 	GpsAlt = "13.716"
-	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+	X3D = "0.0"
+	Y3D = "0.0"
+	Z3D = "0.0"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D)
 
 	// add another router to the database
 	SystemName = "fukui"
@@ -112,7 +109,10 @@ func createsampledb() {
 	GpsLat = "36.063601"
 	GpsLong = "136.220856"
 	GpsAlt = "17"
-	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+	X3D = "0.0"
+	Y3D = "0.0"
+	Z3D = "0.0"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D)
 
 	// add another router to the database
 	SystemName = "amsterdam"
@@ -124,7 +124,10 @@ func createsampledb() {
 	GpsLat = "52.370359"
 	GpsLong = "4.894409"
 	GpsAlt = "-2"
-	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt)
+	X3D = "0.0"
+	Y3D = "0.0"
+	Z3D = "0.0"
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D)
 
 	/*
 	 *	Add RouteTable table to DB
