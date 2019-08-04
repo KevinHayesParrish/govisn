@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.3.3"
+const ViewnetVersion = "0.3.4"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -196,8 +196,6 @@ func main() {
 		cylinderMesh := graphic.NewMesh(rtr3D, mat)
 		/*
 		 * Set coordinates and altitude
-		 *** Needs z coordinate calculation***
-		 *** Needs altitude calculation ***
 		 */
 		GpsLatFloat64, parseErr := strconv.ParseFloat(GpsLat, 64)
 		if parseErr != nil {
