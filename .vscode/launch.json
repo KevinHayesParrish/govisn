@@ -21,7 +21,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["'-d -f ~/go/src/govisn/samplenetwork.db'"]
+            "args": ["'-d -f c:/Users/kevin/go/src/govisn/samplenetwork.db'"]
         }
     ]
 }
