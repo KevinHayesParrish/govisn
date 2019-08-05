@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.3.4"
+const ViewnetVersion = "0.3.5"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -33,6 +33,9 @@ var sampleNetworkDB = flag.Bool("c", false, "Create a sample database.")
 
 //DbName is the name of the discovered network database file
 var DbName = flag.String("f", "discoverednetwork.db", "Name of the discovered network database")
+
+//testArangodb is the startup option to test accessing an ArangoDB database
+var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 
 //routerRadius is the radius of the 3D object representing a network router
 const routerRadius float64 = 0.5
@@ -96,6 +99,9 @@ func main() {
 	if *sampleNetworkDB {
 		createsampledb()
 	}
+	if *testArangoDb {
+		testarango()
+	}
 
 	// Open the database containing the discovered network
 	database, openErr := sql.Open("sqlite3", *DbName)
@@ -104,7 +110,8 @@ func main() {
 		log.Fatal(openErr)
 	}
 	// Retrieve the Routers table
-	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
+	//	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
+	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D FROM Routers")
 	if queryErr != nil {
 		fmt.Println("Database Query error", queryErr)
 		log.Fatal(openErr)
@@ -137,6 +144,9 @@ func main() {
 	var GpsLat string
 	var GpsLong string
 	var GpsAlt string
+	var X3D float32
+	var Y3D float32
+	var Z3D float32
 	var router Router
 	var link Link
 	var LinkID int
@@ -174,7 +184,8 @@ func main() {
 	* Add the routers to the 3D scene
 	 */
 	for routers.Next() {
-		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
+		//		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
+		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt, &X3D, &Y3D, &Z3D)
 
 		// Load router struct from DB fields
 		router.System.RouterID = RouterID
@@ -217,27 +228,51 @@ func main() {
 		router.System.Coordinates.Y = y // update router struc with y coordinate
 
 		GpsAltFloat64, parseErr := strconv.ParseFloat(GpsAlt, 64)
-		//		zRadianAlt := Rad(GpsAltFloat64)
-		//		z = (float)(radius * (java.lang.Math.cos(java.lang.Math.toRadians(Float.valueOf(routerLatitude))))) + (Float.valueOf(routerAltitude));
 		z = (float32)(globeRadius*(math.Cos(yRadianLat)) + GpsAltFloat64)
 		router.System.Coordinates.Z = z // update router struc with z coordinate
 
 		if *debugFlag {
-			//			fmt.Println(strconv.Itoa(RouterID) + ": " + SystemName + " " + SystemDesc + " " + UpTime)
+			fmt.Println("x =", x, "y =", y, "z", z)
 			fmt.Println("router =", router)
-
+			fmt.Println("router.System.Coordinates =", router.System.Coordinates)
 		}
 
 		// TODO: write 3D coordinates to router DB row for later retrieval
 		//	var stringArray []string
 		//		var concatString []string
+		//stringArray = append(stringArray, "UPDATE Routers SET X3D =", strconv.FormatFloat(xFloat64, 'f', -1, 32), "Y3D = ", strconv.FormatFloat(yFloat64, 'f', -1, 32), "Z3D =", strconv.FormatFloat(zFloat64, 'f', -1, 32))
+		//		concatString = string(concatStringArray)
+
 		var xFloat64 = float64(x)
 		var yFloat64 = float64(y)
 		var zFloat64 = float64(z)
-		//stringArray = append(stringArray, "UPDATE Routers SET X3D =", strconv.FormatFloat(xFloat64, 'f', -1, 32), "Y3D = ", strconv.FormatFloat(yFloat64, 'f', -1, 32), "Z3D =", strconv.FormatFloat(zFloat64, 'f', -1, 32))
-		//		concatString = string(concatStringArray)
-		updateStatement, _ := database.Prepare("UPDATE Routers SET (X3D, Y3D, Z3D) WHERE SystemName= VALUES (?, ?, ?, ?)")
-		updateStatement.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64), SystemName)
+		if *debugFlag {
+			fmt.Println("SystemName=", SystemName)
+		}
+		/*
+			updateSelectStatement, updateSelStmErr := database.Prepare("SELECT SystemName, X3D, Y3D, Z3D FROM Routers")
+			if updateSelStmErr != nil {
+				fmt.Println("Error preparing Routers Select statement:", updateSelStmErr)
+				fmt.Println("updateSelStatement=", updateSelectStatement)
+				log.Fatal(openErr)
+			}
+			updSelResult, execUpdSelErr := updateSelectStatement.Exec()
+			if execUpdSelErr != nil {
+				fmt.Println("Error executing Routers row Update:", updSelResult)
+				log.Fatal(openErr)
+			}
+		*/
+		updateStatement, updateStmErr := database.Prepare("UPDATE Routers SET (X3D, Y3D, Z3D) VALUES (?, ?, ?) WHERE SystemName = ? ")
+		if updateStmErr != nil {
+			fmt.Println("Error preparing Routers Update statement:", updateStmErr)
+			fmt.Println("updateStatement=", updateStatement)
+			log.Fatal(openErr)
+		}
+		result, execErr := updateStatement.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64), SystemName)
+		if execErr != nil {
+			fmt.Println("Error executing Routers row Update:", result)
+			log.Fatal(openErr)
+		}
 
 		cylinderMesh.SetPosition(x, y, z)
 		app.Scene().Add(cylinderMesh)
@@ -260,6 +295,7 @@ func main() {
 
 		// retrieve FromRouter coordinates from router struc
 		//		routers, queryErr = database.Query("SELECT RouterID, SystemName FROM Routers WHERE SystemName =", FromRouter)
+
 		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
 		x = router.System.Coordinates.X
 		y = router.System.Coordinates.Y
