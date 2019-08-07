@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.3.5"
+const ViewnetVersion = "0.3.6"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -262,29 +262,36 @@ func main() {
 				log.Fatal(openErr)
 			}
 		*/
-		updateStatement, updateStmErr := database.Prepare("UPDATE Routers SET (X3D, Y3D, Z3D) VALUES (?, ?, ?) WHERE SystemName = ? ")
+		updateStatement, updateStmErr := database.Prepare("UPDATE Routers SET (X3D, Y3D, Z3D) VALUES (?, ?, ?)")
 		if updateStmErr != nil {
 			fmt.Println("Error preparing Routers Update statement:", updateStmErr)
 			fmt.Println("updateStatement=", updateStatement)
-			log.Fatal(openErr)
+			log.Fatal(updateStmErr)
 		}
-		result, execErr := updateStatement.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64), SystemName)
+		result, execErr := updateStatement.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64))
 		if execErr != nil {
 			fmt.Println("Error executing Routers row Update:", result)
-			log.Fatal(openErr)
+			log.Fatal(execErr)
 		}
 
 		cylinderMesh.SetPosition(x, y, z)
 		app.Scene().Add(cylinderMesh)
 
 		//x = x + 2.0
+		queryErr = routers.Err()
+		if queryErr != nil {
+			log.Fatal(queryErr)
+		}
 	}
 
 	/*
 	* Add the links to the 3D scene
 	 */
 	for links.Next() {
-		links.Scan(&LinkID, &FromRouter, &ToRouter)
+		err := links.Scan(&LinkID, &FromRouter, &ToRouter)
+		if err != nil {
+			log.Fatal(err)
+		}
 		// Load link struct from DB fields
 		link.LinkID = LinkID
 		link.FromRouter = FromRouter
@@ -296,7 +303,7 @@ func main() {
 		// retrieve FromRouter coordinates from router struc
 		//		routers, queryErr = database.Query("SELECT RouterID, SystemName FROM Routers WHERE SystemName =", FromRouter)
 
-		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
+		//		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt, X3D, Y3D, Z3D)
 		x = router.System.Coordinates.X
 		y = router.System.Coordinates.Y
 		z = router.System.Coordinates.Z
@@ -304,6 +311,10 @@ func main() {
 			fmt.Println("router coordinates =", router.System.Coordinates)
 		}
 
+		err = links.Err()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	app.Run()
 }
