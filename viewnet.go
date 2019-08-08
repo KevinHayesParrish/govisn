@@ -249,29 +249,28 @@ func main() {
 		if *debugFlag {
 			fmt.Println("SystemName=", SystemName)
 		}
-		/*
-			updateSelectStatement, updateSelStmErr := database.Prepare("SELECT SystemName, X3D, Y3D, Z3D FROM Routers")
-			if updateSelStmErr != nil {
-				fmt.Println("Error preparing Routers Select statement:", updateSelStmErr)
-				fmt.Println("updateSelStatement=", updateSelectStatement)
-				log.Fatal(openErr)
-			}
-			updSelResult, execUpdSelErr := updateSelectStatement.Exec()
-			if execUpdSelErr != nil {
-				fmt.Println("Error executing Routers row Update:", updSelResult)
-				log.Fatal(openErr)
-			}
-		*/
-		updateStatement, updateStmErr := database.Prepare("UPDATE Routers SET (X3D, Y3D, Z3D) VALUES (?, ?, ?)")
-		if updateStmErr != nil {
-			fmt.Println("Error preparing Routers Update statement:", updateStmErr)
-			fmt.Println("updateStatement=", updateStatement)
-			log.Fatal(updateStmErr)
+
+		//		updateStatement, updateStmErr := database.Prepare("UPDATE Routers SET X3D = ?, Y3D = ?, Z3D = ?")
+		update, updateErr := database.Prepare("UPDATE Routers SET X3D = ?, Y3D = ?, Z3D = ?")
+		//		if updateStmErr != nil {
+		//			fmt.Println("Error preparing Routers Update statement:", updateStmErr)
+		//			fmt.Println("updateStatement=", updateStatement)
+		//			log.Fatal(updateStmErr)
+		//		}
+		if updateErr != nil {
+			fmt.Println("Error preparing Routers Update statement:", updateErr)
+			fmt.Println("updateStatement=", update)
+			log.Fatal(updateErr)
 		}
-		result, execErr := updateStatement.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64))
-		if execErr != nil {
+		//		result, execErr := updateStatement.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64))
+		//		if execErr != nil {
+		//			fmt.Println("Error executing Routers row Update:", result)
+		//			log.Fatal(execErr)
+		//		}
+		result, updateErr := update.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64))
+		if updateErr != nil {
 			fmt.Println("Error executing Routers row Update:", result)
-			log.Fatal(execErr)
+			log.Fatal(updateErr)
 		}
 
 		cylinderMesh.SetPosition(x, y, z)
