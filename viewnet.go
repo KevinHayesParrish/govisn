@@ -109,6 +109,8 @@ func main() {
 		fmt.Println("Error opening database", *DbName)
 		log.Fatal(openErr)
 	}
+	defer database.Close()
+
 	// Retrieve the Routers table
 	//	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
 	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D FROM Routers")
@@ -196,12 +198,7 @@ func main() {
 		router.System.GPS.Latitude = GpsLat
 		router.System.GPS.Longitude = GpsLong
 		router.System.GPS.Altitude = GpsAlt
-		//		if *debugFlag {
-		//			//			fmt.Println(strconv.Itoa(RouterID) + ": " + SystemName + " " + SystemDesc + " " + UpTime)
-		//			fmt.Println("router =", router)
-		//		}
-		// Create a blue cylinder to represent the router and adds it to the scene
-		//		rtr3D := geometry.NewCylinder(1.0, 1.0, 0.5, 16, 2, 0, 2*math.Pi, true, true)
+
 		rtr3D := geometry.NewCylinder(routerRadius, routerRadius, 0.5, 16, 2, 0, 2*math.Pi, true, true)
 		mat := material.NewPhong(math32.NewColor("DarkBlue"))
 		cylinderMesh := graphic.NewMesh(rtr3D, mat)
@@ -238,10 +235,6 @@ func main() {
 		}
 
 		// TODO: write 3D coordinates to router DB row for later retrieval
-		//	var stringArray []string
-		//		var concatString []string
-		//stringArray = append(stringArray, "UPDATE Routers SET X3D =", strconv.FormatFloat(xFloat64, 'f', -1, 32), "Y3D = ", strconv.FormatFloat(yFloat64, 'f', -1, 32), "Z3D =", strconv.FormatFloat(zFloat64, 'f', -1, 32))
-		//		concatString = string(concatStringArray)
 
 		var xFloat64 = float64(x)
 		var yFloat64 = float64(y)
