@@ -8,7 +8,7 @@
             "name": "Launch file",
             "type": "go",
             "request": "launch",
-            "mode": "debug",
+            "mode": "exec",
             "program": "${file}"
         },
         {
@@ -21,7 +21,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["'-d -f c:/Users/kevin/go/src/govisn/samplenetwork.db'"]
+            "args": ["-d", "-f", "samplenetwork.db"]
         }
     ]
 }
