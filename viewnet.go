@@ -147,9 +147,9 @@ func main() {
 	var GpsLat string
 	var GpsLong string
 	var GpsAlt string
-	var X3D float32
-	var Y3D float32
-	var Z3D float32
+	//	var X3D float32
+	//	var Y3D float32
+	//	var Z3D float32
 	var router Router
 	var link Link
 	var LinkID int
@@ -187,8 +187,8 @@ func main() {
 	* Add the routers to the 3D scene
 	 */
 	for routers.Next() {
-		//		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
-		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt, &X3D, &Y3D, &Z3D)
+		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
+		//		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt, &X3D, &Y3D, &Z3D)
 
 		// Load router struct from DB fields
 		router.System.RouterID = RouterID
