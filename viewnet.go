@@ -208,7 +208,7 @@ func main() {
 		 */
 		GpsLatFloat64, parseErr := strconv.ParseFloat(GpsLat, 64)
 		if parseErr != nil {
-			fmt.Println("Error parsing GpsLat", GpsLat)
+			fmt.Println("Error parsing GpsLat =", GpsLat)
 			log.Fatal(openErr)
 		}
 		xRadianLat := Rad(GpsLatFloat64)
