@@ -233,6 +233,7 @@ func main() {
 			fmt.Println("x =", x, "y =", y, "z", z)
 			fmt.Println("router =", router)
 			fmt.Println("router.System.Coordinates =", router.System.Coordinates)
+			fmt.Println("RouterID=", RouterID, "SystemName=", SystemName)
 		}
 
 		// TODO: write 3D coordinates to Coordinates table row for later retrieval
@@ -240,9 +241,6 @@ func main() {
 		//		var xFloat64 = float64(x)
 		//		var yFloat64 = float64(y)
 		//		var zFloat64 = float64(z)
-		if *debugFlag {
-			fmt.Println("RouterID=", RouterID, "SystemName=", SystemName)
-		}
 
 		//		updateStatement, updateStmErr := database.Prepare("UPDATE Routers SET X3D = ?, Y3D = ?, Z3D = ?")
 		//update, updateErr := database.Prepare("UPDATE Routers SET X3D = ?, Y3D = ?, Z3D = ?")
