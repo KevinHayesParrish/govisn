@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.3.6"
+const ViewnetVersion = "0.4.0"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -234,39 +234,42 @@ func main() {
 			fmt.Println("router.System.Coordinates =", router.System.Coordinates)
 		}
 
-		// TODO: write 3D coordinates to router DB row for later retrieval
+		// TODO: write 3D coordinates to Coordinates table row for later retrieval
 
-		var xFloat64 = float64(x)
-		var yFloat64 = float64(y)
-		var zFloat64 = float64(z)
+		//		var xFloat64 = float64(x)
+		//		var yFloat64 = float64(y)
+		//		var zFloat64 = float64(z)
 		if *debugFlag {
-			fmt.Println("SystemName=", SystemName)
+			fmt.Println("RouterID=", RouterID, "SystemName=", SystemName)
 		}
 
 		//		updateStatement, updateStmErr := database.Prepare("UPDATE Routers SET X3D = ?, Y3D = ?, Z3D = ?")
-		update, updateErr := database.Prepare("UPDATE Routers SET X3D = ?, Y3D = ?, Z3D = ?")
+		//update, updateErr := database.Prepare("UPDATE Routers SET X3D = ?, Y3D = ?, Z3D = ?")
 		//		if updateStmErr != nil {
 		//			fmt.Println("Error preparing Routers Update statement:", updateStmErr)
 		//			fmt.Println("updateStatement=", updateStatement)
 		//			log.Fatal(updateStmErr)
 		//		}
-		if updateErr != nil {
-			fmt.Println("Error preparing Routers Update statement:", updateErr)
-			fmt.Println("updateStatement=", update)
-			log.Fatal(updateErr)
+		coordStatement, coordErr := database.Prepare("UPDATE Coordinates SET X3D = ?, Y3D = ?, Z3D = ? WHERE RouterID = ?")
+		if coordErr != nil {
+			fmt.Println("Error preparing Coordinates Update statement:", coordErr)
+			fmt.Println("coordStatement=", coordStatement)
+			log.Fatal(coordErr)
 		}
 		//		result, execErr := updateStatement.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64))
 		//		if execErr != nil {
 		//			fmt.Println("Error executing Routers row Update:", result)
 		//			log.Fatal(execErr)
 		//		}
-		result, updateErr := update.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64))
-		if updateErr != nil {
-			fmt.Println("Error executing Routers row Update:", result)
-			log.Fatal(updateErr)
-		}
+		//		result, updateErr := update.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64))
+		//		if updateErr != nil {
+		//			fmt.Println("Error executing Routers row Update:", result)
+		//			log.Fatal(updateErr)
+		//		}
+		coordStatement.Exec(router.System.RouterID, router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
 
-		cylinderMesh.SetPosition(x, y, z)
+		//		cylinderMesh.SetPosition(x, y, z)
+		cylinderMesh.SetPosition(router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
 		app.Scene().Add(cylinderMesh)
 
 		//x = x + 2.0
