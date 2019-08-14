@@ -109,19 +109,19 @@ func main() {
 		fmt.Println("Error opening database", *DbName)
 		log.Fatal(openErr)
 	}
-	// Set database to WAL Mode
-	dbResult, PRAGMAErr := database.Exec("PRAGMA journal_mode=WAL;")
-	if PRAGMAErr != nil {
-		log.Fatal(openErr)
-	}
-	if *debugFlag {
-		fmt.Println("PRAMGA=", dbResult)
-	}
-	database.SetMaxOpenConns(0)
-	if *debugFlag {
-		fmt.Println("After SetMaxOpenConns function call")
-	}
-
+	/*	// Set database to WAL Mode
+		dbResult, PRAGMAErr := database.Exec("PRAGMA journal_mode=WAL;")
+		if PRAGMAErr != nil {
+			log.Fatal(openErr)
+		}
+		if *debugFlag {
+			fmt.Println("PRAMGA=", dbResult)
+		}
+		database.SetMaxOpenConns(0)
+		if *debugFlag {
+			fmt.Println("After SetMaxOpenConns function call")
+		}
+	*/
 	defer database.Close()
 
 	// Retrieve the Routers table
