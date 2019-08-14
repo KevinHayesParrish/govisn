@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.4.0"
+const ViewnetVersion = "0.4.1"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -109,6 +109,19 @@ func main() {
 		fmt.Println("Error opening database", *DbName)
 		log.Fatal(openErr)
 	}
+	// Set database to WAL Mode
+	dbResult, PRAGMAErr := database.Exec("PRAGMA journal_mode=WAL;")
+	if PRAGMAErr != nil {
+		log.Fatal(openErr)
+	}
+	if *debugFlag {
+		fmt.Println("PRAMGA=", dbResult)
+	}
+	database.SetMaxOpenConns(0)
+	if *debugFlag {
+		fmt.Println("After SetMaxOpenConns function call")
+	}
+
 	defer database.Close()
 
 	// Retrieve the Routers table
@@ -119,12 +132,18 @@ func main() {
 		fmt.Println("Database Query error", queryErr)
 		log.Fatal(openErr)
 	}
+	if *debugFlag {
+		fmt.Println("Successful Routers table Select")
+	}
 
 	// Retrieve the Links table
 	links, queryErr := database.Query("SELECT LinkID, FromRouter, ToRouter FROM Links")
 	if queryErr != nil {
 		fmt.Println("Database Query error", queryErr)
 		log.Fatal(openErr)
+	}
+	if *debugFlag {
+		fmt.Println("Successful Links table Select")
 	}
 
 	// Initialize the 3D space
@@ -183,6 +202,9 @@ func main() {
 	globeMesh.SetPosition(-1, -1, -1)
 	app.Scene().Add(globeMesh)
 
+	if *debugFlag {
+		fmt.Println("Beginning routers.Next loop; adding routers to 3D scene.")
+	}
 	/*
 	* Add the routers to the 3D scene
 	 */
@@ -236,36 +258,20 @@ func main() {
 			fmt.Println("RouterID=", RouterID, "SystemName=", SystemName)
 		}
 
-		// TODO: write 3D coordinates to Coordinates table row for later retrieval
+		// Write 3D coordinates to Coordinates table row for later retrieval
 
-		//		var xFloat64 = float64(x)
-		//		var yFloat64 = float64(y)
-		//		var zFloat64 = float64(z)
-
-		//		updateStatement, updateStmErr := database.Prepare("UPDATE Routers SET X3D = ?, Y3D = ?, Z3D = ?")
-		//update, updateErr := database.Prepare("UPDATE Routers SET X3D = ?, Y3D = ?, Z3D = ?")
-		//		if updateStmErr != nil {
-		//			fmt.Println("Error preparing Routers Update statement:", updateStmErr)
-		//			fmt.Println("updateStatement=", updateStatement)
-		//			log.Fatal(updateStmErr)
-		//		}
 		coordStatement, coordErr := database.Prepare("UPDATE Coordinates SET X3D = ?, Y3D = ?, Z3D = ? WHERE RouterID = ?")
 		if coordErr != nil {
 			fmt.Println("Error preparing Coordinates Update statement:", coordErr)
 			fmt.Println("coordStatement=", coordStatement)
 			log.Fatal(coordErr)
 		}
-		//		result, execErr := updateStatement.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64))
-		//		if execErr != nil {
-		//			fmt.Println("Error executing Routers row Update:", result)
-		//			log.Fatal(execErr)
-		//		}
-		//		result, updateErr := update.Exec(strconv.FormatFloat(xFloat64, 'f', -1, 64), strconv.FormatFloat(yFloat64, 'f', -1, 64), strconv.FormatFloat(zFloat64, 'f', -1, 64))
-		//		if updateErr != nil {
-		//			fmt.Println("Error executing Routers row Update:", result)
-		//			log.Fatal(updateErr)
-		//		}
-		coordStatement.Exec(router.System.RouterID, router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
+		//coordStatement.Exec(router.System.RouterID, router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
+		_, coordErr = coordStatement.Exec(router.System.RouterID, router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
+		if coordErr != nil {
+			fmt.Println("Error executing Update to table Coordinates X3D, Y3D and Z3D coordinates.")
+			log.Fatal(coordErr)
+		}
 
 		//		cylinderMesh.SetPosition(x, y, z)
 		cylinderMesh.SetPosition(router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
@@ -278,6 +284,9 @@ func main() {
 		}
 	}
 
+	if *debugFlag {
+		fmt.Println("Beginning links.Next loop; adding links to the 3D scene")
+	}
 	/*
 	* Add the links to the 3D scene
 	 */
