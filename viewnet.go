@@ -104,8 +104,11 @@ func main() {
 	}
 
 	// Open the database containing the discovered network
+	//	dbOpenString := *DbName + "?mode=wal"
+	//	database, openErr := sql.Open("sqlite3", dbOpenString)
 	database, openErr := sql.Open("sqlite3", *DbName)
 	if openErr != nil {
+		//		fmt.Println("Error opening database", dbOpenString)
 		fmt.Println("Error opening database", *DbName)
 		log.Fatal(openErr)
 	}
@@ -274,6 +277,7 @@ func main() {
 			//			log.Fatal(coordErr)
 			log.Fatalln("Error executing Update to table Coordinates X3D, Y3D and Z3D coordinates.", "\ncoordStatement =", coordStatement, "\nError = ", coordErr)
 		}
+		defer coordStatement.Close()
 
 		//		cylinderMesh.SetPosition(x, y, z)
 		cylinderMesh.SetPosition(router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
@@ -285,6 +289,7 @@ func main() {
 			log.Fatal(queryErr)
 		}
 	}
+	defer routers.Close()
 
 	if *debugFlag {
 		fmt.Println("Beginning links.Next loop; adding links to the 3D scene")
