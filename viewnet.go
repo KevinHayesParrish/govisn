@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.4.1"
+const ViewnetVersion = "0.4.2"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -270,6 +270,7 @@ func main() {
 		_, coordErr = coordStatement.Exec(router.System.RouterID, router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
 		if coordErr != nil {
 			fmt.Println("Error executing Update to table Coordinates X3D, Y3D and Z3D coordinates.")
+			fmt.Println("coordStatement=", coordStatement)
 			log.Fatal(coordErr)
 		}
 
