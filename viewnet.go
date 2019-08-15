@@ -269,9 +269,10 @@ func main() {
 		//coordStatement.Exec(router.System.RouterID, router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
 		_, coordErr = coordStatement.Exec(router.System.RouterID, router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
 		if coordErr != nil {
-			fmt.Println("Error executing Update to table Coordinates X3D, Y3D and Z3D coordinates.")
-			fmt.Println("coordStatement=", coordStatement)
-			log.Fatal(coordErr)
+			//			fmt.Println("Error executing Update to table Coordinates X3D, Y3D and Z3D coordinates.")
+			//			fmt.Println("coordStatement=", coordStatement)
+			//			log.Fatal(coordErr)
+			log.Fatalln("Error executing Update to table Coordinates X3D, Y3D and Z3D coordinates.", "\ncoordStatement =", coordStatement, "\nError = ", coordErr)
 		}
 
 		//		cylinderMesh.SetPosition(x, y, z)
