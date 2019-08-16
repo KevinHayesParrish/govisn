@@ -106,10 +106,10 @@ func main() {
 	// Open the database containing the discovered network
 	//	dbOpenString := *DbName + "?mode=wal"
 	//	database, openErr := sql.Open("sqlite3", dbOpenString)
-	database, openErr := sql.Open("sqlite3", *DbName)
+	databaseForRead, openErr := sql.Open("sqlite3", *DbName)
 	if openErr != nil {
 		//		fmt.Println("Error opening database", dbOpenString)
-		fmt.Println("Error opening database", *DbName)
+		fmt.Println("Error opening databaseForRead", *DbName)
 		log.Fatal(openErr)
 	}
 	/*	// Set database to WAL Mode
@@ -125,14 +125,21 @@ func main() {
 			fmt.Println("After SetMaxOpenConns function call")
 		}
 	*/
-	defer database.Close()
+	defer databaseForRead.Close()
+
+	databaseForUpdate, openErr := sql.Open("sqlite3", *DbName)
+	if openErr != nil {
+		fmt.Println("Error opening databaseForUpdate", *DbName)
+		log.Fatal(openErr)
+	}
+	defer databaseForUpdate.Close()
 
 	// Retrieve the Routers table
 	//	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
 	//	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D FROM Routers")
-	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
+	routers, queryErr := databaseForRead.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
 	if queryErr != nil {
-		fmt.Println("Database Query error", queryErr)
+		fmt.Println("databaseForRead Query error", queryErr)
 		log.Fatal(openErr)
 	}
 	if *debugFlag {
@@ -140,9 +147,9 @@ func main() {
 	}
 
 	// Retrieve the Links table
-	links, queryErr := database.Query("SELECT LinkID, FromRouter, ToRouter FROM Links")
+	links, queryErr := databaseForRead.Query("SELECT LinkID, FromRouter, ToRouter FROM Links")
 	if queryErr != nil {
-		fmt.Println("Database Query error", queryErr)
+		fmt.Println("databaseForRead Query error", queryErr)
 		log.Fatal(openErr)
 	}
 	if *debugFlag {
@@ -263,7 +270,7 @@ func main() {
 
 		// Write 3D coordinates to Coordinates table row for later retrieval
 
-		coordStatement, coordErr := database.Prepare("UPDATE Coordinates SET X3D = ?, Y3D = ?, Z3D = ? WHERE RouterID = ?")
+		coordStatement, coordErr := databaseForUpdate.Prepare("UPDATE Coordinates SET X3D = ?, Y3D = ?, Z3D = ? WHERE RouterID = ?")
 		if coordErr != nil {
 			fmt.Println("Error preparing Coordinates Update statement:", coordErr)
 			fmt.Println("coordStatement=", coordStatement)
