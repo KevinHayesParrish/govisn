@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.4.2"
+const ViewnetVersion = "0.4.3"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -282,7 +282,13 @@ func main() {
 			//			fmt.Println("Error executing Update to table Coordinates X3D, Y3D and Z3D coordinates.")
 			//			fmt.Println("coordStatement=", coordStatement)
 			//			log.Fatal(coordErr)
-			log.Fatalln("Error executing Update to table Coordinates X3D, Y3D and Z3D coordinates.", "\ncoordStatement =", coordStatement, "\nError = ", coordErr)
+			//			log.Fatalln("Error executing Update to table Coordinates X3D, Y3D and Z3D coordinates.", "\ncoordStatement =", coordStatement, "\nError = ", coordErr)
+			log.Fatalln("Error executing UPDATE to table Coordinates; X3D, Y3D and Z3D.",
+				"\n System.RouterID =", router.System.RouterID,
+				"\n System.Coordeinates.X =", router.System.Coordinates.X,
+				"\n System.Coordeinates.Y =", router.System.Coordinates.Y,
+				"\n System.Coordeinates.Z =", router.System.Coordinates.Z,
+				"\n Error = ", coordErr)
 		}
 		defer coordStatement.Close()
 
