@@ -147,7 +147,7 @@ func main() {
 	}
 
 	// Retrieve the Links table
-	links, queryErr := databaseForRead.Query("SELECT LinkID, FromRouter, ToRouter FROM Links")
+	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouter, ToRouter FROM Links")
 	if queryErr != nil {
 		fmt.Println("databaseForRead Query error", queryErr)
 		log.Fatal(openErr)
@@ -305,13 +305,13 @@ func main() {
 	defer routerRows.Close()
 
 	if *debugFlag {
-		fmt.Println("Beginning links.Next loop; adding links to the 3D scene")
+		fmt.Println("Beginning linkRows.Next loop; adding links to the 3D scene")
 	}
 	/*
 	* Add the links to the 3D scene
 	 */
-	for links.Next() {
-		err := links.Scan(&LinkID, &FromRouter, &ToRouter)
+	for linkRows.Next() {
+		err := linkRows.Scan(&LinkID, &FromRouter, &ToRouter)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -334,7 +334,7 @@ func main() {
 			fmt.Println("router coordinates =", router.System.Coordinates)
 		}
 
-		err = links.Err()
+		err = linkRows.Err()
 		if err != nil {
 			log.Fatal(err)
 		}
