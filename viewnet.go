@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.4.3"
+const ViewnetVersion = "0.4.4"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -135,9 +135,9 @@ func main() {
 	defer databaseForUpdate.Close()
 
 	// Retrieve the Routers table
-	//	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
-	//	routers, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D FROM Routers")
-	routers, queryErr := databaseForRead.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
+	//	routerRows, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
+	//	routerRows, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D FROM Routers")
+	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
 	if queryErr != nil {
 		fmt.Println("databaseForRead Query error", queryErr)
 		log.Fatal(openErr)
@@ -213,14 +213,14 @@ func main() {
 	app.Scene().Add(globeMesh)
 
 	if *debugFlag {
-		fmt.Println("Beginning routers.Next loop; adding routers to 3D scene.")
+		fmt.Println("Beginning routerRows.Next loop; adding routers to 3D scene.")
 	}
 	/*
 	* Add the routers to the 3D scene
 	 */
-	for routers.Next() {
-		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
-		//		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt, &X3D, &Y3D, &Z3D)
+	for routerRows.Next() {
+		routerRows.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
+		//		routerRows.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt, &X3D, &Y3D, &Z3D)
 
 		// Load router struct from DB fields
 		router.System.RouterID = RouterID
@@ -297,12 +297,12 @@ func main() {
 		app.Scene().Add(cylinderMesh)
 
 		//x = x + 2.0
-		queryErr = routers.Err()
+		queryErr = routerRows.Err()
 		if queryErr != nil {
 			log.Fatal(queryErr)
 		}
 	}
-	defer routers.Close()
+	defer routerRows.Close()
 
 	if *debugFlag {
 		fmt.Println("Beginning links.Next loop; adding links to the 3D scene")
@@ -324,9 +324,9 @@ func main() {
 		}
 
 		// retrieve FromRouter coordinates from router struc
-		//		routers, queryErr = database.Query("SELECT RouterID, SystemName FROM Routers WHERE SystemName =", FromRouter)
+		//		routerRows, queryErr = database.Query("SELECT RouterID, SystemName FROM Routers WHERE SystemName =", FromRouter)
 
-		//		routers.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt, X3D, Y3D, Z3D)
+		//		routerRows.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt, X3D, Y3D, Z3D)
 		x = router.System.Coordinates.X
 		y = router.System.Coordinates.Y
 		z = router.System.Coordinates.Z
