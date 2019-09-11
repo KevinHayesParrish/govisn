@@ -108,23 +108,9 @@ func main() {
 	//	database, openErr := sql.Open("sqlite3", dbOpenString)
 	databaseForRead, openErr := sql.Open("sqlite3", *DbName)
 	if openErr != nil {
-		//		fmt.Println("Error opening database", dbOpenString)
 		fmt.Println("Error opening databaseForRead", *DbName)
 		log.Fatal(openErr)
 	}
-	/*	// Set database to WAL Mode
-		dbResult, PRAGMAErr := database.Exec("PRAGMA journal_mode=WAL;")
-		if PRAGMAErr != nil {
-			log.Fatal(openErr)
-		}
-		if *debugFlag {
-			fmt.Println("PRAMGA=", dbResult)
-		}
-		database.SetMaxOpenConns(0)
-		if *debugFlag {
-			fmt.Println("After SetMaxOpenConns function call")
-		}
-	*/
 	defer databaseForRead.Close()
 
 	databaseForUpdate, openErr := sql.Open("sqlite3", *DbName)
@@ -135,8 +121,6 @@ func main() {
 	defer databaseForUpdate.Close()
 
 	// Retrieve the Routers table
-	//	routerRows, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
-	//	routerRows, queryErr := database.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt, X3D, Y3D, Z3D FROM Routers")
 	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
 	if queryErr != nil {
 		fmt.Println("databaseForRead Query error", queryErr)
@@ -220,7 +204,6 @@ func main() {
 	 */
 	for routerRows.Next() {
 		routerRows.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
-		//		routerRows.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt, &X3D, &Y3D, &Z3D)
 
 		// Load router struct from DB fields
 		router.System.RouterID = RouterID
@@ -276,13 +259,8 @@ func main() {
 			fmt.Println("coordStatement=", coordStatement)
 			log.Fatal(coordErr)
 		}
-		//coordStatement.Exec(router.System.RouterID, router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
 		_, coordErr = coordStatement.Exec(router.System.RouterID, router.System.Coordinates.X, router.System.Coordinates.Y, router.System.Coordinates.Z)
 		if coordErr != nil {
-			//			fmt.Println("Error executing Update to table Coordinates X3D, Y3D and Z3D coordinates.")
-			//			fmt.Println("coordStatement=", coordStatement)
-			//			log.Fatal(coordErr)
-			//			log.Fatalln("Error executing Update to table Coordinates X3D, Y3D and Z3D coordinates.", "\ncoordStatement =", coordStatement, "\nError = ", coordErr)
 			log.Fatalln("Error executing UPDATE to table Coordinates; X3D, Y3D and Z3D.",
 				"\n System.RouterID =", router.System.RouterID,
 				"\n System.Coordeinates.X =", router.System.Coordinates.X,
@@ -324,9 +302,6 @@ func main() {
 		}
 
 		// retrieve FromRouter coordinates from router struc
-		//		routerRows, queryErr = database.Query("SELECT RouterID, SystemName FROM Routers WHERE SystemName =", FromRouter)
-
-		//		routerRows.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt, X3D, Y3D, Z3D)
 		x = router.System.Coordinates.X
 		y = router.System.Coordinates.Y
 		z = router.System.Coordinates.Z
