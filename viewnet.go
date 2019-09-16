@@ -165,7 +165,7 @@ func main() {
 	//	var Y3D float32
 	//	var Z3D float32
 	//	var router Router
-	var routerArray []Router
+	var routerArray [1000]Router
 	var link Link
 	var LinkID int
 	var FromRouter string
