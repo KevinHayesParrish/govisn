@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.4.5"
+const ViewnetVersion = "0.4.6"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -316,9 +316,10 @@ func main() {
 		}
 
 		// retrieve FromRouter coordinates from router struc
-		x = routerArray[routerArrayIndex].System.Coordinates.X
-		y = routerArray[routerArrayIndex].System.Coordinates.Y
-		z = routerArray[routerArrayIndex].System.Coordinates.Z
+		//x = routerArray[routerArrayIndex].System.Coordinates.X
+		//y = routerArray[routerArrayIndex].System.Coordinates.Y
+		//z = routerArray[routerArrayIndex].System.Coordinates.Z
+		x, y, z = getRouterCoordinates(routerArray, link.FromRouter)
 		if *debugFlag {
 			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 		}
@@ -338,3 +339,15 @@ func Rad(d float64) float64 { return d * constX }
 
 // Deg converts radians to degrees
 func Deg(r float64) float64 { return r / constX }
+
+// Get Router Coordinates from routerArray
+func getRouterCoordinates(routerArray [1000]Router, routerName string) (float32, float32, float32) {
+	var x float32
+	var y float32
+	var z float32
+
+	for i := 0; i < len(routerArray); i++ {
+
+	}
+	return x, y, z
+}
