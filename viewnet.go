@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.4.6"
+const ViewnetVersion = "0.4.7"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -347,7 +347,11 @@ func getRouterCoordinates(routerArray [1000]Router, routerName string) (float32,
 	var z float32
 
 	for i := 0; i < len(routerArray); i++ {
-
+		if routerArray[i].System.Name == routerName {
+			x = routerArray[i].System.Coordinates.X
+			y = routerArray[i].System.Coordinates.Y
+			z = routerArray[i].System.Coordinates.Z
+		}
 	}
 	return x, y, z
 }
