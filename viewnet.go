@@ -24,7 +24,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.4.7"
+const ViewnetVersion = "0.4.8"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -209,15 +209,6 @@ func main() {
 		routerRows.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
 
 		// Load router struct from DB fields
-		/*		router.System.RouterID = RouterID
-				router.System.Name = SystemName
-				router.System.UpTime = UpTime
-				router.System.Contact = Contact
-				router.System.Location = Location
-				router.System.GPS.Latitude = GpsLat
-				router.System.GPS.Longitude = GpsLong
-				router.System.GPS.Altitude = GpsAlt
-		*/
 		routerArray[routerArrayIndex].System.RouterID = RouterID
 		routerArray[routerArrayIndex].System.UpTime = UpTime
 		routerArray[routerArrayIndex].System.Name = SystemName
@@ -262,27 +253,8 @@ func main() {
 			fmt.Println("router.System.Coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			fmt.Println("RouterID=", RouterID, "SystemName=", SystemName)
 		}
-		/*
-			// Write 3D coordinates to Coordinates table row for later retrieval
 
-			coordStatement, coordErr := databaseForUpdate.Prepare("UPDATE Coordinates SET X3D = ?, Y3D = ?, Z3D = ? WHERE RouterID = ?")
-			if coordErr != nil {
-				fmt.Println("Error preparing Coordinates Update statement:", coordErr)
-				fmt.Println("coordStatement=", coordStatement)
-				log.Fatal(coordErr)
-			}
-			_, coordErr = coordStatement.Exec(routerArray[routerArrayIndex].System.RouterID, routerArray[routerArrayIndex].System.Coordinates.X, routerArray[routerArrayIndex].System.Coordinates.Y, routerArray[routerArrayIndex].System.Coordinates.Z)
-			if coordErr != nil {
-				log.Fatalln("Error executing UPDATE to table Coordinates; X3D, Y3D and Z3D.",
-					"\n System.RouterID =", routerArray[routerArrayIndex].System.RouterID,
-					"\n System.Coordeinates.X =", routerArray[routerArrayIndex].System.Coordinates.X,
-					"\n System.Coordeinates.Y =", routerArray[routerArrayIndex].System.Coordinates.Y,
-					"\n System.Coordeinates.Z =", routerArray[routerArrayIndex].System.Coordinates.Z,
-					"\n Error = ", coordErr)
-			}
-			defer coordStatement.Close()
-		*/
-		//		cylinderMesh.SetPosition(x, y, z)
+		// Add Router object to 3D scene
 		cylinderMesh.SetPosition(routerArray[routerArrayIndex].System.Coordinates.X, routerArray[routerArrayIndex].System.Coordinates.Y, routerArray[routerArrayIndex].System.Coordinates.Z)
 		app.Scene().Add(cylinderMesh)
 
@@ -302,6 +274,7 @@ func main() {
 	/*
 	* Add the links to the 3D scene
 	 */
+	var FromRouterX, FromRouterY, FromRouterZ, ToRouterX, ToRouterY, ToRouterZ float32
 	for linkRows.Next() {
 		err := linkRows.Scan(&LinkID, &FromRouter, &ToRouter)
 		if err != nil {
@@ -316,13 +289,21 @@ func main() {
 		}
 
 		// retrieve FromRouter coordinates from router struc
-		//x = routerArray[routerArrayIndex].System.Coordinates.X
-		//y = routerArray[routerArrayIndex].System.Coordinates.Y
-		//z = routerArray[routerArrayIndex].System.Coordinates.Z
-		x, y, z = getRouterCoordinates(routerArray, link.FromRouter)
+		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(routerArray, link.FromRouter)
 		if *debugFlag {
 			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
+			fmt.Println("returned from getRouterCoordinates func: FromRouterX=", FromRouterX, "FromRouterY=", FromRouterY, "FromRouterZ=", FromRouterZ)
 		}
+
+		// retrieve ToRouter coordinates from router struc
+		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(routerArray, link.ToRouter)
+		if *debugFlag {
+			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
+			fmt.Println("returned from getRouterCoordinates func: ToRouterX=", ToRouterX, "ToRouterY=", ToRouterY, "ToRouterZ=", ToRouterZ)
+		}
+
+		// Add link object to the 3D scene
+		// <add gen code for line here>
 
 		err = linkRows.Err()
 		if err != nil {
