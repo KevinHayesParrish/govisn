@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/g3n/engine/geometry"
+	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/light"
 	"github.com/g3n/engine/material"
@@ -304,6 +305,35 @@ func main() {
 
 		// Add link object to the 3D scene
 		// <add gen code for line here>
+		//		link3D := geometry.NewCylinder(routerRadius, routerRadius, 0.5, 16, 2, 0, 2*math.Pi, true, true)
+		//		linkMat := material.NewPhong(math32.NewColor("Blue"))
+		//		cylinderMesh := graphic.NewMesh(link3D, linkMat)
+		//		cylinderMesh.SetPosition(FromRouterX, FromRouterY, FromRouterZ)
+		linkGeom := geometry.NewGeometry()
+		vertices := math32.NewArrayF32(0, 16)
+		vertices.Append(
+			FromRouterX, FromRouterY, FromRouterZ,
+			ToRouterX, ToRouterY, ToRouterZ,
+		)
+		if *debugFlag {
+			fmt.Println("link vertices=", vertices)
+		}
+		colors := math32.NewArrayF32(0, 16)
+		colors.Append(
+			0.0, 0.0, 1.0,
+			0.0, 0.0, 1.0,
+		)
+		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
+		linkGeom.AddVBO(gls.NewVBO(colors).AddAttrib(gls.VertexColor))
+
+		// Creates basic material
+		mat := material.NewBasic()
+
+		// Creates lines with the specified geometry and material
+		link3D := graphic.NewLines(linkGeom, mat)
+
+		//		app.Scene().Add(cylinderMesh)
+		app.Scene().Add(link3D)
 
 		err = linkRows.Err()
 		if err != nil {
