@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/g3n/engine/geometry"
+	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/light"
 	"github.com/g3n/engine/material"
@@ -329,6 +330,7 @@ func main() {
 		linkFromVector := math32.NewVector3(FromRouterX, FromRouterY, FromRouterZ)
 		linkToVector := math32.NewVector3(ToRouterX, ToRouterY, ToRouterZ)
 		linkLine := math32.NewLine3(linkFromVector, linkToVector)
+		linkGeom.AddVBO(gls.NewVBO(linkLine))
 
 		// Creates basic material
 		mat := material.NewBasic()
