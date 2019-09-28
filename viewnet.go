@@ -310,7 +310,7 @@ func main() {
 		//		cylinderMesh := graphic.NewMesh(link3D, linkMat)
 		//		cylinderMesh.SetPosition(FromRouterX, FromRouterY, FromRouterZ)
 		linkGeom := geometry.NewGeometry()
-		vertices := math32.NewArrayF32(0, 16)
+		vertices := math32.NewArrayF32(0, 0)
 		vertices.Append(
 			FromRouterX, FromRouterY, FromRouterZ,
 			ToRouterX, ToRouterY, ToRouterZ,
@@ -318,7 +318,7 @@ func main() {
 		if *debugFlag {
 			fmt.Println("link vertices=", vertices)
 		}
-		colors := math32.NewArrayF32(0, 16)
+		colors := math32.NewArrayF32(0, 0)
 		colors.Append(
 			0.0, 0.0, 1.0,
 			0.0, 0.0, 1.0,
