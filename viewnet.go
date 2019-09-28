@@ -310,27 +310,29 @@ func main() {
 		//		cylinderMesh := graphic.NewMesh(link3D, linkMat)
 		//		cylinderMesh.SetPosition(FromRouterX, FromRouterY, FromRouterZ)
 		linkGeom := geometry.NewGeometry()
-		//		vertices := math32.NewArrayF32(0, 16)
-		//		vertices.Append(
-		//			FromRouterX, FromRouterY, FromRouterZ,
-		//			ToRouterX, ToRouterY, ToRouterZ,
-		//		)
-		//		if *debugFlag {
-		//			fmt.Println("link vertices=", vertices)
-		//		}
-		//		colors := math32.NewArrayF32(0, 16)
-		//		colors.Append(
-		//			0.0, 0.0, 1.0,
-		//			0.0, 0.0, 1.0,
-		//		)
-		//		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
+		vertices := math32.NewArrayF32(0, 16)
+		vertices.Append(
+			FromRouterX, FromRouterY, FromRouterZ,
+			ToRouterX, ToRouterY, ToRouterZ,
+		)
+		if *debugFlag {
+			fmt.Println("link vertices=", vertices)
+		}
+		colors := math32.NewArrayF32(0, 16)
+		colors.Append(
+			0.0, 0.0, 1.0,
+			0.0, 0.0, 1.0,
+		)
+		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
 
-		//		linkGeom.AddVBO(gls.NewVBO(colors).AddAttrib(gls.VertexColor))
+		linkGeom.AddVBO(gls.NewVBO(colors).AddAttrib(gls.VertexColor))
 
-		linkFromVector := math32.NewVector3(FromRouterX, FromRouterY, FromRouterZ)
-		linkToVector := math32.NewVector3(ToRouterX, ToRouterY, ToRouterZ)
-		linkLine := math32.NewLine3(linkFromVector, linkToVector)
-		linkGeom.AddVBO(gls.NewVBO(linkLine))
+		/*
+			linkFromVector := math32.NewVector3(FromRouterX, FromRouterY, FromRouterZ)
+			linkToVector := math32.NewVector3(ToRouterX, ToRouterY, ToRouterZ)
+			linkLine := math32.NewLine3(linkFromVector, linkToVector)
+			linkGeom.AddVBO(gls.NewVBO(linkLine))
+		*/
 
 		// Creates basic material
 		mat := material.NewBasic()
