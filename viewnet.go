@@ -14,6 +14,8 @@ import (
 	"github.com/g3n/engine/light"
 	"github.com/g3n/engine/material"
 	"github.com/g3n/engine/math32"
+	"github.com/g3n/engine/text"
+	"github.com/g3n/engine/texture"
 	"github.com/g3n/engine/util/application"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -25,7 +27,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.4.8"
+const ViewnetVersion = "0.5.0"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -259,7 +261,31 @@ func main() {
 		cylinderMesh.SetPosition(routerArray[routerArrayIndex].System.Coordinates.X, routerArray[routerArrayIndex].System.Coordinates.Y, routerArray[routerArrayIndex].System.Coordinates.Z)
 		app.Scene().Add(cylinderMesh)
 
-		//x = x + 2.0
+		// Add router name to scene
+		// Creates Font
+		fontfile := app.DirData() + "/fonts/FreeSans.ttf"
+		font, err := text.NewFont(fontfile)
+		if err != nil {
+			app.Log().Fatal(err.Error())
+		}
+		font.SetLineSpacing(1.0)
+		font.SetPointSize(28)
+		font.SetDPI(72)
+		font.SetFgColor(&math32.Color4{0, 0, 1, 1})
+		font.SetBgColor(&math32.Color4{1, 1, 0, 0.8})
+		canvas := text.NewCanvas(300, 200, &math32.Color4{0, 1, 0, 0.8})
+		rtext := strconv.Itoa(routerArray[routerArrayIndex].System.RouterID) + "\n" + routerArray[routerArrayIndex].System.Name
+		swidth, sheight := font.MeasureText(rtext)
+		canvas = text.NewCanvas(swidth, sheight, &math32.Color4{0, 1, 1, 1})
+		canvas.DrawText(0, 0, rtext, font)
+		tex3 := texture.NewTexture2DFromRGBA(canvas.RGBA)
+		mat3 := material.NewStandard(&math32.Color{1, 1, 1})
+		mat3.AddTexture(tex3)
+		aspect := float32(swidth) / float32(sheight)
+		mesh3 := graphic.NewSprite(aspect, 1, mat3)
+		mesh3.SetPosition(-1.5, 1.5, 0.1)
+		app.Scene().Add(mesh3)
+
 		queryErr = routerRows.Err()
 		if queryErr != nil {
 			log.Fatal(queryErr)
