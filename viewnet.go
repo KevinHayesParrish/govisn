@@ -28,7 +28,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.5.1"
+const ViewnetVersion = "0.5.2"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -286,7 +286,6 @@ func main() {
 		mat3.AddTexture(tex3)
 		aspect := float32(swidth) / float32(sheight)
 		mesh3 := graphic.NewSprite(aspect, 1, mat3)
-		//		mesh3.SetPosition(-1.5, 1.5, 0.1)
 		mesh3.SetPosition(routerArray[routerArrayIndex].System.Coordinates.X, routerArray[routerArrayIndex].System.Coordinates.Y, routerArray[routerArrayIndex].System.Coordinates.Z+1.0)
 		app.Scene().Add(mesh3)
 
