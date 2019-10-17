@@ -199,7 +199,7 @@ func main() {
 	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
 	globeMat := material.NewPhong(&math32.Color{R: 0.5, G: 0.5, B: 0.5})
 	globeMesh := graphic.NewMesh(globe3D, globeMat)
-	globeMesh.SetPosition(-1, -1, -1)
+	globeMesh.SetPosition(0, 0, 0)
 	app.Scene().Add(globeMesh)
 
 	if *debugFlag {
