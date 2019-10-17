@@ -28,7 +28,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.5.1"
+const ViewnetVersion = "0.5.2"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -193,7 +193,8 @@ func main() {
 	// Set initial camera position, i.e. viewing point
 	//	app.CameraPersp().SetPosition(4, 0, 15)
 	//	app.CameraPersp().SetPosition(0, 0, (float32)(globeRadius+40))
-	app.CameraPersp().SetPosition(0, 0, (float32)(globeRadius*3.0))
+	//	app.CameraPersp().SetPosition(0, 0, (float32)(globeRadius*3.0))
+	app.CameraPersp().SetPosition(0.0, -5.0, (float32)(globeRadius*5.0))
 
 	// Create a sphere representing the globe
 	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
@@ -286,7 +287,6 @@ func main() {
 		mat3.AddTexture(tex3)
 		aspect := float32(swidth) / float32(sheight)
 		mesh3 := graphic.NewSprite(aspect, 1, mat3)
-		//		mesh3.SetPosition(-1.5, 1.5, 0.1)
 		mesh3.SetPosition(routerArray[routerArrayIndex].System.Coordinates.X, routerArray[routerArrayIndex].System.Coordinates.Y, routerArray[routerArrayIndex].System.Coordinates.Z+1.0)
 		app.Scene().Add(mesh3)
 
