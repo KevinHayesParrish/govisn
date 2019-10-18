@@ -47,8 +47,7 @@ const routerRadius float64 = 0.5
 
 //globeRadius is the radius of the 3D object representing the earth
 //const globeRadius float64 = 1.5
-//const globeRadius float64 = 65.0
-const globeRadius float64 = 210.0
+const globeRadius float64 = 65.0
 
 // Router is the structure representing a network router
 type Router struct {
