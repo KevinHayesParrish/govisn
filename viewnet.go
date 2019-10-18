@@ -28,7 +28,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.5.2"
+const ViewnetVersion = "0.5.3"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -47,7 +47,8 @@ const routerRadius float64 = 0.5
 
 //globeRadius is the radius of the 3D object representing the earth
 //const globeRadius float64 = 1.5
-const globeRadius float64 = 65.0
+//const globeRadius float64 = 65.0
+const globeRadius float64 = 210.0
 
 // Router is the structure representing a network router
 type Router struct {
