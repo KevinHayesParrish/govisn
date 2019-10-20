@@ -9,10 +9,13 @@ import (
 	"os"
 	"strconv"
 
+	//	"github.com/g3n/g3nd/material"
+
 	"github.com/g3n/engine/geometry"
 	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/light"
+
 	"github.com/g3n/engine/material"
 	"github.com/g3n/engine/math32"
 	"github.com/g3n/engine/text"
@@ -47,7 +50,7 @@ const routerRadius float64 = 0.5
 
 //globeRadius is the radius of the 3D object representing the earth
 //const globeRadius float64 = 1.5
-const globeRadius float64 = 65.0
+const globeRadius float64 = 63.7
 
 // Router is the structure representing a network router
 type Router struct {
@@ -199,6 +202,8 @@ func main() {
 	// Create a sphere representing the globe
 	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
 	globeMat := material.NewPhong(&math32.Color{R: 0.5, G: 0.5, B: 0.5})
+	globeMat.SetTransparent(true)
+	globeMat.SetOpacity(0.5)
 	globeMesh := graphic.NewMesh(globe3D, globeMat)
 	globeMesh.SetPosition(0, 0, 0)
 	app.Scene().Add(globeMesh)
@@ -249,8 +254,9 @@ func main() {
 		routerArray[routerArrayIndex].System.Coordinates.Y = y // update router struc with y coordinate
 
 		GpsAltFloat64, parseErr := strconv.ParseFloat(GpsAlt, 64)
+		GpsAltFloat64 = GpsAltFloat64 / 100000.0
 		z = (float32)(globeRadius*(math.Cos(yRadianLat)) + GpsAltFloat64)
-		routerArray[routerArrayIndex].System.Coordinates.Z = z // update router struc with z coordinate
+		routerArray[routerArrayIndex].System.Coordinates.Z = z // update router struc with z coordinate.
 
 		if *debugFlag {
 			fmt.Println("x =", x, "y =", y, "z", z)
@@ -259,7 +265,7 @@ func main() {
 			fmt.Println("RouterID=", RouterID, "SystemName=", SystemName)
 		}
 
-		// Add Router object to 3D scene
+		// Add Router object to 3D scene.
 		cylinderMesh.SetPosition(routerArray[routerArrayIndex].System.Coordinates.X, routerArray[routerArrayIndex].System.Coordinates.Y, routerArray[routerArrayIndex].System.Coordinates.Z)
 		app.Scene().Add(cylinderMesh)
 
