@@ -31,7 +31,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.5.3"
+const ViewnetVersion = "0.5.4"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -194,10 +194,8 @@ func main() {
 	app.Scene().Add(axis)
 
 	// Set initial camera position, i.e. viewing point
-	//	app.CameraPersp().SetPosition(4, 0, 15)
-	//	app.CameraPersp().SetPosition(0, 0, (float32)(globeRadius+40))
-	//	app.CameraPersp().SetPosition(0, 0, (float32)(globeRadius*3.0))
-	app.CameraPersp().SetPosition(0.0, -5.0, (float32)(globeRadius*9.0))
+	app.CameraPersp().SetPosition(0.0, 0.0, (float32)(globeRadius*2.0))
+	//	app.CameraPersp().SetPosition(0.0, 0.0, 126.0)
 
 	// Create a sphere representing the globe
 	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
@@ -284,7 +282,7 @@ func main() {
 		font.SetFgColor(&math32.Color4{R: 0, G: 0, B: 1, A: 1})
 		font.SetBgColor(&math32.Color4{R: 1, G: 1, B: 0, A: 0.8})
 		canvas := text.NewCanvas(300, 200, &math32.Color4{R: 0, G: 1, B: 0, A: 0.8})
-		rtext := strconv.Itoa(routerArray[routerArrayIndex].System.RouterID) + "\n" + routerArray[routerArrayIndex].System.Name
+		rtext := "RouterID: " + strconv.Itoa(routerArray[routerArrayIndex].System.RouterID) + "\nHostname: " + routerArray[routerArrayIndex].System.Name
 		swidth, sheight := font.MeasureText(rtext)
 		canvas = text.NewCanvas(swidth, sheight, &math32.Color4{R: 0, G: 1, B: 1, A: 1})
 		canvas.DrawText(0, 0, rtext, font)
