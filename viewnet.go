@@ -195,7 +195,6 @@ func main() {
 
 	// Set initial camera position, i.e. viewing point
 	app.CameraPersp().SetPosition(0.0, 0.0, (float32)(globeRadius*2.0))
-	//	app.CameraPersp().SetPosition(0.0, 0.0, 126.0)
 
 	// Create a sphere representing the globe
 	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
