@@ -26,8 +26,6 @@ import (
 
 /*
 * TODO:
-*	1. Add the router's 3D coordinates to the Router table.
-*		This is for use when adding the links to the 3D scene.
  */
 
 //ViewnetVersion is the file version number
