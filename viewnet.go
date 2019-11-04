@@ -29,13 +29,15 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.5.4"
+const ViewnetVersion = "0.6.0"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
 var debugFlag = flag.Bool("d", false, "Print Debug statements.")
 var sampleNetworkDB = flag.Bool("c", false, "Create a sample database.")
+var loadDBFlag = flag.Bool("l", false, "Load a database from an XML document.")
+var networkXML = "discoverednetwork.xml"
 
 //DbName is the name of the discovered network database file
 var DbName = flag.String("f", "discoverednetwork.db", "Name of the discovered network database")
@@ -107,6 +109,9 @@ func main() {
 	}
 	if *testArangoDb {
 		testarango()
+	}
+	if *loadDBFlag {
+		loaddb(networkXML)
 	}
 
 	// Open the database containing the discovered network

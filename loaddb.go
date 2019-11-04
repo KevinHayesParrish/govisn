@@ -15,7 +15,7 @@ import (
 //loaddbVersion is the file version number
 const loadbVersion = "0.1.0"
 
-func loaddb(string dbName) {
+func loaddb(DbName string) {
 	fmt.Println("loaddb version:", loadbVersion)
 	//	database, _ := sql.Open("sqlite3", "./samplenetwork.db")
 	database, _ := sql.Open("sqlite3", "./dbname")
