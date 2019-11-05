@@ -111,7 +111,11 @@ func main() {
 		testarango()
 	}
 	if *loadDBFlag {
+		if *DbName != "discoverednetwork.db" {
+			networkXML = *DbName
+		}
 		loaddb(networkXML)
+		return
 	}
 
 	// Open the database containing the discovered network
