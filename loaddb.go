@@ -1,20 +1,63 @@
 package main
 
 import (
+	"encoding/xml"
 	"fmt"
-
-	//	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.1.0"
+const loadbVersion = "0.1.1"
 
 func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
 	fmt.Println("networkXML=", networkXML) // FOR TESTING ONLY
 
+	type V15NDiscoveredNetwork struct {
+		XMLName xml.Name `xml:"V15N_Discovered_Network"`
+		Text    string   `xml:",chardata"`
+		Router  struct {
+			Text   string `xml:",chardata"`
+			System struct {
+				Text        string `xml:",chardata"`
+				Name        string `xml:"Name"`
+				Description string `xml:"Description"`
+				UpTime      string `xml:"Up_Time"`
+				Contact     string `xml:"Contact"`
+				Location    string `xml:"Location"`
+				GPS         struct {
+					Text      string `xml:",chardata"`
+					Latitude  string `xml:"Latitude"`
+					Longitude string `xml:"Longitude"`
+					Altitude  string `xml:"Altitude"`
+				} `xml:"GPS"`
+			} `xml:"System"`
+			Addresses struct {
+				Text             string `xml:",chardata"`
+				NetworkAddresses struct {
+					Text      string   `xml:",chardata"`
+					IPAddress []string `xml:"IP_Address"`
+				} `xml:"Network_Addresses"`
+				MediaAddresses struct {
+					Text         string   `xml:",chardata"`
+					MediaAddress []string `xml:"Media_Address"`
+				} `xml:"Media_Addresses"`
+			} `xml:"Addresses"`
+			Neighbors struct {
+				Text     string `xml:",chardata"`
+				Neighbor []struct {
+					Text               string `xml:",chardata"`
+					DestinationAddress string `xml:"Destination_Address"`
+					NextHop            string `xml:"Next_Hop"`
+				} `xml:"Neighbor"`
+			} `xml:"Neighbors"`
+		} `xml:"Router"`
+	}
+
+	var DiscoveredNetworkXML V15NDiscoveredNetwork
+
+	fmt.Println("DiscoveredNetworkXML=", DiscoveredNetworkXML)
 	/*
 		database, _ := sql.Open("sqlite3", "./networkXML")
 
