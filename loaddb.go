@@ -12,7 +12,7 @@ const loadbVersion = "0.1.1"
 
 func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
-	fmt.Println("networkXML=", networkXML) // FOR TESTING ONLY
+	fmt.Println("Loading database from XML document", networkXML) // FOR TESTING ONLY
 
 	type V15NDiscoveredNetwork struct {
 		XMLName xml.Name `xml:"V15N_Discovered_Network"`
@@ -58,6 +58,7 @@ func loaddb(networkXML string) {
 	var DiscoveredNetworkXML V15NDiscoveredNetwork
 
 	fmt.Println("DiscoveredNetworkXML=", DiscoveredNetworkXML)
+
 	/*
 		database, _ := sql.Open("sqlite3", "./networkXML")
 
