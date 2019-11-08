@@ -16,6 +16,11 @@ func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
 	fmt.Println("Loading database from XML document", networkXML) // FOR TESTING ONLY
 
+	// The struc which contains all the Routers in the XML input file.
+	type Routers struct {
+		XMLName xml.Name `xml:"Routers"`
+		Routers []Router `xml:"Router"`
+	}
 	// The V15NDiscoveredNetwork struct contains the discovered network attributes.
 	type V15NDiscoveredNetwork struct {
 		XMLName xml.Name `xml:"V15N_Discovered_Network"`
@@ -60,6 +65,9 @@ func loaddb(networkXML string) {
 
 	var discoveredNetworkXML V15NDiscoveredNetwork
 
+	// Initialize the routers array
+	var routers []Routers
+
 	fmt.Println("discoveredNetworkXML=", discoveredNetworkXML)
 	// Open our xmlFile
 	xmlFile, err := os.Open(networkXML)
@@ -80,9 +88,9 @@ func loaddb(networkXML string) {
 
 	fmt.Println("discoveredNetworkBytes=", discoveredNetworkBytes) // TESTING ONLY
 
-    for i := 0; i < len(users.Users); i++ {
-        fmt.Println("User Type: " + users.Users[i].Type)
-    }
+	for i := 0; i < len(routers.Router); i++ {
+		fmt.Println("Router Type: " + routers.Router[i].System.Name)
+	}
 
 	/*
 		database, _ := sql.Open("sqlite3", "./networkXML")
