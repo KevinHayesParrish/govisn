@@ -16,6 +16,7 @@ func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
 	fmt.Println("Loading database from XML document", networkXML) // FOR TESTING ONLY
 
+	// The V15NDiscoveredNetwork struct contains the discovered network attributes.
 	type V15NDiscoveredNetwork struct {
 		XMLName xml.Name `xml:"V15N_Discovered_Network"`
 		Text    string   `xml:",chardata"`
