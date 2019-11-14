@@ -66,7 +66,8 @@ func loaddb(networkXML string) {
 	var discoveredNetworkXML V15NDiscoveredNetwork
 
 	// Initialize the routers array
-	var routers []Routers
+	//var routers []Routers
+	var routers []V15NDiscoveredNetwork
 
 	fmt.Println("discoveredNetworkXML=", discoveredNetworkXML)
 	// Open our xmlFile
@@ -84,12 +85,14 @@ func loaddb(networkXML string) {
 
 	// we unmarshal our byteArray which contains our
 	// xmlFiles content into 'discoveredNetworkXML' which we defined above
-	xml.Unmarshal(discoveredNetworkBytes, &discoveredNetworkXML)
+	//xml.Unmarshal(discoveredNetworkBytes, &discoveredNetworkXML)
+	xml.Unmarshal(discoveredNetworkBytes, &routers)
 
-	fmt.Println("discoveredNetworkBytes=", discoveredNetworkBytes) // TESTING ONLY
+	//fmt.Println("discoveredNetworkBytes=", discoveredNetworkBytes) // TESTING ONLY
+	fmt.Println("routers=", routers) //TESTING ONLY
 
-	for i := 0; i < len(routers.Router); i++ {
-		fmt.Println("Router Type: " + routers.Router[i].System.Name)
+	for i := 0; i < len(routers); i++ {
+		fmt.Println("Router:", routers[i])
 	}
 
 	/*
