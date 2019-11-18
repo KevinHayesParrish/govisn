@@ -66,10 +66,10 @@ func loaddb(networkXML string) {
 	var discoveredNetworkXML V15NDiscoveredNetwork
 
 	// Initialize the routers array
-	//var routers []Routers
-	var routers []V15NDiscoveredNetwork
+	var routers []Routers
+	//var routers []V15NDiscoveredNetwork
 
-	fmt.Println("discoveredNetworkXML=", discoveredNetworkXML)
+	fmt.Println("Initialized discoveredNetworkXML=", discoveredNetworkXML)
 	// Open our xmlFile
 	xmlFile, err := os.Open(networkXML)
 	// if we os.Open returns an error then handle it
@@ -92,7 +92,8 @@ func loaddb(networkXML string) {
 	fmt.Println("routers=", routers) //TESTING ONLY
 
 	for i := 0; i < len(routers); i++ {
-		fmt.Println("Router:", routers[i])
+		//fmt.Println("Router ", i, "=", routers[i])
+		fmt.Println("i=", i)
 	}
 
 	/*
