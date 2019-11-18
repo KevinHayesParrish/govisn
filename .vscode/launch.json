@@ -35,5 +35,17 @@
             "env": {},
             "args": ["-c"]
         }
+        {
+            "name": "Debug govisn -l -f",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "remotePath": "",
+            "port": 2345,
+            "host": "127.0.0.1",
+            "program": "${file}",
+            "env": {},
+            "args": ["-l", "-f", "data/V15N-VSP-GPS.xml"]
+        }
     ]
 }
