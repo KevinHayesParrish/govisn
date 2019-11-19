@@ -10,7 +10,7 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.1.1"
+const loadbVersion = "0.1.2"
 
 func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
@@ -63,11 +63,53 @@ func loaddb(networkXML string) {
 		} `xml:"Router"`
 	}
 
+	// The Router struct, this contains
+	// the router's Name, Descriptions, UpTime
+	// Contact, Location and GPS Coordinates.
+	// It also contains nested structs for Addresses
+	// and Neighbor routers.
+	type Router struct {
+		Text   string `xml:",chardata"`
+		System struct {
+			Text        string `xml:",chardata"`
+			Name        string `xml:"Name"`
+			Description string `xml:"Description"`
+			UpTime      string `xml:"Up_Time"`
+			Contact     string `xml:"Contact"`
+			Location    string `xml:"Location"`
+			GPS         struct {
+				Text      string `xml:",chardata"`
+				Latitude  string `xml:"Latitude"`
+				Longitude string `xml:"Longitude"`
+				Altitude  string `xml:"Altitude"`
+			} `xml:"GPS"`
+		} `xml:"System"`
+		Addresses struct {
+			Text             string `xml:",chardata"`
+			NetworkAddresses struct {
+				Text      string   `xml:",chardata"`
+				IPAddress []string `xml:"IP_Address"`
+			} `xml:"Network_Addresses"`
+			MediaAddresses struct {
+				Text         string   `xml:",chardata"`
+				MediaAddress []string `xml:"Media_Address"`
+			} `xml:"Media_Addresses"`
+		} `xml:"Addresses"`
+		Neighbors struct {
+			Text     string `xml:",chardata"`
+			Neighbor []struct {
+				Text               string `xml:",chardata"`
+				DestinationAddress string `xml:"Destination_Address"`
+				NextHop            string `xml:"Next_Hop"`
+			} `xml:"Neighbor"`
+		} `xml:"Neighbors"`
+	}
+
 	var discoveredNetworkXML V15NDiscoveredNetwork
 
 	// Initialize the routers array
-	var routers []Routers
-	//var routers []V15NDiscoveredNetwork
+	//var routers []Routers
+	var routers []V15NDiscoveredNetwork.Router
 
 	fmt.Println("Initialized discoveredNetworkXML=", discoveredNetworkXML)
 	// Open our xmlFile
@@ -92,7 +134,7 @@ func loaddb(networkXML string) {
 	fmt.Println("routers=", routers) //TESTING ONLY
 
 	for i := 0; i < len(routers); i++ {
-		//fmt.Println("Router ", i, "=", routers[i])
+		fmt.Println("Router Name: " + routers.Routers[i].Name)
 		fmt.Println("i=", i)
 	}
 
