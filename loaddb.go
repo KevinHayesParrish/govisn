@@ -21,8 +21,8 @@ func loaddb(networkXML string) {
 		XMLName xml.Name `xml:"Routers"`
 		Routers []Router `xml:"Router"`
 	}
-	// The V15NDiscoveredNetwork struct contains the discovered network attributes.
-	type V15NDiscoveredNetwork struct {
+	// The Network struct contains the discovered network attributes.
+	type Network struct {
 		XMLName xml.Name `xml:"V15N_Discovered_Network"`
 		Text    string   `xml:",chardata"`
 		Router  struct {
@@ -105,13 +105,13 @@ func loaddb(networkXML string) {
 		} `xml:"Neighbors"`
 	}
 
-	var discoveredNetworkXML V15NDiscoveredNetwork
+	var network Network
 
 	// Initialize the routers array
 	//var routers []Routers
-	var routers []V15NDiscoveredNetwork.Router
+	var routers []Router
 
-	fmt.Println("Initialized discoveredNetworkXML=", discoveredNetworkXML)
+	fmt.Println("Initialized network=", network)
 	// Open our xmlFile
 	xmlFile, err := os.Open(networkXML)
 	// if we os.Open returns an error then handle it
@@ -123,18 +123,27 @@ func loaddb(networkXML string) {
 	defer xmlFile.Close()
 
 	// read our opened xmlFile as a byte array.
-	discoveredNetworkBytes, _ := ioutil.ReadAll(xmlFile)
+	discoveredNetworkBytes, err := ioutil.ReadAll(xmlFile)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// we unmarshal our byteArray which contains our
 	// xmlFiles content into 'discoveredNetworkXML' which we defined above
 	//xml.Unmarshal(discoveredNetworkBytes, &discoveredNetworkXML)
-	xml.Unmarshal(discoveredNetworkBytes, &routers)
+	err = xml.Unmarshal(discoveredNetworkBytes, &routers)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("routers length=", len(routers))
 
 	//fmt.Println("discoveredNetworkBytes=", discoveredNetworkBytes) // TESTING ONLY
 	fmt.Println("routers=", routers) //TESTING ONLY
 
+	var router Router
 	for i := 0; i < len(routers); i++ {
-		fmt.Println("Router Name: " + routers.Routers[i].Name)
+		router = routers[i]
+		fmt.Println("Router Name: " + router.System.Name)
 		fmt.Println("i=", i)
 	}
 
