@@ -10,57 +10,58 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.1.2"
+const loadbVersion = "0.1.3"
 
 func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
 	fmt.Println("Loading database from XML document", networkXML) // FOR TESTING ONLY
 
+	// The Network struct contains the discovered network attributes.
+	//	type Network struct {
+	//		XMLName xml.Name `xml:"V15N_Discovered_Network"`
+	//		Text    string   `xml:",chardata"`
+	//		Router  struct {
+	//			Text   string `xml:",chardata"`
+	//			System struct {
+	//				Text        string `xml:",chardata"`
+	//				Name        string `xml:"Name"`
+	//				Description string `xml:"Description"`
+	//				UpTime      string `xml:"Up_Time"`
+	//				Contact     string `xml:"Contact"`
+	//				Location    string `xml:"Location"`
+	//				GPS         struct {
+	//					Text      string `xml:",chardata"`
+	//					Latitude  string `xml:"Latitude"`
+	//					Longitude string `xml:"Longitude"`
+	//					Altitude  string `xml:"Altitude"`
+	//				} `xml:"GPS"`
+	//			} `xml:"System"`
+	//			Addresses struct {
+	//				Text             string `xml:",chardata"`
+	//				NetworkAddresses struct {
+	//					Text      string   `xml:",chardata"`
+	//					IPAddress []string `xml:"IP_Address"`
+	//				} `xml:"Network_Addresses"`
+	//				MediaAddresses struct {
+	//					Text         string   `xml:",chardata"`
+	//					MediaAddress []string `xml:"Media_Address"`
+	//				} `xml:"Media_Addresses"`
+	//			} `xml:"Addresses"`
+	//			Neighbors struct {
+	//				Text     string `xml:",chardata"`
+	//				Neighbor []struct {
+	//					Text               string `xml:",chardata"`
+	//					DestinationAddress string `xml:"Destination_Address"`
+	//					NextHop            string `xml:"Next_Hop"`
+	//				} `xml:"Neighbor"`
+	//			} `xml:"Neighbors"`
+	//		} `xml:"Router"`
+	//	}
+
 	// The struc which contains all the Routers in the XML input file.
 	type Routers struct {
-		XMLName xml.Name `xml:"Routers"`
-		Routers []Router `xml:"Router"`
-	}
-	// The Network struct contains the discovered network attributes.
-	type Network struct {
 		XMLName xml.Name `xml:"V15N_Discovered_Network"`
-		Text    string   `xml:",chardata"`
-		Router  struct {
-			Text   string `xml:",chardata"`
-			System struct {
-				Text        string `xml:",chardata"`
-				Name        string `xml:"Name"`
-				Description string `xml:"Description"`
-				UpTime      string `xml:"Up_Time"`
-				Contact     string `xml:"Contact"`
-				Location    string `xml:"Location"`
-				GPS         struct {
-					Text      string `xml:",chardata"`
-					Latitude  string `xml:"Latitude"`
-					Longitude string `xml:"Longitude"`
-					Altitude  string `xml:"Altitude"`
-				} `xml:"GPS"`
-			} `xml:"System"`
-			Addresses struct {
-				Text             string `xml:",chardata"`
-				NetworkAddresses struct {
-					Text      string   `xml:",chardata"`
-					IPAddress []string `xml:"IP_Address"`
-				} `xml:"Network_Addresses"`
-				MediaAddresses struct {
-					Text         string   `xml:",chardata"`
-					MediaAddress []string `xml:"Media_Address"`
-				} `xml:"Media_Addresses"`
-			} `xml:"Addresses"`
-			Neighbors struct {
-				Text     string `xml:",chardata"`
-				Neighbor []struct {
-					Text               string `xml:",chardata"`
-					DestinationAddress string `xml:"Destination_Address"`
-					NextHop            string `xml:"Next_Hop"`
-				} `xml:"Neighbor"`
-			} `xml:"Neighbors"`
-		} `xml:"Router"`
+		Routers []Router `xml:"Router"`
 	}
 
 	// The Router struct, this contains
@@ -69,49 +70,48 @@ func loaddb(networkXML string) {
 	// It also contains nested structs for Addresses
 	// and Neighbor routers.
 	type Router struct {
-		Text   string `xml:",chardata"`
-		System struct {
-			Text        string `xml:",chardata"`
-			Name        string `xml:"Name"`
-			Description string `xml:"Description"`
-			UpTime      string `xml:"Up_Time"`
-			Contact     string `xml:"Contact"`
-			Location    string `xml:"Location"`
+		XMLName xml.Name `xml:"Router"`
+		System  struct {
+			XMLName     xml.Name `xml:"System"`
+			Name        string   `xml:"Name"`
+			Description string   `xml:"Description"`
+			UpTime      string   `xml:"Up_Time"`
+			Contact     string   `xml:"Contact"`
+			Location    string   `xml:"Location"`
 			GPS         struct {
-				Text      string `xml:",chardata"`
-				Latitude  string `xml:"Latitude"`
-				Longitude string `xml:"Longitude"`
-				Altitude  string `xml:"Altitude"`
+				XMLName   xml.Name `xml:"GPS"`
+				Latitude  string   `xml:"Latitude"`
+				Longitude string   `xml:"Longitude"`
+				Altitude  string   `xml:"Altitude"`
 			} `xml:"GPS"`
 		} `xml:"System"`
 		Addresses struct {
-			Text             string `xml:",chardata"`
+			XMLName          xml.Name `xml:"Addresses"`
 			NetworkAddresses struct {
-				Text      string   `xml:",chardata"`
+				XMLName   xml.Name `xml:"Network_Addresses"`
 				IPAddress []string `xml:"IP_Address"`
 			} `xml:"Network_Addresses"`
 			MediaAddresses struct {
-				Text         string   `xml:",chardata"`
+				XMLName      xml.Name `xml:"Media_Addresses"`
 				MediaAddress []string `xml:"Media_Address"`
 			} `xml:"Media_Addresses"`
 		} `xml:"Addresses"`
 		Neighbors struct {
-			Text     string `xml:",chardata"`
+			XMLName  xml.Name `xml:"Neighbors"`
 			Neighbor []struct {
-				Text               string `xml:",chardata"`
-				DestinationAddress string `xml:"Destination_Address"`
-				NextHop            string `xml:"Next_Hop"`
+				XMLName            xml.Name `xml:"Neighbor"`
+				DestinationAddress string   `xml:"Destination_Address"`
+				NextHop            string   `xml:"Next_Hop"`
 			} `xml:"Neighbor"`
 		} `xml:"Neighbors"`
 	}
 
-	var network Network
+	//	var network Network
 
 	// Initialize the routers array
-	//var routers []Routers
 	var routers []Router
 
-	fmt.Println("Initialized network=", network)
+	fmt.Println("Initialized routers=", routers)
 	// Open our xmlFile
 	xmlFile, err := os.Open(networkXML)
 	// if we os.Open returns an error then handle it
@@ -123,22 +123,22 @@ func loaddb(networkXML string) {
 	defer xmlFile.Close()
 
 	// read our opened xmlFile as a byte array.
-	discoveredNetworkBytes, err := ioutil.ReadAll(xmlFile)
+	xmlFileBytes, err := ioutil.ReadAll(xmlFile)
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	fmt.Println("xmlFileBytes=", xmlFileBytes) // TESTING ONLY
 
 	// we unmarshal our byteArray which contains our
 	// xmlFiles content into 'discoveredNetworkXML' which we defined above
-	//xml.Unmarshal(discoveredNetworkBytes, &discoveredNetworkXML)
-	err = xml.Unmarshal(discoveredNetworkBytes, &routers)
+	//xml.Unmarshal(xmlFileBytes, &discoveredNetworkXML)
+	err = xml.Unmarshal(xmlFileBytes, &routers)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("routers length=", len(routers))
 
-	//fmt.Println("discoveredNetworkBytes=", discoveredNetworkBytes) // TESTING ONLY
-	fmt.Println("routers=", routers) //TESTING ONLY
+	fmt.Println("routers length=", len(routers)) // TESTING ONLY
 
 	var router Router
 	for i := 0; i < len(routers); i++ {
@@ -146,6 +146,8 @@ func loaddb(networkXML string) {
 		fmt.Println("Router Name: " + router.System.Name)
 		fmt.Println("i=", i)
 	}
+
+	fmt.Println("routers=", routers) //TESTING ONLY
 
 	/*
 		database, _ := sql.Open("sqlite3", "./networkXML")
