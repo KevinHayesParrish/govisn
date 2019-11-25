@@ -61,7 +61,7 @@ func loaddb(networkXML string) {
 	// The struc which contains all the Routers in the XML input file.
 	type Routers struct {
 		XMLName xml.Name `xml:"V15N_Discovered_Network"`
-		Routers []Router `xml:"Router"`
+		Routers []Router `xml:"V15N_Discovered_Network"`
 	}
 
 	// The Router struct, this contains
@@ -128,7 +128,7 @@ func loaddb(networkXML string) {
 		fmt.Println(err)
 	}
 
-	fmt.Println("xmlFileBytes=", xmlFileBytes) // TESTING ONLY
+	//fmt.Println("xmlFileBytes=", xmlFileBytes) // TESTING ONLY
 
 	// we unmarshal our byteArray which contains our
 	// xmlFiles content into 'discoveredNetworkXML' which we defined above
@@ -136,14 +136,17 @@ func loaddb(networkXML string) {
 	err = xml.Unmarshal(xmlFileBytes, &routers)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
-	fmt.Println("routers length=", len(routers)) // TESTING ONLY
+	//	fmt.Println("routers length=", len(routers)) // TESTING ONLY
 
 	var router Router
 	for i := 0; i < len(routers); i++ {
 		router = routers[i]
 		fmt.Println("Router Name: " + router.System.Name)
+		fmt.Println("Description=", router.System.Description)
+		fmt.Println("Up_Time=", router.System.Up_Time)
 		fmt.Println("i=", i)
 	}
 
