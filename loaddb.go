@@ -109,7 +109,9 @@ func loaddb(networkXML string) {
 	//	var network Network
 
 	// Initialize the routers array
-	var routers []Router
+	//	var routers []Router
+	//	var routers []Routers
+	var routers Routers
 
 	fmt.Println("Initialized routers=", routers)
 	// Open our xmlFile
@@ -141,12 +143,12 @@ func loaddb(networkXML string) {
 
 	//	fmt.Println("routers length=", len(routers)) // TESTING ONLY
 
-	var router Router
-	for i := 0; i < len(routers); i++ {
-		router = routers[i]
-		fmt.Println("Router Name: " + router.System.Name)
-		fmt.Println("Description=", router.System.Description)
-		fmt.Println("Up_Time=", router.System.Up_Time)
+	//	var router Router
+	for i := 0; i < len(routers.Routers); i++ {
+		//		fmt.Println("Router Name: " + router.System.Name)
+		fmt.Println("Router Name: " + routers.Routers[i].System.Name)
+		fmt.Println("Description=", routers.Routers[i].System.Description)
+		fmt.Println("Up_Time=", routers.Routers[i].System.UpTime)
 		fmt.Println("i=", i)
 	}
 
