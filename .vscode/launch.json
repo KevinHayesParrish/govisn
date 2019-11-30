@@ -45,7 +45,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["-l", "-f", "data/sample.xml"]
+            "args": ["-l", "-f", "data/V15N-GPS-5.xml"]
         }
     ]
 }
