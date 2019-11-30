@@ -96,7 +96,9 @@ func loaddb(networkXML string) {
 	fmt.Println("routers length=", len(routers.Routers)) // TESTING ONLY
 
 	// Open the database
-	database, _ := sql.Open("sqlite3", "./samplenetwork.db")
+	databaseName := *DbName + ".db"
+	fmt.Println("dabaseName=", databaseName) //TESTING ONLY
+	database, _ := sql.Open("sqlite3", databaseName)
 
 	// CreATE Routers table
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
