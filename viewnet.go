@@ -40,7 +40,7 @@ var loadDBFlag = flag.Bool("l", false, "Load a database from an XML document.")
 var networkXML = "discoverednetwork.xml"
 
 //DbName is the name of the discovered network database file
-var DbName = flag.String("f", "discoverednetwork.db", "Name of the discovered network database or \nName of the XML input file if combined with -l option.")
+var DbName = flag.String("f", "discoverednetwork.db", "Name of the discovered network database -or-\nName of the XML input file if combined with -l option.")
 
 //testArangodb is the startup option to test accessing an ArangoDB database
 var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
