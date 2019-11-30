@@ -1,16 +1,19 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/xml"
 	"fmt"
+	"hash/crc32"
 	"io/ioutil"
 	"os"
+	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.1.4"
+const loadbVersion = "0.1.5"
 
 func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
@@ -92,12 +95,31 @@ func loaddb(networkXML string) {
 
 	fmt.Println("routers length=", len(routers.Routers)) // TESTING ONLY
 
-	//	var router Router
+	// Open the database
+	database, _ := sql.Open("sqlite3", "./samplenetwork.db")
+
+	// CreATE Routers table
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	statement.Exec()
+	statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+
+	// Add Routers to the database
 	for i := 0; i < len(routers.Routers); i++ {
-		fmt.Println("Router Name: " + routers.Routers[i].System.Name)
-		fmt.Println("Description=", routers.Routers[i].System.Description)
-		fmt.Println("Up_Time=", routers.Routers[i].System.UpTime)
-		fmt.Println("i=", i)
+		fmt.Println("i=", i)                                               // TESTING ONLY
+		fmt.Println("Router Name: " + routers.Routers[i].System.Name)      // TESTING ONLY
+		fmt.Println("Description=", routers.Routers[i].System.Description) // TESTING ONLY
+		fmt.Println("Up_Time=", routers.Routers[i].System.UpTime)          // TESTING ONLY
+
+		SystemName := routers.Routers[i].System.Name
+		RouterIDUint32 := crc32.ChecksumIEEE([]byte(SystemName))
+		SystemDesc := routers.Routers[i].System.Description
+		UpTime := routers.Routers[i].System.UpTime
+		Contact := routers.Routers[i].System.Contact
+		Location := routers.Routers[i].System.Location
+		GpsLat := routers.Routers[i].System.GPS.Latitude
+		GpsLong := routers.Routers[i].System.GPS.Longitude
+		GpsAlt := routers.Routers[i].System.GPS.Altitude
+		statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
 	}
 
 	fmt.Println("routers=", routers) //TESTING ONLY
