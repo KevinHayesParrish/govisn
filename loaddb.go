@@ -100,10 +100,25 @@ func loaddb(networkXML string) {
 	fmt.Println("dabaseName=", databaseName) //TESTING ONLY
 	database, _ := sql.Open("sqlite3", databaseName)
 
-	// CreATE Routers table
+	// Create Routers DB table
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
 	statement.Exec()
 	statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+
+	// Create RouterIp DB
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IPAddr TEXT)")
+	statement.Exec()
+	statement, _ = database.Prepare("INSERT INTO RouterIp (RouterID, IPAddr) VALUES (?, ?)")
+
+	//	Create RouterMac DB table
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
+	statement.Exec()
+	statement, _ = database.Prepare("INSERT INTO RouterMac (RourterID, MacAddr) VALUES (?, ?)")
+
+	//	Create Links DB table
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
+	statement.Exec()
+	statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
 
 	// Add Routers to the database
 	for i := 0; i < len(routers.Routers); i++ {
@@ -122,6 +137,18 @@ func loaddb(networkXML string) {
 		GpsLong := routers.Routers[i].System.GPS.Longitude
 		GpsAlt := routers.Routers[i].System.GPS.Altitude
 		statement.Exec(strconv.Itoa(int(RouterIDUint32)), SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
+
+		// Add IP Addresses to current router
+		for j := 0; j < len(routers.Routers[i].Addresses.NetworkAddresses.IPAddress); j++ {
+			IPAddr := routers.Routers[i].Addresses.NetworkAddresses.IPAddress[j]
+			statement.Exec(strconv.Itoa(int(RouterIDUint32)), IPAddr) // Add router
+		}
+
+		// Add Media Addresses to current router
+		for k := 0; k < len(routers.Routers[i].Addresses.MediaAddresses.MediaAddress); k++ {
+			MediaAddr := routers.Routers[i].Addresses.MediaAddresses.MediaAddress[k]
+			statement.Exec(strconv.Itoa(int(RouterIDUint32)), MediaAddr) // Add router
+		}
 	}
 
 	fmt.Println("routers=", routers) //TESTING ONLY
