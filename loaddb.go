@@ -13,7 +13,7 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.1.5"
+const loadbVersion = "0.1.6"
 
 func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
