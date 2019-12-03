@@ -13,7 +13,7 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.1.6"
+const loadbVersion = "0.1.7"
 
 func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
@@ -67,9 +67,6 @@ func loaddb(networkXML string) {
 		} `xml:"Neighbors"`
 	}
 
-	// Initialize the routers array
-	var routers Routers
-
 	// Open our xmlFile
 	xmlFile, err := os.Open(networkXML)
 	// if we os.Open returns an error then handle it
@@ -86,7 +83,10 @@ func loaddb(networkXML string) {
 		fmt.Println(err)
 	}
 
-	// we unmarshal our byteArray which contains our
+	// Initialize the routers array
+	var routers Routers
+
+	// Unmarshal our byteArray which contains our discovered network
 	err = xml.Unmarshal(xmlFileBytes, &routers)
 	if err != nil {
 		fmt.Println(err)
@@ -126,6 +126,9 @@ func loaddb(networkXML string) {
 		fmt.Println("Router Name: " + routers.Routers[i].System.Name)      // TESTING ONLY
 		fmt.Println("Description=", routers.Routers[i].System.Description) // TESTING ONLY
 		fmt.Println("Up_Time=", routers.Routers[i].System.UpTime)          // TESTING ONLY
+		fmt.Println("GPS=", routers.Routers[i].System.GPS)                 // TESTING ONLY
+		fmt.Println("Addresses=", routers.Routers[i].Addresses)            // TESTING ONLY
+		fmt.Println("Neighbors=", routers.Routers[i].Neighbors)            // TESTING ONLY
 
 		SystemName := routers.Routers[i].System.Name
 		RouterIDUint32 := crc32.ChecksumIEEE([]byte(SystemName))
