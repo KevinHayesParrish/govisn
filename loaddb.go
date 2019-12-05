@@ -82,6 +82,7 @@ func loaddb(networkXML string) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println("xmlFileBytes=\n" + string(xmlFileBytes)) // TESTING ONLY
 
 	// Initialize the routers array
 	var routers Routers
@@ -92,6 +93,7 @@ func loaddb(networkXML string) {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println("routers=", routers) //TESTING ONLY
 
 	fmt.Println("routers length=", len(routers.Routers)) // TESTING ONLY
 
@@ -152,8 +154,6 @@ func loaddb(networkXML string) {
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
 	statement.Exec()
 	statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
-
-	fmt.Println("routers=", routers) //TESTING ONLY
 
 	/*
 		database, _ := sql.Open("sqlite3", "./networkXML")
