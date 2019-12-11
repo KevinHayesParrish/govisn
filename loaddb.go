@@ -13,7 +13,7 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.1.8"
+const loadbVersion = "0.1.10"
 
 func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
@@ -21,8 +21,50 @@ func loaddb(networkXML string) {
 
 	// The struc which contains all the Routers in the XML input file.
 	type Routers struct {
+		XMLName     xml.Name `xml:"V15N_Discovered_Network"`
+		NetworkName string   `xml:"V15N_Discovered_Network"`
+		Routers     []Router `xml:"Router"`
+	}
+
+	type V15NDiscoveredNetwork struct {
 		XMLName xml.Name `xml:"V15N_Discovered_Network"`
-		Routers []Router `xml:"Router"`
+		Text    string   `xml:",chardata"`
+		Router  []struct {
+			Text   string `xml:",chardata"`
+			System struct {
+				Text        string `xml:",chardata"`
+				Name        string `xml:"Name"`
+				Description string `xml:"Description"`
+				UpTime      string `xml:"Up_Time"`
+				Contact     string `xml:"Contact"`
+				Location    string `xml:"Location"`
+				GPS         struct {
+					Text      string `xml:",chardata"`
+					Latitude  string `xml:"Latitude"`
+					Longitude string `xml:"Longitude"`
+					Altitude  string `xml:"Altitude"`
+				} `xml:"GPS"`
+			} `xml:"System"`
+			Addresses struct {
+				Text             string `xml:",chardata"`
+				NetworkAddresses struct {
+					Text      string   `xml:",chardata"`
+					IPAddress []string `xml:"IP_Address"`
+				} `xml:"Network_Addresses"`
+				MediaAddresses struct {
+					Text         string   `xml:",chardata"`
+					MediaAddress []string `xml:"Media_Address"`
+				} `xml:"Media_Addresses"`
+			} `xml:"Addresses"`
+			Neighbors struct {
+				Text     string `xml:",chardata"`
+				Neighbor []struct {
+					Text               string `xml:",chardata"`
+					DestinationAddress string `xml:"Destination_Address"`
+					NextHop            string `xml:"Next_Hop"`
+				} `xml:"Neighbor"`
+			} `xml:"Neighbors"`
+		} `xml:"Router"`
 	}
 
 	// The Router struct, this contains
@@ -110,7 +152,8 @@ func loaddb(networkXML string) {
 	// Add Routers to the database
 	for i := 0; i < len(routers.Routers); i++ {
 		statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-		fmt.Println("i=", i)                                               // TESTING ONLY
+		fmt.Println("i=", i)
+		fmt.Println("Network Name: " + routers.NetworkName)                // TESTING ONLY
 		fmt.Println("Router Name: " + routers.Routers[i].System.Name)      // TESTING ONLY
 		fmt.Println("Description=", routers.Routers[i].System.Description) // TESTING ONLY
 		fmt.Println("Up_Time=", routers.Routers[i].System.UpTime)          // TESTING ONLY
