@@ -217,8 +217,8 @@ func loaddb(networkXML string) {
 
 		// Add Media Addresses to current router
 		for k := 0; k < len(network.Router[i].Addresses.MediaAddresses.MediaAddress); k++ {
-			MediaAddr := network.Router[i].Addresses.MediaAddresses.MediaAddress[k]
-			_, err := statement.Exec(strconv.Itoa(int(RouterIDUint32)), MediaAddr) // Add Media Address
+			MacAddr := network.Router[i].Addresses.MediaAddresses.MediaAddress[k]
+			_, err := statement.Exec(strconv.Itoa(int(RouterIDUint32)), MacAddr) // Add Media Address
 			if err != nil {
 				panic(err)
 			}
