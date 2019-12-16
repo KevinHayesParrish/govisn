@@ -13,7 +13,7 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.1.12"
+const loadbVersion = "0.1.13"
 
 func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
@@ -154,11 +154,31 @@ func loaddb(networkXML string) {
 			MacAddr := network.Router[i].Addresses.MediaAddresses.MediaAddress[k]
 			statement.Exec(strconv.Itoa(int(RouterIDUint32)), MacAddr) // Add Media Address
 		}
+
+		//	Create Links DB table
+		statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
+		statement.Exec()
+		statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
+
+		// Add Link records to Links table
+		var dest string
+		var nextHop string
+		for l := 0; l < len(network.Router[i].Neighbors.Neighbor); l++ {
+			//* Add a set of Links to the database
+			dest = network.Router[i].Neighbors.Neighbor[l].DestinationAddress
+			nextHop = network.Router[i].Neighbors.Neighbor[l].NextHop
+			destToNextHopLinkStr := dest + nextHop // directional link from dest to nextHop
+			nextHopToDestStr := nextHop + dest     // directional link from nextHop to dest
+
+			// add direction link from dest to nextHop to the database
+			destToNextHopLinkUint32 := crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
+			statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), dest, nextHop)
+
+			// add direction link from nextHop to dest to the database
+			nextHopToDestUint32 := crc32.ChecksumIEEE([]byte(nextHopToDestStr))
+			statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), nextHop, dest)
+		}
 	}
-	//	Create Links DB table
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
-	statement.Exec()
-	statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
 
 	/*
 		database, _ := sql.Open("sqlite3", "./networkXML")
