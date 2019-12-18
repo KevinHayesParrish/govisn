@@ -21,8 +21,8 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["-d", "-f", "samplenetwork.db"]
-        }
+            "args": ["-d", "-f", "./data/samplenetwork.db"]
+        },
         {
             "name": "Debug govisn -c",
             "type": "go",
@@ -34,7 +34,7 @@
             "program": "${file}",
             "env": {},
             "args": ["-c"]
-        }
+        },
         {
             "name": "Debug govisn -l -f",
             "type": "go",
