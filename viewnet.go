@@ -29,7 +29,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.6.1"
+const ViewnetVersion = "0.7.0"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
