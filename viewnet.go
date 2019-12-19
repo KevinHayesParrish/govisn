@@ -321,6 +321,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		// Exclude false routes
+		if ToRouter == "127.0.0.0" || ToRouter == "127.0.0.1" || ToRouter == "224.0.0.0" || ToRouter == "0.0.0.0" {
+			continue
+		}
+
 		// Load link struct from DB fields
 		link.LinkID = LinkID
 		link.FromRouter = FromRouter
