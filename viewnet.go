@@ -29,7 +29,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.7.0"
+const ViewnetVersion = "0.7.1"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -331,19 +331,23 @@ func main() {
 		link.LinkID = LinkID
 		link.FromRouter = FromRouter
 		link.ToRouter = ToRouter
-		if *debugFlag {
-			fmt.Println("link =", link)
-		}
 
 		// retrieve FromRouter coordinates from router struc
-		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(routerArray, link.FromRouter)
+		if *debugFlag {
+			fmt.Println("link =", link)
+			fmt.Println("From routername=", link.FromRouter)
+		}
+		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouter)
 		if *debugFlag {
 			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			fmt.Println("returned from getRouterCoordinates func: FromRouterX=", FromRouterX, "FromRouterY=", FromRouterY, "FromRouterZ=", FromRouterZ)
 		}
 
 		// retrieve ToRouter coordinates from router struc
-		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(routerArray, link.ToRouter)
+		if *debugFlag {
+			fmt.Println("To routername=", link.ToRouter)
+		}
+		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.ToRouter)
 		if *debugFlag {
 			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			fmt.Println("returned from getRouterCoordinates func: ToRouterX=", ToRouterX, "ToRouterY=", ToRouterY, "ToRouterZ=", ToRouterZ)
@@ -406,7 +410,7 @@ func Rad(d float64) float64 { return d * constX }
 func Deg(r float64) float64 { return r / constX }
 
 // Get Router Coordinates from routerArray
-func getRouterCoordinates(routerArray [1000]Router, routerName string) (float32, float32, float32) {
+func getRouterCoordinates(debug bool, routerArray [1000]Router, routerName string) (float32, float32, float32) {
 	var x float32
 	var y float32
 	var z float32
@@ -416,6 +420,7 @@ func getRouterCoordinates(routerArray [1000]Router, routerName string) (float32,
 			x = routerArray[i].System.Coordinates.X
 			y = routerArray[i].System.Coordinates.Y
 			z = routerArray[i].System.Coordinates.Z
+			break
 		}
 	}
 	return x, y, z
