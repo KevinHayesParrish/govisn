@@ -66,11 +66,11 @@ type Router struct {
 			Longitude string
 			Altitude  string
 		}
-		Coordinates struct {
-			X float32
-			Y float32
-			Z float32
-		}
+		//		Coordinates struct {
+		//			X float32
+		//			Y float32
+		//			Z float32
+		//		}
 	}
 	Addresses struct {
 		NetworkAddresses struct {
@@ -251,26 +251,32 @@ func main() {
 		}
 		xRadianLong := Rad(GpsLongFloat64)
 		x = (float32)(globeRadius * math.Sin(xRadianLat) * math.Cos(xRadianLong))
-		routerArray[routerArrayIndex].System.Coordinates.X = x // update router struc with x coordinate
+		//		routerArray[routerArrayIndex].System.Coordinates.X = x // update router struc with x coordinate
+		routerArray[routerArrayIndex].System.GPS.Longitude = fmt.Sprintf("%f", x) // update router struc with x coordinate
 		yRadianLat := Rad(GpsLatFloat64)
 		yRadianLong := Rad(GpsLongFloat64)
 		y = (float32)(globeRadius * math.Sin(yRadianLat) * math.Sin(yRadianLong))
-		routerArray[routerArrayIndex].System.Coordinates.Y = y // update router struc with y coordinate
+		//		routerArray[routerArrayIndex].System.Coordinates.Y = y // update router struc with y coordinate
+		routerArray[routerArrayIndex].System.GPS.Latitude = fmt.Sprintf("%f", y) // update router struc with y coordinate
 
 		GpsAltFloat64, parseErr := strconv.ParseFloat(GpsAlt, 64)
 		GpsAltFloat64 = GpsAltFloat64 / 100000.0
 		z = (float32)(globeRadius*(math.Cos(yRadianLat)) + GpsAltFloat64)
-		routerArray[routerArrayIndex].System.Coordinates.Z = z // update router struc with z coordinate.
+		//		routerArray[routerArrayIndex].System.Coordinates.Z = z // update router struc with z coordinate.
+		routerArray[routerArrayIndex].System.GPS.Altitude = fmt.Sprintf("%f", z) // update router struc with z coordinate.
 
 		if *debugFlag {
 			fmt.Println("x =", x, "y =", y, "z", z)
 			fmt.Println("router =", routerArray[routerArrayIndex])
-			fmt.Println("router.System.Coordinates =", routerArray[routerArrayIndex].System.Coordinates)
+			//			fmt.Println("router.System.Coordinates =", routerArray[routerArrayIndex].System.Coordinates)
+			fmt.Println("router.System.GPS =", routerArray[routerArrayIndex].System.GPS)
 			fmt.Println("RouterID=", RouterID, "SystemName=", SystemName)
 		}
 
 		// Add Router object to 3D scene.
-		cylinderMesh.SetPosition(routerArray[routerArrayIndex].System.Coordinates.X, routerArray[routerArrayIndex].System.Coordinates.Y, routerArray[routerArrayIndex].System.Coordinates.Z)
+		//		cylinderMesh.SetPosition(routerArray[routerArrayIndex].System.Coordinates.X, routerArray[routerArrayIndex].System.Coordinates.Y, routerArray[routerArrayIndex].System.Coordinates.Z)
+		//		cylinderMesh.SetPosition(routerArray[routerArrayIndex].System.GPS.Longitude, routerArray[routerArrayIndex].System.GPS.Latitude, routerArray[routerArrayIndex].System.GPS.Altitude)
+		cylinderMesh.SetPosition(x, y, z)
 		app.Scene().Add(cylinderMesh)
 
 		// Add router name to scene
@@ -297,7 +303,8 @@ func main() {
 		mat3.AddTexture(tex3)
 		aspect := float32(swidth) / float32(sheight)
 		mesh3 := graphic.NewSprite(aspect, 1, mat3)
-		mesh3.SetPosition(routerArray[routerArrayIndex].System.Coordinates.X, routerArray[routerArrayIndex].System.Coordinates.Y, routerArray[routerArrayIndex].System.Coordinates.Z+1.0)
+		//		mesh3.SetPosition(routerArray[routerArrayIndex].System.Coordinates.X, routerArray[routerArrayIndex].System.Coordinates.Y, routerArray[routerArrayIndex].System.Coordinates.Z+1.0)
+		mesh3.SetPosition(x, y, z+1.0)
 		app.Scene().Add(mesh3)
 
 		queryErr = routerRows.Err()
@@ -339,7 +346,8 @@ func main() {
 		}
 		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouter)
 		if *debugFlag {
-			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
+			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
+			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)
 			fmt.Println("returned from getRouterCoordinates func: FromRouterX=", FromRouterX, "FromRouterY=", FromRouterY, "FromRouterZ=", FromRouterZ)
 		}
 
@@ -349,7 +357,8 @@ func main() {
 		}
 		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.ToRouter)
 		if *debugFlag {
-			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
+			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
+			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)
 			fmt.Println("returned from getRouterCoordinates func: ToRouterX=", ToRouterX, "ToRouterY=", ToRouterY, "ToRouterZ=", ToRouterZ)
 		}
 
@@ -417,9 +426,24 @@ func getRouterCoordinates(debug bool, routerArray [1000]Router, routerName strin
 
 	for i := 0; i < len(routerArray); i++ {
 		if routerArray[i].System.Name == routerName {
-			x = routerArray[i].System.Coordinates.X
-			y = routerArray[i].System.Coordinates.Y
-			z = routerArray[i].System.Coordinates.Z
+			//			x = routerArray[i].System.Coordinates.X
+			x1, err := strconv.ParseFloat(routerArray[i].System.GPS.Longitude, 32)
+			if err != nil {
+				panic(err)
+			}
+			x = (float32)(x1)
+			//			y = routerArray[i].System.Coordinates.Y
+			y1, err := strconv.ParseFloat(routerArray[i].System.GPS.Latitude, 32)
+			if err != nil {
+				panic(err)
+			}
+			y = (float32)(y1)
+			//			z = routerArray[i].System.Coordinates.Z
+			z1, err := strconv.ParseFloat(routerArray[i].System.GPS.Altitude, 32)
+			if err != nil {
+				panic(err)
+			}
+			z = (float32)(z1)
 			break
 		}
 	}
