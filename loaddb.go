@@ -13,7 +13,7 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.1.13"
+const loadbVersion = "0.2.0"
 
 func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
@@ -156,9 +156,10 @@ func loaddb(networkXML string) {
 		}
 
 		//	Create Links DB table
-		statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
-		statement.Exec()
-		statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
+		//		statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
+		statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouterName TEXT, FromRouterIp TEXT, ToRouterName TEXT, ToRouterIp TEXT)")
+		//		statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
+		statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouterName, FromRouterIp, ToRouterName, ToRouterName) VALUES (?, ?, ?, ?, ?)")
 
 		// Add Link records to Links table
 		var dest string
