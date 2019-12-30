@@ -21,7 +21,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["-d", "-f", "./data/home.db"]
+            "args": ["-d", "-f", "/temp/home3.xml.db"]
         },
         {
             "name": "Debug govisn -c",
@@ -45,7 +45,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["-l", "-f", "/Users/kevipa/tmp/samplenetwork.xml"]
+            "args": ["-l", "-f", "/temp/home3.xml"]
         }
     ]
 }
