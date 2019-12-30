@@ -15,64 +15,64 @@ import (
 //loaddbVersion is the file version number
 const loadbVersion = "0.2.0"
 
+// The V15NDiscoveredNetwork struct contains the discovered network, and it's sub-structs;
+// essentially, the XML input file.
+type V15NDiscoveredNetwork struct {
+	XMLName xml.Name `xml:"V15N_Discovered_Network"`
+	Text    string   `xml:",chardata"`
+	// The Router struct, this contains
+	// the router's Name, Descriptions, UpTime
+	// Contact, Location and GPS Coordinates.
+	// It also contains nested structs for Addresses
+	// and Neighbor routers.
+	Router []struct {
+		Text   string `xml:",chardata"`
+		System struct {
+			Text        string `xml:",chardata"`
+			Name        string `xml:"Name"`
+			Description string `xml:"Description"`
+			UpTime      string `xml:"Up_Time"`
+			Contact     string `xml:"Contact"`
+			Location    string `xml:"Location"`
+			GPS         struct {
+				Text      string `xml:",chardata"`
+				Latitude  string `xml:"Latitude"`
+				Longitude string `xml:"Longitude"`
+				Altitude  string `xml:"Altitude"`
+			} `xml:"GPS"`
+		} `xml:"System"`
+		Addresses struct {
+			Text             string `xml:",chardata"`
+			NetworkAddresses struct {
+				Text      string   `xml:",chardata"`
+				IPAddress []string `xml:"IP_Address"`
+			} `xml:"Network_Addresses"`
+			MediaAddresses struct {
+				Text         string   `xml:",chardata"`
+				MediaAddress []string `xml:"Media_Address"`
+			} `xml:"Media_Addresses"`
+		} `xml:"Addresses"`
+		Neighbors struct {
+			Text     string `xml:",chardata"`
+			Neighbor []struct {
+				Text               string `xml:",chardata"`
+				DestinationAddress string `xml:"Destination_Address"`
+				NextHop            string `xml:"Next_Hop"`
+			} `xml:"Neighbor"`
+		} `xml:"Neighbors"`
+	} `xml:"Router"`
+}
+
 func loaddb(networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
 	fmt.Println("Loading database from XML document", networkXML) // FOR TESTING ONLY
 
 	// The struc which contains all the Routers in the XML input file.
-	type Routers struct {
-		XMLName     xml.Name `xml:"V15N_Discovered_Network"`
-		NetworkName string   `xml:"V15N_Discovered_Network"`
-		Routers     []Router `xml:"Router"`
-	}
-
-	// The V15NDiscoveredNetwork struct contains the discovered network, and it's sub-structs;
-	// essentially, the XML input file.
-	type V15NDiscoveredNetwork struct {
-		XMLName xml.Name `xml:"V15N_Discovered_Network"`
-		Text    string   `xml:",chardata"`
-		// The Router struct, this contains
-		// the router's Name, Descriptions, UpTime
-		// Contact, Location and GPS Coordinates.
-		// It also contains nested structs for Addresses
-		// and Neighbor routers.
-		Router []struct {
-			Text   string `xml:",chardata"`
-			System struct {
-				Text        string `xml:",chardata"`
-				Name        string `xml:"Name"`
-				Description string `xml:"Description"`
-				UpTime      string `xml:"Up_Time"`
-				Contact     string `xml:"Contact"`
-				Location    string `xml:"Location"`
-				GPS         struct {
-					Text      string `xml:",chardata"`
-					Latitude  string `xml:"Latitude"`
-					Longitude string `xml:"Longitude"`
-					Altitude  string `xml:"Altitude"`
-				} `xml:"GPS"`
-			} `xml:"System"`
-			Addresses struct {
-				Text             string `xml:",chardata"`
-				NetworkAddresses struct {
-					Text      string   `xml:",chardata"`
-					IPAddress []string `xml:"IP_Address"`
-				} `xml:"Network_Addresses"`
-				MediaAddresses struct {
-					Text         string   `xml:",chardata"`
-					MediaAddress []string `xml:"Media_Address"`
-				} `xml:"Media_Addresses"`
-			} `xml:"Addresses"`
-			Neighbors struct {
-				Text     string `xml:",chardata"`
-				Neighbor []struct {
-					Text               string `xml:",chardata"`
-					DestinationAddress string `xml:"Destination_Address"`
-					NextHop            string `xml:"Next_Hop"`
-				} `xml:"Neighbor"`
-			} `xml:"Neighbors"`
-		} `xml:"Router"`
-	}
+	//	type Routers struct {
+	//		XMLName     xml.Name `xml:"V15N_Discovered_Network"`
+	//		NetworkName string   `xml:"V15N_Discovered_Network"`
+	//		Routers     []Router `xml:"Router"`
+	//	}
 
 	// Open our xmlFile
 	xmlFile, err := os.Open(networkXML)
@@ -157,9 +157,19 @@ func loaddb(networkXML string) {
 
 		//	Create Links DB table
 		//		statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
-		statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouterName TEXT, FromRouterIp TEXT, ToRouterName TEXT, ToRouterIp TEXT)")
 		//		statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
-		statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouterName, FromRouterIp, ToRouterName, ToRouterName) VALUES (?, ?, ?, ?, ?)")
+		statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouterName TEXT, FromRouterIp TEXT, ToRouterName TEXT, ToRouterIp TEXT)")
+		if err != nil {
+			fmt.Println("Error creating Links table.")
+			panic(err)
+		}
+		statement.Exec()
+
+		statement, err = database.Prepare("INSERT INTO Links (LinkID, FromRouterName, FromRouterIp, ToRouterName, ToRouterIp) VALUES (?, ?, ?, ?, ?)")
+		if err != nil {
+			fmt.Println("Error inserting row into Links table.")
+			panic(err)
+		}
 
 		// Add Link records to Links table
 		var dest string
@@ -175,13 +185,13 @@ func loaddb(networkXML string) {
 
 			// add direction link from dest to nextHop to the database
 			destToNextHopLinkUint32 := crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
-			FromRouterName := getRouterNameUsingIp(dest)
-			if err != nil {
+			FromRouterName = getRouterNameUsingIP(dest)
+			if FromRouterName == "Not Found" {
 				FromRouterName = "Unknown"
 				fmt.Println("router name with destination IP of", dest, " Not Found.")
 			}
-			ToRouterName := getRouterNameUsingIp(nextHop)
-			if err != nil {
+			ToRouterName = getRouterNameUsingIP(nextHop)
+			if ToRouterName == "Not Found" {
 				ToRouterName = "Unknown"
 				fmt.Println("router name with destination IP of", dest, " Not Found.")
 			}
@@ -195,17 +205,18 @@ func loaddb(networkXML string) {
 
 }
 
-func getRouterNameUsingIp(ipAddress string) string {
+func getRouterNameUsingIP(ipAddress string) string {
 	var routerName string
+	var network V15NDiscoveredNetwork
+	routerName = "Not Found"
 	for i := 0; i < len(network.Router); i++ {
-		for j := 0; j < len(network.Router[i].Addresses.NetworkAddresses); j++ {
-			if network.Router[i].Addresses.NetworkAddresses[j] == ipAddress {
+		for j := 0; j < len(network.Router[i].Addresses.NetworkAddresses.IPAddress); j++ {
+			if network.Router[i].Addresses.NetworkAddresses.IPAddress[j] == ipAddress {
 				routerName = network.Router[i].System.Name
 				break
 			}
 		}
 	}
 	// router name not found in network
-	routerName = "Not Found"
 	return routerName
 }
