@@ -67,6 +67,10 @@ func loaddb(debug bool, networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
 	fmt.Println("Loading database from XML document", networkXML) // FOR TESTING ONLY
 
+	if debug {
+		fmt.Println("Debug option selected")
+	}
+
 	// The struc which contains all the Routers in the XML input file.
 	//	type Routers struct {
 	//		XMLName     xml.Name `xml:"V15N_Discovered_Network"`
@@ -176,6 +180,11 @@ func loaddb(debug bool, networkXML string) {
 		var nextHop string
 		var FromRouterName string
 		var ToRouterName string
+
+		if debug {
+			fmt.Println("Adding link records to Lins table.")
+			fmt.Println("network.Router[", i, "]=", network.Router[i])
+		}
 		for l := 0; l < len(network.Router[i].Neighbors.Neighbor); l++ {
 			//* Add a set of Links to the database
 			dest = network.Router[i].Neighbors.Neighbor[l].DestinationAddress
@@ -188,12 +197,16 @@ func loaddb(debug bool, networkXML string) {
 			FromRouterName = getRouterNameUsingIP(debug, dest)
 			if FromRouterName == "Not Found" {
 				FromRouterName = "Unknown"
-				fmt.Println("router name with destination IP of", dest, " Not Found.")
+				if debug {
+					fmt.Println("router name with destination IP of", dest, " Not Found.")
+				}
 			}
 			ToRouterName = getRouterNameUsingIP(debug, nextHop)
 			if ToRouterName == "Not Found" {
 				ToRouterName = "Unknown"
-				fmt.Println("router name with destination IP of", dest, " Not Found.")
+				if debug {
+					fmt.Println("router name with destination IP of", dest, " Not Found.")
+				}
 			}
 			statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), FromRouterName, dest, ToRouterName, nextHop)
 
@@ -210,6 +223,11 @@ func getRouterNameUsingIP(debug bool, ipAddress string) string {
 	var network V15NDiscoveredNetwork
 	routerName = "Not Found"
 	for i := 0; i < len(network.Router); i++ {
+		if debug {
+			fmt.Println("getRouterNameUsingIP")
+			fmt.Println(" i=", i)
+			fmt.Println(" network.Router[i]", network.Router[i])
+		}
 		for j := 0; j < len(network.Router[i].Addresses.NetworkAddresses.IPAddress); j++ {
 			if network.Router[i].Addresses.NetworkAddresses.IPAddress[j] == ipAddress {
 				routerName = network.Router[i].System.Name
