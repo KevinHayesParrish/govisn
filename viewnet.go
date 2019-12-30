@@ -118,7 +118,7 @@ func main() {
 		if *DbName != "discoverednetwork.db" {
 			networkXML = *DbName
 		}
-		loaddb(networkXML)
+		loaddb(*debugFlag, networkXML)
 		return
 	}
 
