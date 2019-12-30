@@ -359,7 +359,7 @@ func main() {
 			fmt.Println("From routername=", link.FromRouterName)
 		}
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouter)
-		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouterIP)
+		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouterName)
 		if *debugFlag {
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)
@@ -372,7 +372,7 @@ func main() {
 			fmt.Println("To routername=", link.ToRouterIP)
 		}
 		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.ToRouter)
-		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.ToRouterIP)
+		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.ToRouterName)
 		if *debugFlag {
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)
