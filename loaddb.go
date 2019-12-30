@@ -13,7 +13,7 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.2.0"
+const loadbVersion = "0.2.1"
 
 // The V15NDiscoveredNetwork struct contains the discovered network, and it's sub-structs;
 // essentially, the XML input file.
@@ -63,7 +63,7 @@ type V15NDiscoveredNetwork struct {
 	} `xml:"Router"`
 }
 
-func loaddb(networkXML string) {
+func loaddb(debug bool, networkXML string) {
 	fmt.Println("loaddb version:", loadbVersion)
 	fmt.Println("Loading database from XML document", networkXML) // FOR TESTING ONLY
 
@@ -185,12 +185,12 @@ func loaddb(networkXML string) {
 
 			// add direction link from dest to nextHop to the database
 			destToNextHopLinkUint32 := crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
-			FromRouterName = getRouterNameUsingIP(dest)
+			FromRouterName = getRouterNameUsingIP(debug, dest)
 			if FromRouterName == "Not Found" {
 				FromRouterName = "Unknown"
 				fmt.Println("router name with destination IP of", dest, " Not Found.")
 			}
-			ToRouterName = getRouterNameUsingIP(nextHop)
+			ToRouterName = getRouterNameUsingIP(debug, nextHop)
 			if ToRouterName == "Not Found" {
 				ToRouterName = "Unknown"
 				fmt.Println("router name with destination IP of", dest, " Not Found.")
@@ -205,7 +205,7 @@ func loaddb(networkXML string) {
 
 }
 
-func getRouterNameUsingIP(ipAddress string) string {
+func getRouterNameUsingIP(debug bool, ipAddress string) string {
 	var routerName string
 	var network V15NDiscoveredNetwork
 	routerName = "Not Found"
