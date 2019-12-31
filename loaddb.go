@@ -162,14 +162,14 @@ func loaddb(debug bool, networkXML string) {
 		//	Create Links DB table
 		//		statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
 		//		statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
-		statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouterName TEXT, FromRouterIp TEXT, ToRouterName TEXT, ToRouterIp TEXT)")
+		statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, RouterName TEXT, DestinationName TEXT, DestinationIP TEXT, NextHopName TEXT, NextHopIP TEXT)")
 		if err != nil {
 			fmt.Println("Error creating Links table.")
 			panic(err)
 		}
 		statement.Exec()
 
-		statement, err = database.Prepare("INSERT INTO Links (LinkID, FromRouterName, FromRouterIp, ToRouterName, ToRouterIp) VALUES (?, ?, ?, ?, ?)")
+		statement, err = database.Prepare("INSERT INTO Links (LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP) VALUES (?, ?, ?, ?, ?, ?)")
 		if err != nil {
 			fmt.Println("Error inserting row into Links table.")
 			panic(err)
@@ -178,8 +178,8 @@ func loaddb(debug bool, networkXML string) {
 		// Add Link records to Links table
 		var dest string
 		var nextHop string
-		var FromRouterName string
-		var ToRouterName string
+		var DestinationName string
+		var NextHopName string
 
 		if debug {
 			fmt.Println("Adding link records to Lins table.")
@@ -194,25 +194,26 @@ func loaddb(debug bool, networkXML string) {
 
 			// add direction link from dest to nextHop to the database
 			destToNextHopLinkUint32 := crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
-			FromRouterName = getRouterNameUsingIP(debug, dest)
-			if FromRouterName == "Not Found" {
-				FromRouterName = "Unknown"
+			DestinationName = getRouterNameUsingIP(debug, dest)
+			if DestinationName == "Not Found" {
+				DestinationName = "Unknown"
 				if debug {
 					fmt.Println("router name with destination IP of", dest, " Not Found.")
 				}
 			}
-			ToRouterName = getRouterNameUsingIP(debug, nextHop)
-			if ToRouterName == "Not Found" {
-				ToRouterName = "Unknown"
+			NextHopName = getRouterNameUsingIP(debug, nextHop)
+			if NextHopName == "Not Found" {
+				NextHopName = "Unknown"
 				if debug {
-					fmt.Println("router name with destination IP of", dest, " Not Found.")
+					fmt.Println("router name with Next Hop IP of", nextHop, " Not Found.")
 				}
 			}
-			statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), FromRouterName, dest, ToRouterName, nextHop)
+			//			statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), DestinationName, dest, NextHopName, nextHop)
+			statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), SystemName, DestinationName, dest, NextHopName, nextHop)
 
 			// add direction link from nextHop to dest to the database
 			nextHopToDestUint32 := crc32.ChecksumIEEE([]byte(nextHopToDestStr))
-			statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), FromRouterName, nextHop, ToRouterName, dest)
+			statement.Exec(strconv.Itoa(int(nextHopToDestUint32)), SystemName, DestinationName, nextHop, NextHopName, dest)
 		}
 	}
 
