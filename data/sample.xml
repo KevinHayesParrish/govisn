@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE V15N_Discovered_Network>
+<V15N_Discovered_Network>
   <Router>
     <System>
       <Name>media</Name>
@@ -404,3 +406,4 @@
       </Neighbor>
     </Neighbors>
   </Router>
+  </V15N_Discovered_Network>
