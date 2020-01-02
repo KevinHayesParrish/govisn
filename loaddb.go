@@ -13,7 +13,7 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.2.1"
+const loadbVersion = "0.2.2"
 
 // The V15NDiscoveredNetwork struct contains the discovered network, and it's sub-structs;
 // essentially, the XML input file.
@@ -182,7 +182,7 @@ func loaddb(debug bool, networkXML string) {
 		var NextHopName string
 
 		if debug {
-			fmt.Println("Adding link records to Lins table.")
+			fmt.Println("Adding link records to Links table.")
 			fmt.Println("network.Router[", i, "]=", network.Router[i])
 		}
 		for l := 0; l < len(network.Router[i].Neighbors.Neighbor); l++ {
@@ -194,14 +194,14 @@ func loaddb(debug bool, networkXML string) {
 
 			// add direction link from dest to nextHop to the database
 			destToNextHopLinkUint32 := crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
-			DestinationName = getRouterNameUsingIP(debug, dest)
+			DestinationName = getRouterNameUsingIP(debug, dest, network)
 			if DestinationName == "Not Found" {
 				DestinationName = "Unknown"
 				if debug {
 					fmt.Println("router name with destination IP of", dest, " Not Found.")
 				}
 			}
-			NextHopName = getRouterNameUsingIP(debug, nextHop)
+			NextHopName = getRouterNameUsingIP(debug, nextHop, network)
 			if NextHopName == "Not Found" {
 				NextHopName = "Unknown"
 				if debug {
@@ -219,17 +219,29 @@ func loaddb(debug bool, networkXML string) {
 
 }
 
-func getRouterNameUsingIP(debug bool, ipAddress string) string {
+func getRouterNameUsingIP(debug bool, ipAddress string, network V15NDiscoveredNetwork) string {
 	var routerName string
-	var network V15NDiscoveredNetwork
+	//	var network V15NDiscoveredNetwork
 	routerName = "Not Found"
+
+	fmt.Println("getRouterNameUsingIP")                          // TESTING ONLY
+	fmt.Println("network.Router length is", len(network.Router)) // TESTING ONLY
+
 	for i := 0; i < len(network.Router); i++ {
+		fmt.Println(" network.Router[i].System.Name=", network.Router[i].System.Name)
 		if debug {
-			fmt.Println("getRouterNameUsingIP")
 			fmt.Println(" i=", i)
-			fmt.Println(" network.Router[i]", network.Router[i])
+			//fmt.Println(" network.Router[i]", network.Router[i])
+			fmt.Println("len(network.Router[i].Addresses.NetworkAddresses.IPAddress=", len(network.Router[i].Addresses.NetworkAddresses.IPAddress))
 		}
+
 		for j := 0; j < len(network.Router[i].Addresses.NetworkAddresses.IPAddress); j++ {
+			if debug {
+				fmt.Println(" j=", j)
+				fmt.Println("ipAddress=", ipAddress)
+				fmt.Println("network.Router[i].Addresses.NetworkAddresses.IPAddress[j]=", network.Router[i].Addresses.NetworkAddresses.IPAddress[j])
+				//fmt.Println(" network.Router[i]", network.Router[i])
+			}
 			if network.Router[i].Addresses.NetworkAddresses.IPAddress[j] == ipAddress {
 				routerName = network.Router[i].System.Name
 				break
@@ -237,5 +249,6 @@ func getRouterNameUsingIP(debug bool, ipAddress string) string {
 		}
 	}
 	// router name not found in network
+	fmt.Println("Returning routerName of", routerName) // TESTING? ONLY
 	return routerName
 }
