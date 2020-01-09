@@ -224,22 +224,24 @@ func getRouterNameUsingIP(debug bool, ipAddress string, network V15NDiscoveredNe
 	//	var network V15NDiscoveredNetwork
 	routerName = "Not Found"
 
-	fmt.Println("getRouterNameUsingIP")                          // TESTING ONLY
-	fmt.Println("network.Router length is", len(network.Router)) // TESTING ONLY
+	if debug {
+		fmt.Println("getRouterNameUsingIP")
+		fmt.Println(" network.Router length is", len(network.Router))
+	}
 
 	for i := 0; i < len(network.Router); i++ {
-		fmt.Println(" network.Router[i].System.Name=", network.Router[i].System.Name)
 		if debug {
+			fmt.Println(" network.Router[i].System.Name=", network.Router[i].System.Name)
 			fmt.Println(" i=", i)
 			//fmt.Println(" network.Router[i]", network.Router[i])
-			fmt.Println("len(network.Router[i].Addresses.NetworkAddresses.IPAddress=", len(network.Router[i].Addresses.NetworkAddresses.IPAddress))
+			fmt.Println(" len(network.Router[i].Addresses.NetworkAddresses.IPAddress=", len(network.Router[i].Addresses.NetworkAddresses.IPAddress))
 		}
 
 		for j := 0; j < len(network.Router[i].Addresses.NetworkAddresses.IPAddress); j++ {
 			if debug {
 				fmt.Println(" j=", j)
-				fmt.Println("ipAddress=", ipAddress)
-				fmt.Println("network.Router[i].Addresses.NetworkAddresses.IPAddress[j]=", network.Router[i].Addresses.NetworkAddresses.IPAddress[j])
+				fmt.Println(" ipAddress=", ipAddress)
+				fmt.Println(" network.Router[i].Addresses.NetworkAddresses.IPAddress[j]=", network.Router[i].Addresses.NetworkAddresses.IPAddress[j])
 				//fmt.Println(" network.Router[i]", network.Router[i])
 			}
 			if network.Router[i].Addresses.NetworkAddresses.IPAddress[j] == ipAddress {
@@ -249,6 +251,9 @@ func getRouterNameUsingIP(debug bool, ipAddress string, network V15NDiscoveredNe
 		}
 	}
 	// router name not found in network
-	fmt.Println("Returning routerName of", routerName) // TESTING? ONLY
+	if debug {
+		fmt.Println(" Returning routerName of", routerName)
+		fmt.Println()
+	}
 	return routerName
 }
