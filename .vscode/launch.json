@@ -21,7 +21,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["-f", "/Users/kevipa/tmp/home3.xml.db"]
+            "args": ["-f", "/temp/home3.xml.db"]
         },
         {
             "name": "Debug govisn -d -f",
@@ -33,7 +33,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["-d", "-f", "/Users/kevipa/tmp/home3.xml.db"]
+            "args": ["-d", "-f", "/temp/home3.xml.db"]
         },
         {
             "name": "Debug govisn -c",
@@ -57,7 +57,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["-l", "-f", "/Users/kevin/tmp/sample.xml"]
+            "args": ["-l", "-f", "/temp/home3.xml"]
         }
     ]
 }
