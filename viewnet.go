@@ -29,7 +29,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.7.5"
+const ViewnetVersion = "0.7.6"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -360,6 +360,7 @@ func main() {
 		//		link.FromRouterIP = FromRouterIP
 		//		link.ToRouterName = ToRouterName
 		//		link.ToRouterIP = ToRouterIP
+		link.RouterName = RouterName
 		link.DestinationName = DestinationName
 		link.DestinationIP = DestinationIP
 		link.NextHopName = NextHopName
@@ -368,13 +369,15 @@ func main() {
 		// retrieve FromRouter coordinates from router struc
 		if *debugFlag {
 			fmt.Println("link =", link)
-			//			fmt.Println("From routername=", link.FromRouter)
-			fmt.Println("From routername=", link.DestinationName)
+			//fmt.Println("From routername=", link.FromRouter)
+			fmt.Println("From DestinationName=", link.DestinationName)
+			fmt.Println("From routername=", link.RouterName)
 		}
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouter)
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouterName)
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.Destination)
-		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.DestinationName)
+		//FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.DestinationName)
+		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.RouterName)
 		if *debugFlag {
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)
