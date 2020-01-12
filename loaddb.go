@@ -13,7 +13,7 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.2.2"
+const loadbVersion = "0.2.3"
 
 // The V15NDiscoveredNetwork struct contains the discovered network, and it's sub-structs;
 // essentially, the XML input file.
