@@ -187,7 +187,10 @@ func loaddb(debug bool, networkXML string) {
 		}
 		for l := 0; l < len(network.Router[i].Neighbors.Neighbor); l++ {
 			// Don't add link row for loopback interface
-			if network.Router[i].Neighbors.Neighbor[l].DestinationAddress == "127.0.0.0" || network.Router[i].Neighbors.Neighbor[l].DestinationAddress == "127.0.0.1" {
+			if network.Router[i].Neighbors.Neighbor[l].DestinationAddress == "127.0.0.0" {
+				continue
+			}
+			if network.Router[i].Neighbors.Neighbor[l].DestinationAddress == "127.0.0.1" {
 				continue
 			}
 			// Don't add link row for Multicast route
