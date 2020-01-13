@@ -29,7 +29,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.7.4"
+const ViewnetVersion = "0.7.6"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -360,6 +360,7 @@ func main() {
 		//		link.FromRouterIP = FromRouterIP
 		//		link.ToRouterName = ToRouterName
 		//		link.ToRouterIP = ToRouterIP
+		link.RouterName = RouterName
 		link.DestinationName = DestinationName
 		link.DestinationIP = DestinationIP
 		link.NextHopName = NextHopName
@@ -368,13 +369,15 @@ func main() {
 		// retrieve FromRouter coordinates from router struc
 		if *debugFlag {
 			fmt.Println("link =", link)
-			//			fmt.Println("From routername=", link.FromRouter)
-			fmt.Println("From routername=", link.DestinationName)
+			//fmt.Println("From routername=", link.FromRouter)
+			fmt.Println("From DestinationName=", link.DestinationName)
+			fmt.Println("From routername=", link.RouterName)
 		}
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouter)
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouterName)
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.Destination)
-		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.DestinationName)
+		//FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.DestinationName)
+		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.RouterName)
 		if *debugFlag {
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)
@@ -458,9 +461,9 @@ func getRouterCoordinates(debug bool, routerArray [1000]Router, routerName strin
 	var z float32
 
 	for i := 0; i < len(routerArray); i++ {
-		if routerArray[i].System.Name == "" {
-			break // end of routerArray entries
-		}
+		//		if routerArray[i].System.Name == "" {
+		//			break // end of routerArray entries
+		//		}
 		if routerArray[i].System.Name == routerName {
 			//			x = routerArray[i].System.Coordinates.X
 			x1, err := strconv.ParseFloat(routerArray[i].System.GPS.Longitude, 32)

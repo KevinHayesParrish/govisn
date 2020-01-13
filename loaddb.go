@@ -13,7 +13,7 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.2.2"
+const loadbVersion = "0.2.3"
 
 // The V15NDiscoveredNetwork struct contains the discovered network, and it's sub-structs;
 // essentially, the XML input file.
@@ -183,9 +183,25 @@ func loaddb(debug bool, networkXML string) {
 
 		if debug {
 			fmt.Println("Adding link records to Links table.")
-			fmt.Println("network.Router[", i, "]=", network.Router[i])
+			//fmt.Println("network.Router[", i, "]=", network.Router[i])
 		}
 		for l := 0; l < len(network.Router[i].Neighbors.Neighbor); l++ {
+			// Don't add link row for loopback interface
+			if network.Router[i].Neighbors.Neighbor[l].DestinationAddress == "127.0.0.0" {
+				continue
+			}
+			if network.Router[i].Neighbors.Neighbor[l].DestinationAddress == "127.0.0.1" {
+				continue
+			}
+			// Don't add link row for Multicast route
+			if network.Router[i].Neighbors.Neighbor[l].DestinationAddress == "224.0.0.0" {
+				continue
+			}
+			// Don't add link row for broadcast
+			if network.Router[i].Neighbors.Neighbor[l].DestinationAddress == "255.255.255.255" {
+				continue
+			}
+
 			//* Add a set of Links to the database
 			dest = network.Router[i].Neighbors.Neighbor[l].DestinationAddress
 			nextHop = network.Router[i].Neighbors.Neighbor[l].NextHop
@@ -194,21 +210,40 @@ func loaddb(debug bool, networkXML string) {
 
 			// add direction link from dest to nextHop to the database
 			destToNextHopLinkUint32 := crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
+
+			// Lookup DestinationName
+			if debug {
+				fmt.Println("\nCalling getRouterNameUsingIP with Destination", dest)
+			}
 			DestinationName = getRouterNameUsingIP(debug, dest, network)
+			if debug {
+				fmt.Println(" Returned DestinationName", DestinationName)
+			}
 			if DestinationName == "Not Found" {
 				DestinationName = "Unknown"
 				if debug {
 					fmt.Println("router name with destination IP of", dest, " Not Found.")
 				}
 			}
+			// Lookup NextHopName
+			if debug {
+				fmt.Println("\nCalling getRouterNameUsingIP with NextHop", nextHop)
+			}
 			NextHopName = getRouterNameUsingIP(debug, nextHop, network)
+			if debug {
+				fmt.Println(" Returned NextHopName", NextHopName)
+			}
 			if NextHopName == "Not Found" {
 				NextHopName = "Unknown"
 				if debug {
 					fmt.Println("router name with Next Hop IP of", nextHop, " Not Found.")
 				}
 			}
+
 			//			statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), DestinationName, dest, NextHopName, nextHop)
+			if debug {
+				fmt.Println("Adding link row with fields =", SystemName, DestinationName, dest, NextHopName, nextHop)
+			}
 			statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), SystemName, DestinationName, dest, NextHopName, nextHop)
 
 			// add direction link from nextHop to dest to the database
