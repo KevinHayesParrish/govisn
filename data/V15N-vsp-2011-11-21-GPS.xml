@@ -4,10 +4,7 @@
   <Router>
     <System>
       <Name>ranchocordova-hq1-pip</Name>
-      <Description>Cisco IOS Software, 3800 Software (C3845-SPSERVICESK9-M), Version 12.3(11)T7, RELEASE SOFTWARE (fc3)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2005 by Cisco Systems, Inc.
-Compiled Sat 30-Jul-05 03:12 by dchih</Description>
+      <Description>Cisco IOS Software, 3800 Software (C3845-SPSERVICESK9-M), Version 12.3(11)T7, RELEASE SOFTWARE (fc3) Technical Support: http://www.cisco.com/techsupport Copyright (c) 1986-2005 by Cisco Systems, Inc. Compiled Sat 30-Jul-05 03:12 by dchih</Description>
       <Up_Time />
       <Contact />
       <Location />
