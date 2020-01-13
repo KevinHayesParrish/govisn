@@ -21,7 +21,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["-f", "/Users/kevipa/tmp/home3.xml.db"]
+            "args": ["-f", "/Users/kevipa/tmp/V15N-vsp-2011-11-21.xml.db"]
         },
         {
             "name": "Debug govisn -d -f",
