@@ -21,11 +21,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-<<<<<<< HEAD
             "args": ["-f", "/Users/kevipa/tmp/V15N-vsp-2011-11-21.xml.db"]
-=======
-            "args": ["-f", "/temp/home3.xml.db"]
->>>>>>> dabed778c225410e68e3d82059e7e6d345d74846
         },
         {
             "name": "Debug govisn -d -f",
