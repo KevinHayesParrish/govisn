@@ -13,7 +13,7 @@ import (
 )
 
 //loaddbVersion is the file version number
-const loadbVersion = "0.2.3"
+const loadbVersion = "0.2.4"
 
 // The V15NDiscoveredNetwork struct contains the discovered network, and it's sub-structs;
 // essentially, the XML input file.
@@ -111,19 +111,26 @@ func loaddb(debug bool, networkXML string) {
 	database, _ := sql.Open("sqlite3", databaseName)
 
 	// Create Routers DB table
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	//	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat TEXT, GPSLong TEXT, GpsAlt TEXT)")
 	statement.Exec()
 
 	// Add Routers to the database
 	for i := 0; i < len(network.Router); i++ {
 		statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
-		//	fmt.Println("Router Name: " + network.Router[i].System.Name)      // TESTING ONLY
-		//	fmt.Println("Description=", network.Router[i].System.Description) // TESTING ONLY
-		//	fmt.Println("Up_Time=", network.Router[i].System.UpTime)          // TESTING ONLY
-		//	fmt.Println("GPS=", network.Router[i].System.GPS)                 // TESTING ONLY
-		//	fmt.Println("Addresses=", network.Router[i].Addresses)            // TESTING ONLY
-		//	fmt.Println("Neighbors=", network.Router[i].Neighbors)            // TESTING ONLY
+		if debug {
+			fmt.Println("Router Name: ", network.Router[i].System.Name)
+			fmt.Println("Description=", network.Router[i].System.Description)
+			fmt.Println("Up_Time=", network.Router[i].System.UpTime)
+			fmt.Println("GPS=", network.Router[i].System.GPS)
+			fmt.Println("Addresses=", network.Router[i].Addresses)
+			fmt.Println("Neighbors=", network.Router[i].Neighbors)
+		}
+		fmt.Println("Router Name: ", network.Router[i].System.Name)       // TESTING ONLY
+		fmt.Println("Description=", network.Router[i].System.Description) // TESTING ONLY
+		fmt.Println("Up_Time=", network.Router[i].System.UpTime)          // TESTING ONLY
+		fmt.Println("GPS=", network.Router[i].System.GPS)                 // TESTING ONLY
 
 		SystemName := network.Router[i].System.Name
 		RouterIDUint32 := crc32.ChecksumIEEE([]byte(SystemName))
