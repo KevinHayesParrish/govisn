@@ -4,10 +4,10 @@
   <Router>
     <System>
       <Name>ranchocordova-hq1-pip</Name>
-      <Description>Cisco IOS Software, 3800 Software (C3845-SPSERVICESK9-M), Version 12.3(11)T7, RELEASE SOFTWARE (fc3) Technical Support: http://www.cisco.com/techsupportCopyright (c) 1986-2005 by Cisco Systems, Inc. Compiled Sat 30-Jul-05 03:12 by dchih</Description>
-      <Up_Time />
-      <Contact />
-      <Location />
+      <Description>Cisco IOS Software, 3800 Software (C3845-SPSERVICESK9-M), Version 12.3(11)T7, RELEASE SOFTWARE (fc3)</Description>
+      <Up_Time>15d 14h 18m 54s 68</Up_Time>
+      <Contact>Unknown</Contact>
+      <Location>Unknown</Location>
       <GPS>
         <GPS_Latitude>38.583962</GPS_Latitude>
         <GPS_Longitude>-121.288388</GPS_Longitude>
@@ -354,7 +354,7 @@
       <Description>Linux dmz-fw-a1 2.6.18-92cp #1 SMP Wed Oct 27 15:39:23 IST 2010 i686</Description>
       <Up_Time>15d 14h 18m 54s 68</Up_Time>
       <Contact>Unknown</Contact>
-      <Location>"Unknown"</Location>
+      <Location>Unknown</Location>
       <GPS>
         <GPS_Latitude>38.583945</GPS_Latitude>
         <GPS_Longitude>-121.288408</GPS_Longitude>
@@ -454,7 +454,7 @@
       <Description>Cisco IOS Software, s72033_rp Software (s72033_rp-ADVIPSERVICESK9_WAN-M), Version 12.2(33)SXI6, RELEASE SOFTWARE (fc4) Technical Support: http://www.cisco.com/techsupport Copyright (c) 1986-2011 by Cisco Systems, Inc. Compiled Mon 28-Mar-11 12:09 by pr</Description>
       <Up_Time>190d 5h 34m 6s 25</Up_Time>
       <Contact>SmartNet#1552171</Contact>
-      <Location />
+      <Location>Unknown</Location>
       <GPS>
         <GPS_Latitude>38.583974</GPS_Latitude>
         <GPS_Longitude>-121.288475</GPS_Longitude>
@@ -1070,9 +1070,9 @@
     <System>
       <Name>hq3-dist-b.vsp.com</Name>
       <Description>Cisco IOS Software, Catalyst 4500 L3 Switch Software (cat4500e-ENTSERVICESK9-M), Version 12.2(54)SG, RELEASE SOFTWARE (fc3) Technical Support: http://www.cisco.com/techsupport Copyright (c) 1986-2010 by Cisco Systems, Inc. Compiled Sun 27-Jun-10 09:28 </Description>
-      <Up_Time>NULL</Up_Time>
-      <Contact>SMT#1552171 SN#FOX1433GKLJ</Contact>
-      <Location>HQ3 1E Room</Location>
+      <Up_Time>15d 14h 18m 54s 68</Up_Time>
+      <Contact>Unknown</Contact>
+      <Location>Unknown</Location>
       <GPS>
         <GPS_Latitude>38.583965</GPS_Latitude>
         <GPS_Longitude>-121.288364</GPS_Longitude>
@@ -2011,9 +2011,9 @@
     <System>
       <Name>inet-fw-1</Name>
       <Description>Linux inet-fw-1 2.4.21-21cp #1 Wed Feb 11 16:10:12 IST 2009 i686</Description>
-      <Up_Time />
+      <Up_Time>15d 14h 18m 54s 68</Up_Time>
       <Contact>Unknown</Contact>
-      <Location>"Unknown"</Location>
+      <Location>Unknown</Location>
       <GPS>
         <GPS_Latitude>38.583998</GPS_Latitude>
         <GPS_Longitude>-121.288338</GPS_Longitude>
@@ -2643,7 +2643,7 @@
       <Description>Linux remote-fw-a1 2.6.18-92cp #1 SMP Wed Oct 27 15:39:23 IST 2010 i686</Description>
       <Up_Time>88d 18h 8m 29s 10</Up_Time>
       <Contact>Unknown</Contact>
-      <Location>"Unknown"</Location>
+      <Location>Unknown</Location>
       <GPS>
         <GPS_Latitude>38.584021</GPS_Latitude>
         <GPS_Longitude>-121.288332</GPS_Longitude>
