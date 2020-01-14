@@ -4,10 +4,7 @@
   <Router>
     <System>
       <Name>ranchocordova-hq1-pip</Name>
-      <Description>Cisco IOS Software, 3800 Software (C3845-SPSERVICESK9-M), Version 12.3(11)T7, RELEASE SOFTWARE (fc3)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2005 by Cisco Systems, Inc.
-Compiled Sat 30-Jul-05 03:12 by dchih</Description>
+      <Description>Cisco IOS Software, 3800 Software (C3845-SPSERVICESK9-M), Version 12.3(11)T7, RELEASE SOFTWARE (fc3) Technical Support: http://www.cisco.com/techsupportCopyright (c) 1986-2005 by Cisco Systems, Inc. Compiled Sat 30-Jul-05 03:12 by dchih</Description>
       <Up_Time />
       <Contact />
       <Location />
@@ -454,10 +451,7 @@ Compiled Sat 30-Jul-05 03:12 by dchih</Description>
   <Router>
     <System>
       <Name>hq1-dist-a.vsp.com</Name>
-      <Description>Cisco IOS Software, s72033_rp Software (s72033_rp-ADVIPSERVICESK9_WAN-M), Version 12.2(33)SXI6, RELEASE SOFTWARE (fc4)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2011 by Cisco Systems, Inc.
-Compiled Mon 28-Mar-11 12:09 by pr</Description>
+      <Description>Cisco IOS Software, s72033_rp Software (s72033_rp-ADVIPSERVICESK9_WAN-M), Version 12.2(33)SXI6, RELEASE SOFTWARE (fc4) Technical Support: http://www.cisco.com/techsupport Copyright (c) 1986-2011 by Cisco Systems, Inc. Compiled Mon 28-Mar-11 12:09 by pr</Description>
       <Up_Time>190d 5h 34m 6s 25</Up_Time>
       <Contact>SmartNet#1552171</Contact>
       <Location />
@@ -1075,10 +1069,7 @@ Compiled Mon 28-Mar-11 12:09 by pr</Description>
   <Router>
     <System>
       <Name>hq3-dist-b.vsp.com</Name>
-      <Description>Cisco IOS Software, Catalyst 4500 L3 Switch Software (cat4500e-ENTSERVICESK9-M), Version 12.2(54)SG, RELEASE SOFTWARE (fc3)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2010 by Cisco Systems, Inc.
-Compiled Sun 27-Jun-10 09:28 </Description>
+      <Description>Cisco IOS Software, Catalyst 4500 L3 Switch Software (cat4500e-ENTSERVICESK9-M), Version 12.2(54)SG, RELEASE SOFTWARE (fc3) Technical Support: http://www.cisco.com/techsupport Copyright (c) 1986-2010 by Cisco Systems, Inc. Compiled Sun 27-Jun-10 09:28 </Description>
       <Up_Time>NULL</Up_Time>
       <Contact>SMT#1552171 SN#FOX1433GKLJ</Contact>
       <Location>HQ3 1E Room</Location>
@@ -1265,10 +1256,7 @@ Compiled Sun 27-Jun-10 09:28 </Description>
   <Router>
     <System>
       <Name>hq1-rtr-eoc.vsp.com</Name>
-      <Description>Cisco IOS Software, 3700 Software (C3725-IPBASEK9-M), Version 12.4(13b), RELEASE SOFTWARE (fc3)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2007 by Cisco Systems, Inc.
-Compiled Tue 24-Apr-07 22:01 by prod_rel_team</Description>
+      <Description>Cisco IOS Software, 3700 Software (C3725-IPBASEK9-M), Version 12.4(13b), RELEASE SOFTWARE (fc3) Technical Support: http://www.cisco.com/techsupport Copyright (c) 1986-2007 by Cisco Systems, Inc. Compiled Tue 24-Apr-07 22:01 by prod_rel_team</Description>
       <Up_Time>NULL</Up_Time>
       <Contact>S/N JMX0805L3SS</Contact>
       <Location>HQ1 2nd Floor</Location>
@@ -1484,10 +1472,7 @@ Compiled Tue 24-Apr-07 22:01 by prod_rel_team</Description>
   <Router>
     <System>
       <Name>hq3-core-2.vsp.com</Name>
-      <Description>Cisco IOS Software, s72033_rp Software (s72033_rp-IPSERVICESK9_WAN-VM), Version 12.2(33)SXI3, RELEASE SOFTWARE (fc2)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2009 by Cisco Systems, Inc.
-Compiled Tue 27-Oct-09 05:12 by prod</Description>
+      <Description>Cisco IOS Software, s72033_rp Software (s72033_rp-IPSERVICESK9_WAN-VM), Version 12.2(33)SXI3, RELEASE SOFTWARE (fc2) Technical Support: http://www.cisco.com/techsupport Copyright (c) 1986-2009 by Cisco Systems, Inc. Compiled Tue 27-Oct-09 05:12 by prod</Description>
       <Up_Time>44d 16h 16m 48s 14</Up_Time>
       <Contact>VSP-IT</Contact>
       <Location>HQ3 1E Telecom Room</Location>
@@ -2081,10 +2066,7 @@ Compiled Tue 27-Oct-09 05:12 by prod</Description>
   <Router>
     <System>
       <Name>hq1-core-1.vsp.com</Name>
-      <Description>Cisco IOS Software, s72033_rp Software (s72033_rp-IPSERVICESK9_WAN-VM), Version 12.2(33)SXI3, RELEASE SOFTWARE (fc2)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2009 by Cisco Systems, Inc.
-Compiled Tue 27-Oct-09 05:12 by prod</Description>
+      <Description>Cisco IOS Software, s72033_rp Software (s72033_rp-IPSERVICESK9_WAN-VM), Version 12.2(33)SXI3, RELEASE SOFTWARE (fc2) Technical Support: http://www.cisco.com/techsupport Copyright (c) 1986-2009 by Cisco Systems, Inc. Compiled Tue 27-Oct-09 05:12 by prod</Description>
       <Up_Time>NULL</Up_Time>
       <Contact>VSP-IT</Contact>
       <Location>HQ1-2 Telecom Room</Location>
@@ -2803,7 +2785,7 @@ Compiled Tue 27-Oct-09 05:12 by prod</Description>
       </Neighbor>
     </Neighbors>
   </Router>
-<Router>
+  <Router>
     <System>
       <Name>201 Old Country Road</Name>
       <Description>Cisco 2911</Description>
