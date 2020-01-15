@@ -37,6 +37,14 @@
         <Destination_Address>192.168.3.0</Destination_Address>
         <Next_Hop>192.168.1.3</Next_Hop>
       </Neighbor>
+      <Neighbor>
+        <Destination_Address>65.78.170.0</Destination_Address>
+        <Next_Hop>65.78.170.83</Next_Hop>
+      </Neighbor>
+      <Neighbor>
+        <Destination_Address>0.0.0.0</Destination_Address>
+        <Next_Hop>65.78.170.1</Next_Hop>
+      </Neighbor>
     </Neighbors>
   </Router>
   <Router>
