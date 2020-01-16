@@ -33,6 +33,14 @@
         <Destination_Address>65.78.170.1</Destination_Address>
         <Next_Hop>0.0.0.0</Next_Hop>
       </Neighbor>
+      <Neighbor>
+        <Destination_Address>65.78.170.0</Destination_Address>
+        <Next_Hop>65.78.170.83</Next_Hop>
+      </Neighbor>
+      <Neighbor>
+        <Destination_Address>0.0.0.0</Destination_Address>
+        <Next_Hop>65.78.170.1</Next_Hop>
+      </Neighbor>
     </Neighbors>
   </Router>
   <Router>
