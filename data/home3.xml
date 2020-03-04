@@ -26,16 +26,12 @@
     </Addresses>
     <Neighbors>
       <Neighbor>
-        <Destination_Address>192.168.1.0</Destination_Address>
-        <Next_Hop>127.0.0.1</Next_Hop>
+        <Destination_Address>0.0.0.0</Destination_Address>
+        <Next_Hop>0.0.0.0</Next_Hop>
       </Neighbor>
       <Neighbor>
-        <Destination_Address>192.168.2.0</Destination_Address>
-        <Next_Hop>192.168.1.2</Next_Hop>
-      </Neighbor>
-      <Neighbor>
-        <Destination_Address>192.168.3.0</Destination_Address>
-        <Next_Hop>192.168.1.3</Next_Hop>
+        <Destination_Address>65.78.170.1</Destination_Address>
+        <Next_Hop>0.0.0.0</Next_Hop>
       </Neighbor>
       <Neighbor>
         <Destination_Address>65.78.170.0</Destination_Address>
@@ -72,32 +68,12 @@
     </Addresses>
     <Neighbors>
       <Neighbor>
-        <Destination_Address>192.168.1.0</Destination_Address>
-        <Next_Hop>192.168.1.1</Next_Hop>
+        <Destination_Address>0.0.0.0</Destination_Address>
+        <Next_Hop>0.0.0.0</Next_Hop>
       </Neighbor>
       <Neighbor>
         <Destination_Address>192.168.2.0</Destination_Address>
-        <Next_Hop>127.0.0.1</Next_Hop>
-      </Neighbor>
-      <Neighbor>
-        <Destination_Address>192.168.3.0</Destination_Address>
-        <Next_Hop>192.168.1.3</Next_Hop>
-      </Neighbor>
-      <Neighbor>
-        <Destination_Address>255.255.255.255</Destination_Address>
-        <Next_Hop>192.168.1.1</Next_Hop>
-      </Neighbor>
-      <Neighbor>
-        <Destination_Address>127.0.0.0</Destination_Address>
-        <Next_Hop>127.0.0.1</Next_Hop>
-      </Neighbor>
-      <Neighbor>
-        <Destination_Address>0.0.0.0</Destination_Address>
-        <Next_Hop>65.78.170.1</Next_Hop>
-      </Neighbor>
-      <Neighbor>
-        <Destination_Address>224.0.0.0</Destination_Address>
-        <Next_Hop>192.168.1.1</Next_Hop>
+        <Next_Hop>192.168.2.0</Next_Hop>
       </Neighbor>
     </Neighbors>
   </Router>
@@ -126,32 +102,16 @@
     </Addresses>
     <Neighbors>
       <Neighbor>
-        <Destination_Address>192.168.3.0</Destination_Address>
-        <Next_Hop>127.0.0.1</Next_Hop>
-      </Neighbor>
-      <Neighbor>
-        <Destination_Address>192.168.1.0</Destination_Address>
-        <Next_Hop>192.168.1.1</Next_Hop>
-      </Neighbor>
-      <Neighbor>
-        <Destination_Address>192.168.2.0</Destination_Address>
-        <Next_Hop>192.168.1.2</Next_Hop>
-      </Neighbor>
-      <Neighbor>
-        <Destination_Address>255.255.255.255</Destination_Address>
-        <Next_Hop>192.168.3.1</Next_Hop>
-      </Neighbor>
-      <Neighbor>
-        <Destination_Address>127.0.0.0</Destination_Address>
-        <Next_Hop>127.0.0.1</Next_Hop>
-      </Neighbor>
-      <Neighbor>
         <Destination_Address>0.0.0.0</Destination_Address>
+        <Next_Hop>0.0.0.0</Next_Hop>
+      </Neighbor>
+      <Neighbor>
+        <Destination_Address>192.168.1.1</Destination_Address>
         <Next_Hop>192.168.1.1</Next_Hop>
       </Neighbor>
       <Neighbor>
-        <Destination_Address>224.0.0.0</Destination_Address>
-        <Next_Hop>192.168.1.1</Next_Hop>
+        <Destination_Address>192.168.3.0</Destination_Address>
+        <Next_Hop>192.168.3.0</Next_Hop>
       </Neighbor>
     </Neighbors>
   </Router>
