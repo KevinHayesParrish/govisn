@@ -9,8 +9,11 @@ import (
 func Test_main(t *testing.T) {
 	tests := []struct {
 		name string
+		args string
 	}{
 		// TODO: Add test cases.
+		{"test1", "-f /temp/home3.xml.db"},
+		{"test2", "-d -f /temp/home3.xml.db"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
