@@ -14,11 +14,13 @@ import (
 	g "github.com/soniah/gosnmp"
 )
 
-func main() {
+func discover(seed string) {
 
 	// get Target and Port from environment
-	envTarget := os.Getenv("GOSNMP_TARGET")
-	envPort := os.Getenv("GOSNMP_PORT")
+	//	envTarget := os.Getenv("GOSNMP_TARGET")
+	envTarget := seed
+	//	envPort := os.Getenv("GOSNMP_PORT")
+	envPort := "161"
 	if len(envTarget) <= 0 {
 		log.Fatalf("environment variable not set: GOSNMP_TARGET")
 	}

@@ -29,7 +29,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.7.6"
+const ViewnetVersion = "0.7.7"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -44,6 +44,10 @@ var DbName = flag.String("f", "discoverednetwork.db", "Name of the discovered ne
 
 //testArangodb is the startup option to test accessing an ArangoDB database
 var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
+
+//discoverFlag is the option to discover a network
+var discoverFlag = flag.String("di", "127.0.0.1", "Discover a network using seed IP Address")
+var seed = "127.0.0.1"
 
 //routerRadius is the radius of the 3D object representing a network router
 const routerRadius float64 = 0.5
@@ -125,6 +129,9 @@ func main() {
 		}
 		loaddb(*debugFlag, networkXML)
 		return
+	}
+	if discoverFlag != nil {
+		discover(seed)
 	}
 
 	// Open the database containing the discovered network
