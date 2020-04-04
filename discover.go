@@ -14,7 +14,7 @@ import (
 	g "github.com/soniah/gosnmp"
 )
 
-func discover(seed string) {
+func discover(seed string, community string) {
 
 	// get Target and Port from environment
 	//	envTarget := os.Getenv("GOSNMP_TARGET")

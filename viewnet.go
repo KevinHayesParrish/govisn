@@ -34,8 +34,8 @@ const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
-var debugFlag = flag.Bool("d", false, "Print Debug statements.")
-var sampleNetworkDB = flag.Bool("c", false, "Create a sample database.")
+var debugFlag = flag.Bool("de", false, "Print Debug statements.")
+var sampleNetworkDB = flag.Bool("cr", false, "Create a sample database.")
 var loadDBFlag = flag.Bool("l", false, "Load a database from an XML document.")
 var networkXML = "discoverednetwork.xml"
 
@@ -48,6 +48,7 @@ var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 //discoverFlag is the option to discover a network
 var discoverFlag = flag.String("di", "127.0.0.1", "Discover a network using seed IP Address")
 var seed = "127.0.0.1"
+var community = flag.String("co", "private", "SNMP Community ReadOnly String")
 
 //routerRadius is the radius of the 3D object representing a network router
 const routerRadius float64 = 0.5
@@ -131,7 +132,7 @@ func main() {
 		return
 	}
 	if discoverFlag != nil {
-		discover(seed)
+		discover(seed, *community)
 	}
 
 	// Open the database containing the discovered network
