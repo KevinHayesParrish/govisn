@@ -48,7 +48,7 @@ var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 //discoverFlag is the option to discover a network
 var discoverFlag = flag.String("di", "127.0.0.1", "Discover a network using seed IP Address")
 var seed = "127.0.0.1"
-var community = flag.String("co", "private", "SNMP Community ReadOnly String")
+var community = flag.String("co", "public", "SNMP Community ReadOnly String")
 
 //routerRadius is the radius of the 3D object representing a network router
 const routerRadius float64 = 0.5

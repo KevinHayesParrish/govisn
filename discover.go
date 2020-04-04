@@ -32,9 +32,10 @@ func discover(seed string, community string) {
 	// Build our own GoSNMP struct, rather than using g.Default.
 	// Do verbose logging of packets.
 	params := &g.GoSNMP{
-		Target:    envTarget,
-		Port:      uint16(port),
-		Community: "idontknow",
+		Target: envTarget,
+		Port:   uint16(port),
+		//Community: "idontknow",
+		Community: community,
 		Version:   g.Version2c,
 		Timeout:   time.Duration(2) * time.Second,
 		Logger:    log.New(os.Stdout, "", 0),
@@ -45,7 +46,8 @@ func discover(seed string, community string) {
 	}
 	defer params.Conn.Close()
 
-	oids := []string{"1.3.6.1.2.1.1.4.0", "1.3.6.1.2.1.1.7.0"}
+	// Retrive sysName, sysDescr, sysContact, sysLocation
+	oids := []string{"1.3.6.1.2.1.1.5.0", "1.3.6.1.2.1.1.1.0", "1.3.6.1.2.1.1.4.0", "1.3.6.1.2.1.1.6.0"}
 	result, err2 := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 	if err2 != nil {
 		log.Fatalf("Get() err: %v", err2)
