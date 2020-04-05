@@ -7,7 +7,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"time"
 
@@ -42,7 +41,8 @@ func discover(debugFlag bool, seed string, community string) {
 		Community: community,
 		Version:   g.Version2c,
 		Timeout:   time.Duration(2) * time.Second,
-		Logger:    log.New(os.Stdout, "govisn.discover: ", 0),
+		//Logger:    log.New(os.Stdout, "govisn.discover: ", 0), // TESTING ONLY
+		Logger: nil,
 	}
 
 	if debugFlag {
@@ -61,6 +61,9 @@ func discover(debugFlag bool, seed string, community string) {
 	if err2 != nil {
 		log.Fatalf("Get() err: %v", err2)
 	}
+	if debugFlag {
+		fmt.Println("\ngovisn.discover.results=", result)
+	}
 
 	for i, variable := range result.Variables {
 		fmt.Printf("%d: oid: %s ", i, variable.Name)
@@ -69,6 +72,7 @@ func discover(debugFlag bool, seed string, community string) {
 		// interface{}. You could do a type switch...
 		switch variable.Type {
 		case g.OctetString:
+
 			fmt.Printf("string: %s\n", string(variable.Value.([]byte)))
 		default:
 			// ... or often you're just interested in numeric values.

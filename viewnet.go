@@ -137,6 +137,7 @@ func main() {
 			fmt.Println("seed=", seed, "community=", *community)
 		}
 		discover(*debugFlag, seed, *community)
+		return
 	}
 
 	// Open the database containing the discovered network
