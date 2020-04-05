@@ -132,7 +132,11 @@ func main() {
 		return
 	}
 	if discoverFlag != nil {
-		discover(seed, *community)
+		seed = *discoverFlag
+		if *debugFlag {
+			fmt.Println("seed=", seed, "community=", *community)
+		}
+		discover(*debugFlag, seed, *community)
 	}
 
 	// Open the database containing the discovered network

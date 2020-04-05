@@ -14,7 +14,7 @@ import (
 	g "github.com/soniah/gosnmp"
 )
 
-func discover(seed string, community string) {
+func discover(debugFlag bool, seed string, community string) {
 
 	// get Target and Port from environment
 	//	envTarget := os.Getenv("GOSNMP_TARGET")
@@ -23,6 +23,10 @@ func discover(seed string, community string) {
 	envPort := "161"
 	if len(envTarget) <= 0 {
 		log.Fatalf("environment variable not set: GOSNMP_TARGET")
+	} else {
+		if debugFlag {
+			fmt.Println("envTarget=", envTarget)
+		}
 	}
 	if len(envPort) <= 0 {
 		log.Fatalf("environment variable not set: GOSNMP_PORT")
@@ -34,12 +38,17 @@ func discover(seed string, community string) {
 	params := &g.GoSNMP{
 		Target: envTarget,
 		Port:   uint16(port),
-		//Community: "idontknow",
+		//Community: "public",
 		Community: community,
 		Version:   g.Version2c,
 		Timeout:   time.Duration(2) * time.Second,
-		Logger:    log.New(os.Stdout, "", 0),
+		Logger:    log.New(os.Stdout, "govisn.discover: ", 0),
 	}
+
+	if debugFlag {
+		fmt.Println("params=", params)
+	}
+
 	err := params.Connect()
 	if err != nil {
 		log.Fatalf("Connect() err: %v", err)
