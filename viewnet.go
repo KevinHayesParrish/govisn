@@ -29,7 +29,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.7.7"
+const ViewnetVersion = "0.7.8"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -49,6 +49,7 @@ var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 var discoverFlag = flag.String("di", "127.0.0.1", "Discover a network using seed IP Address")
 var seed = "127.0.0.1"
 var community = flag.String("co", "public", "SNMP Community ReadOnly String")
+var maxHops = flag.String("m", "0", "Scope of discovery. Maximum number of Hops from seed")
 
 //routerRadius is the radius of the 3D object representing a network router
 const routerRadius float64 = 0.5
@@ -136,7 +137,7 @@ func main() {
 		if *debugFlag {
 			fmt.Println("seed=", seed, "community=", *community)
 		}
-		discover(*debugFlag, seed, *community)
+		discover(*debugFlag, seed, *community, *maxHops)
 		return
 	}
 

@@ -13,7 +13,9 @@ import (
 	g "github.com/soniah/gosnmp"
 )
 
-func discover(debugFlag bool, seed string, community string) {
+func discover(debugFlag bool, seed string, community string, maxHopsStr string) {
+
+	fmt.Println("\nfunc discover started.\ndebugFlag=", debugFlag)
 
 	// get Target and Port from environment
 	//	envTarget := os.Getenv("GOSNMP_TARGET")
@@ -31,6 +33,14 @@ func discover(debugFlag bool, seed string, community string) {
 		log.Fatalf("environment variable not set: GOSNMP_PORT")
 	}
 	port, _ := strconv.ParseUint(envPort, 10, 16)
+
+	maxHops, _ := strconv.Atoi(maxHopsStr)
+	// Discover network, constrained by input parm maximum hops away from seed node
+	for i := 0; i <= maxHops; i++ {
+		if debugFlag {
+			fmt.Println("Discover iteration")
+		}
+	}
 
 	// Build our own GoSNMP struct, rather than using g.Default.
 	// Do verbose logging of packets.
