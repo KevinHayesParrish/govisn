@@ -13,29 +13,29 @@ import (
 	g "github.com/soniah/gosnmp"
 )
 
-func discover(debugFlag bool, seed string, community string, maxHopsStr string) {
+func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
 
 	fmt.Println("\nfunc discover started.\ndebugFlag=", debugFlag)
 
 	// get Target and Port from environment
 	//	envTarget := os.Getenv("GOSNMP_TARGET")
-	envTarget := seed
+	//envTarget := snmpTarget
 	//	envPort := os.Getenv("GOSNMP_PORT")
-	envPort := "161"
-	if len(envTarget) <= 0 {
+	snmpPort := "161"
+	if len(snmpTarget) <= 0 {
 		log.Fatalf("environment variable not set: GOSNMP_TARGET")
 	} else {
 		if debugFlag {
-			fmt.Println("envTarget=", envTarget)
+			fmt.Println("snmpTarget=", snmpTarget)
 		}
 	}
-	if len(envPort) <= 0 {
+	if len(snmpPort) <= 0 {
 		log.Fatalf("environment variable not set: GOSNMP_PORT")
 	}
-	port, _ := strconv.ParseUint(envPort, 10, 16)
+	port, _ := strconv.ParseUint(snmpPort, 10, 16)
 
 	maxHops, _ := strconv.Atoi(maxHopsStr)
-	// Discover network, constrained by input parm maximum hops away from seed node
+	// Discover network, constrained by input parm maximum hops away from snmpTarget node
 	for i := 0; i <= maxHops; i++ {
 		if debugFlag {
 			fmt.Println("Discover iteration")
@@ -44,15 +44,23 @@ func discover(debugFlag bool, seed string, community string, maxHopsStr string) 
 
 	// Build our own GoSNMP struct, rather than using g.Default.
 	// Do verbose logging of packets.
+	//params := &g.GoSNMP{
+	//	Target: envTarget,
+	//	Port:   uint16(port),
+	//	Community: "public",
+	//	Version:   g.Version2c,
+	//	Timeout:   time.Duration(2) * time.Second,
+	//	Logger:    log.New(os.Stdout, "govisn.discover: ", 0), // TESTING ONLY
+	//}
+
+	// GoSNMP struct
 	params := &g.GoSNMP{
-		Target: envTarget,
-		Port:   uint16(port),
-		//Community: "public",
+		Target:    snmpTarget,
+		Port:      uint16(port),
 		Community: community,
 		Version:   g.Version2c,
 		Timeout:   time.Duration(2) * time.Second,
-		//Logger:    log.New(os.Stdout, "govisn.discover: ", 0), // TESTING ONLY
-		Logger: nil,
+		Logger:    nil,
 	}
 
 	if debugFlag {
@@ -66,7 +74,15 @@ func discover(debugFlag bool, seed string, community string, maxHopsStr string) 
 	defer params.Conn.Close()
 
 	// Retrive sysName, sysDescr, sysContact, sysLocation
-	oids := []string{"1.3.6.1.2.1.1.5.0", "1.3.6.1.2.1.1.1.0", "1.3.6.1.2.1.1.4.0", "1.3.6.1.2.1.1.6.0"}
+	oids := []string{
+		"1.3.6.1.2.1.1.5.0", // sysName
+		"1.3.6.1.2.1.1.1.0", // sysDescr
+		"1.3.6.1.2.1.1.4.0", // sysContact
+		"1.3.6.1.2.1.1.6.0", // sysLocation
+		"1.3.6.1.2.1.2",     // interfaces
+		"1.3.6.1.2.1.4.20",  // ipAddrTable
+		"1.3.6.1.2.1.4.21",  // ipRouteTable
+	}
 	result, err2 := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 	if err2 != nil {
 		log.Fatalf("Get() err: %v", err2)
