@@ -108,4 +108,25 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 			fmt.Printf("number: %d\n", g.ToBigInt(variable.Value))
 		}
 	}
+
+	// get ifTable
+	ifTable, err3 := params.WalkAll("1.3.6.1.2.1.2.2")
+	if err3 != nil {
+		log.Fatalf("Get() err: %v", err2)
+	}
+	fmt.Println("ifTable=", ifTable)
+
+	// get ipAddrTable
+	ipAddrTable, err3 := params.WalkAll("1.3.6.1.2.1.4.20")
+	if err3 != nil {
+		log.Fatalf("Get() err: %v", err2)
+	}
+	fmt.Println("\nipAddrTable=", ipAddrTable)
+
+	// get ipRouteTable
+	ipRouteTable, err3 := params.WalkAll("1.3.6.1.2.1.4.21")
+	if err3 != nil {
+		log.Fatalf("Get() err: %v", err2)
+	}
+	fmt.Println("\nipRouteTable=", ipRouteTable)
 }
