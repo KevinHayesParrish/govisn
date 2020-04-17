@@ -75,13 +75,14 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 
 	// Retrive sysName, sysDescr, sysContact, sysLocation
 	oids := []string{
-		"1.3.6.1.2.1.1.5.0", // sysName
-		"1.3.6.1.2.1.1.1.0", // sysDescr
-		"1.3.6.1.2.1.1.4.0", // sysContact
-		"1.3.6.1.2.1.1.6.0", // sysLocation
-		"1.3.6.1.2.1.2",     // interfaces
-		"1.3.6.1.2.1.4.20",  // ipAddrTable
-		"1.3.6.1.2.1.4.21",  // ipRouteTable
+		"1.3.6.1.2.1.1.5.0",     // sysName
+		"1.3.6.1.2.1.1.1.0",     // sysDescr
+		"1.3.6.1.2.1.1.4.0",     // sysContact
+		"1.3.6.1.2.1.1.6.0",     // sysLocation
+		"1.3.6.1.2.1.2.1.0",     // number of interfaces
+		"1.3.6.1.2.1.2.2.1.2.1", // ifDescr 1
+		"1.3.6.1.2.1.4.20.1",    // ipAddrTable
+		"1.3.6.1.2.1.4.21.1",    // ipRouteTable
 	}
 	result, err2 := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 	if err2 != nil {
