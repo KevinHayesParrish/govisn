@@ -1,7 +1,3 @@
-// Copyright 2012-2014 The GoSNMP Authors. All rights reserved.  Use of this
-// source code is governed by a BSD-style license that can be found in the
-// LICENSE file.
-
 package main
 
 import (
@@ -14,6 +10,34 @@ import (
 )
 
 func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
+
+	type ipAddrTable struct {
+		ipAddrEntry struct {
+			ipAdEntAddr         []string
+			ipAdEntIfIndex      []int32
+			ipAdEntNetMask      []string
+			ipAdEntBcastAddr    []int32
+			ipAdEntReasmMaxSize []int32
+		}
+	}
+
+	type ipRouteTable struct {
+		ipRouteEntry struct {
+			ipRouteDest    []string
+			ipRouteIfIndex []int32
+			ipRouteMetric1 []int32
+			ipRouteMetric2 []int32
+			ipRouteMetric3 []int32
+			ipRouteMetric4 []int32
+			ipRouteNextHop []string
+			ipRouteType    []string
+			ipRouteProto   []string
+			ipRouteAge     []int32
+			ipRouteMask    []string
+			ipRouteMetric5 []int32
+			ipRouteInfo    []string
+		}
+	}
 
 	fmt.Println("\nfunc discover started.\ndebugFlag=", debugFlag)
 
@@ -74,11 +98,18 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	defer params.Conn.Close()
 
 	// Retrive sysName, sysDescr, sysContact, sysLocation
+	//oids := []string{
+	//	"1.3.6.1.2.1.1.5.0", // sysName
+	//	"1.3.6.1.2.1.1.1.0", // sysDescr
+	//	"1.3.6.1.2.1.1.4.0", // sysContact
+	//	"1.3.6.1.2.1.1.6.0", // sysLocation
+	//}
 	oids := []string{
-		"1.3.6.1.2.1.1.5.0", // sysName
-		"1.3.6.1.2.1.1.1.0", // sysDescr
-		"1.3.6.1.2.1.1.4.0", // sysContact
-		"1.3.6.1.2.1.1.6.0", // sysLocation
+		sysNameOID + ".0",     // sysName
+		sysDescrOID + ".0",    // sysDescr
+		sysContactOID + ".0",  // sysContact
+		sysLocationOID + ".0", // sysLocation
+		sysServicesOID + ".0", // sysServices
 	}
 	result, err2 := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 	if err2 != nil {
@@ -106,23 +137,26 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	}
 
 	// get ifTable
-	ifTable, err3 := params.WalkAll("1.3.6.1.2.1.2.2")
+	//ifTable, err3 := params.WalkAll("1.3.6.1.2.1.2.2")
+	ifTable, err3 := params.WalkAll(ifTableOID)
 	if err3 != nil {
 		log.Fatalf("Get() err: %v", err2)
 	}
-	fmt.Println("\nifTable=", ifTable)
+	fmt.Println("\nifTable PDU=", ifTable)
 
 	// get ipAddrTable
-	ipAddrTable, err3 := params.WalkAll("1.3.6.1.2.1.4.20")
+	resultPDU, err3 := params.WalkAll(ipAddrTableOID)
 	if err3 != nil {
 		log.Fatalf("Get() err: %v", err2)
 	}
-	fmt.Println("\nipAddrTable=", ipAddrTable)
+	fmt.Println("\nipAddrTable PDU=", resultPDU)
+	//var ipAddrTableResult ipAddrTable
 
 	// get ipRouteTable
-	ipRouteTable, err3 := params.WalkAll("1.3.6.1.2.1.4.21")
+	resultPDU, err3 = params.WalkAll(ipRouteTableOID)
 	if err3 != nil {
 		log.Fatalf("Get() err: %v", err2)
 	}
-	fmt.Println("\nipRouteTable=", ipRouteTable)
+	fmt.Println("\nipRouteTable PDU=", resultPDU)
+	//var ipRouteTableResult ipRouteTable
 }
