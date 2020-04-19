@@ -11,6 +11,31 @@ import (
 
 func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
 
+	type ifTable struct {
+		ifEntry struct {
+			ifIndex           []int
+			ifDescr           []string
+			ifType            []string
+			ifMtu             []int32
+			ifSpeed           []int32
+			ifPhysAddress     []string
+			ifAdminStatus     []string
+			ifOperStatus      []string
+			ifLastChange      []uint32
+			ifInOctets        []uint32
+			ifInNUcastPkts    []uint32
+			ifInDiscards      []uint32
+			ifInErrors        []uint32
+			ifInUnknownProtos []uint32
+			ifOutOctets       []uint32
+			ifOutNUcastPkts   []uint32
+			ifOutDiscards     []uint32
+			ifOutErrors       []uint32
+			ifOutQLen         []uint32 // deprecated
+			ifSpecific        []string // deprecated
+		}
+	}
+
 	type ipAddrTable struct {
 		ipAddrEntry struct {
 			ipAdEntAddr         []string
@@ -137,33 +162,67 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		}
 	}
 
+	// get Number of Interfaces
+	ifNumberArray := []string{ifNumberOID + ".0"}
+	getPDU, getError := params.Get(ifNumberArray)
+	if getError != nil {
+		log.Fatalf("Get() err: %v", getError)
+	}
+	if debugFlag {
+		fmt.Println("ifNumber walkPDU=", getPDU)
+	} // TESTING ONLY
+	nbrOfInterfaces := getPDU.Variables[0].Value
+	if debugFlag {
+		fmt.Println("nbrOfInterfaces =", nbrOfInterfaces)
+	}
+
 	// get ifTable
 	//ifTable, err3 := params.WalkAll("1.3.6.1.2.1.2.2")
-	ifTable, err3 := params.WalkAll(ifTableOID)
-	if err3 != nil {
+	//ifTable, walkError := params.WalkAll(ifTableOID)
+	walkPDU, walkError := params.WalkAll(ifTableOID)
+	if walkError != nil {
 		log.Fatalf("Get() err: %v", err2)
 	}
 	if debugFlag {
-		fmt.Println("\nifTable PDU=", ifTable)
+		fmt.Println("\nifTable PDU=", walkPDU)
+	}
+
+	var interfaceTable ifTable
+	//nbrOfInterfacesInt, strErr := strconv.ParseInt(nbrOfInterfaces.(string), 10, 32)
+	//if strErr != nil {
+	//	log.Fatalf("Get() err: %v", strErr)
+	//}
+	//var i int32 = 0
+	for i, variable := range walkPDU {
+		//fmt.Println("Interface Descr", i, "=", variable.Value)
+		var strErr error
+		interfaceTable.ifEntry.ifIndex[i], strErr = strconv.ParseInt(variable.Value.(string), 10, 16)
+		fmt.Println("interfaceTable.ifEntry.ifindex[i]", interfaceTable.ifEntry.ifIndex[i])
+		//for k := 0; k < int(nbrOfInterfacesInt); k++ {
+		//	fmt.Println("walkPDU=", walkPDU)
+		//addressTable.ipAddrEntry.ipAdEntAddr[i] = walkPDU.Variables[k].Value
+		//	fmt.Println("addressTable.ipAddrEntry.ipAdEntAddr[i]", addressTable.ipAddrEntry.ipAdEntAddr[i])
+		//}
 	}
 
 	// get ipAddrTable
-	resultPDU, err3 := params.WalkAll(ipAddrTableOID)
-	if err3 != nil {
+	//var addressTable ipAddrTable
+	walkPDU, walkError = params.WalkAll(ipAddrTableOID)
+	if walkError != nil {
 		log.Fatalf("Get() err: %v", err2)
 	}
 	if debugFlag {
-		fmt.Println("\nipAddrTable PDU=", resultPDU)
+		fmt.Println("\nipAddrTable PDU=", walkPDU)
 	}
 	//var ipAddrTableResult ipAddrTable
 
 	// get ipRouteTable
-	resultPDU, err3 = params.WalkAll(ipRouteTableOID)
-	if err3 != nil {
+	walkPDU, walkError = params.WalkAll(ipRouteTableOID)
+	if walkError != nil {
 		log.Fatalf("Get() err: %v", err2)
 	}
 	if debugFlag {
-		fmt.Println("\nipRouteTable PDU=", resultPDU)
+		fmt.Println("\nipRouteTable PDU=", walkPDU)
 	}
 	//var ipRouteTableResult ipRouteTable
 }
