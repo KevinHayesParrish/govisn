@@ -45,6 +45,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	//	envTarget := os.Getenv("GOSNMP_TARGET")
 	//envTarget := snmpTarget
 	//	envPort := os.Getenv("GOSNMP_PORT")
+
 	snmpPort := "161"
 	if len(snmpTarget) <= 0 {
 		log.Fatalf("environment variable not set: GOSNMP_TARGET")
@@ -142,14 +143,18 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	if err3 != nil {
 		log.Fatalf("Get() err: %v", err2)
 	}
-	fmt.Println("\nifTable PDU=", ifTable)
+	if debugFlag {
+		fmt.Println("\nifTable PDU=", ifTable)
+	}
 
 	// get ipAddrTable
 	resultPDU, err3 := params.WalkAll(ipAddrTableOID)
 	if err3 != nil {
 		log.Fatalf("Get() err: %v", err2)
 	}
-	fmt.Println("\nipAddrTable PDU=", resultPDU)
+	if debugFlag {
+		fmt.Println("\nipAddrTable PDU=", resultPDU)
+	}
 	//var ipAddrTableResult ipAddrTable
 
 	// get ipRouteTable
@@ -157,6 +162,8 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	if err3 != nil {
 		log.Fatalf("Get() err: %v", err2)
 	}
-	fmt.Println("\nipRouteTable PDU=", resultPDU)
+	if debugFlag {
+		fmt.Println("\nipRouteTable PDU=", resultPDU)
+	}
 	//var ipRouteTableResult ipRouteTable
 }
