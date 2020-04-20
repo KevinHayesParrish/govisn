@@ -196,7 +196,12 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	for i, variable := range walkPDU {
 		//fmt.Println("Interface Descr", i, "=", variable.Value)
 		var strErr error
-		interfaceTable.ifEntry.ifIndex[i], strErr = strconv.ParseInt(variable.Value.(string), 10, 16)
+		var ifIndexInt int64 = 0
+		ifIndexInt, strErr = strconv.ParseInt(variable.Value.(string), 10, 16)
+		if strErr != nil {
+			log.Fatalf("Get() err: %v", strErr)
+		}
+		interfaceTable.ifEntry.ifIndex[i] = int(ifIndexInt)
 		fmt.Println("interfaceTable.ifEntry.ifindex[i]", interfaceTable.ifEntry.ifIndex[i])
 		//for k := 0; k < int(nbrOfInterfacesInt); k++ {
 		//	fmt.Println("walkPDU=", walkPDU)
