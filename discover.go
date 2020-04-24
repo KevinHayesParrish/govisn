@@ -9,30 +9,172 @@ import (
 	g "github.com/soniah/gosnmp"
 )
 
+/*
+* TODO:
+ */
+
+//DiscoverVersion is the file version number
+const DiscoverVersion = "0.0.1"
+
 func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
 
+	//type ifTable struct {
+	//	ifEntry struct {
+	//		ifIndex           []int
+	//		ifDescr           []string
+	//		ifType            []string
+	//		ifMtu             []int32
+	//		ifSpeed           []int32
+	//		ifPhysAddress     []string
+	//		ifAdminStatus     []string
+	//		ifOperStatus      []string
+	//		ifLastChange      []uint32
+	//		ifInOctets        []uint32
+	//		ifInNUcastPkts    []uint32
+	//		ifInDiscards      []uint32
+	//		ifInErrors        []uint32
+	//		ifInUnknownProtos []uint32
+	//		ifOutOctets       []uint32
+	//		ifOutNUcastPkts   []uint32
+	//		ifOutDiscards     []uint32
+	//		ifOutErrors       []uint32
+	//		ifOutQLen         []uint32 // deprecated
+	//		ifSpecific        []string // deprecated
+	//	}
+	//}
 	type ifTable struct {
 		ifEntry struct {
-			ifIndex           []int
-			ifDescr           []string
-			ifType            []string
-			ifMtu             []int32
-			ifSpeed           []int32
-			ifPhysAddress     []string
-			ifAdminStatus     []string
-			ifOperStatus      []string
-			ifLastChange      []uint32
-			ifInOctets        []uint32
-			ifInNUcastPkts    []uint32
-			ifInDiscards      []uint32
-			ifInErrors        []uint32
-			ifInUnknownProtos []uint32
-			ifOutOctets       []uint32
-			ifOutNUcastPkts   []uint32
-			ifOutDiscards     []uint32
-			ifOutErrors       []uint32
-			ifOutQLen         []uint32 // deprecated
-			ifSpecific        []string // deprecated
+			ifIndexRow []struct {
+				ifIndexOID  string
+				ifIndexType string
+				ifIndex     int
+			}
+
+			ifDescrRow []struct {
+				ifDescrOID  string
+				ifDescrType string
+				ifDescr     string
+			}
+
+			ifTypeRow []struct {
+				ifTypeOID  string
+				ifTypeType string
+				ifType     int
+			}
+
+			ifMtuRow []struct {
+				ifMtuOID  string
+				ifMtuType string
+				ifMtu     int32
+			}
+
+			ifSpeedRow []struct {
+				ifSpeedOID  string
+				ifSpeedType string
+				ifSpeed     uint32
+			}
+
+			ifPhysAddressRow []struct {
+				ifPhysAddressOID  string
+				ifPhysAddressType string
+				ifPhysAddress     string
+			}
+
+			ifAdminStatusRow []struct {
+				ifAdminStatusOID  string
+				ifAdminStatusType string
+				ifAdminStatus     string
+			}
+
+			ifOperStatusRow []struct {
+				ifOperStatusOID  string
+				ifOperStatusType string
+				ifOperStatus     string
+			}
+
+			ifLastChangeRow []struct {
+				ifLastChangeOID  string
+				ifLastChangeType string
+				ifLastChange     uint32
+			}
+
+			ifInOctetsRow []struct {
+				ifInOctetsOID  string
+				ifInOctetsType string
+				ifInOctets     uint32
+			}
+
+			ifInUcastPktsRow []struct {
+				ifInUcastPktsOID  string
+				ifInUcastPktsType string
+				ifInUcastPkts     uint32
+			}
+
+			ifInNUcastPktsRow []struct {
+				ifInNUcastPktsOID  string // deprecated
+				ifInNUcastPktsType string // deprecated
+				ifInNUcastPkts     uint32 // deprecated
+			}
+
+			ifInDiscardsRow []struct {
+				ifInDiscardsOID  string
+				ifInDiscardsType string
+				ifInDiscards     uint32
+			}
+
+			ifInErrorsRow []struct {
+				ifInErrorsOID  string
+				ifInErrorsType string
+				ifInErrors     uint32
+			}
+
+			ifInUnknownProtosRow []struct {
+				ifInUnknownProtosOID  string
+				ifInUnknownProtosType string
+				ifInUnknownProtos     uint32
+			}
+
+			ifOutOctetsRow []struct {
+				ifOutOctetsOID  string
+				ifOutOctetsType string
+				ifOutOctets     uint32
+			}
+
+			ifOutUcastPktsRow []struct {
+				ifOutUcastPktsOID  string
+				ifOutUcastPktsType string
+				ifOutUcastPkts     uint32
+			}
+
+			ifOutNUcastPktsRow []struct {
+				ifOutNucastPktsOID  string // deprecated
+				ifOutNucastPktsType string // deprecated
+				ifOutNUcastPkts     uint32 //deprecated
+			}
+
+			ifOutDiscardsRow []struct {
+				ifOutDiscardsOID  string
+				ifOutDiscardsType string
+				ifOutDiscards     uint32
+			}
+
+			ifOutErrorsRow []struct {
+				ifOutErrorsOID  string
+				ifOutErrorsType string
+				ifOutErrors     uint32
+			}
+
+			ifOutQLenRow []struct {
+				ifOutQLenOID  string
+				ifOutQLenType string
+				ifOutQLen     uint32 // deprecated
+			}
+
+			IfOutSpecificRow []struct {
+				ifOutSpecficOID    string
+				ifOutSpecificType  string
+				ifSpecificSpecific string // deprecated
+			}
 		}
 	}
 
@@ -187,27 +329,42 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		fmt.Println("\nifTable PDU=", walkPDU)
 	}
 
+	//var interfaceTable ifTable
 	var interfaceTable ifTable
+
 	//nbrOfInterfacesInt, strErr := strconv.ParseInt(nbrOfInterfaces.(string), 10, 32)
 	//if strErr != nil {
 	//	log.Fatalf("Get() err: %v", strErr)
 	//}
 	//var i int32 = 0
-	for i, variable := range walkPDU {
-		//fmt.Println("Interface Descr", i, "=", variable.Value)
-		var strErr error
-		var ifIndexInt int64 = 0
-		ifIndexInt, strErr = strconv.ParseInt(variable.Value.(string), 10, 16)
-		if strErr != nil {
-			log.Fatalf("Get() err: %v", strErr)
-		}
-		interfaceTable.ifEntry.ifIndex[i] = int(ifIndexInt)
-		fmt.Println("interfaceTable.ifEntry.ifindex[i]", interfaceTable.ifEntry.ifIndex[i])
-		//for k := 0; k < int(nbrOfInterfacesInt); k++ {
-		//	fmt.Println("walkPDU=", walkPDU)
-		//addressTable.ipAddrEntry.ipAdEntAddr[i] = walkPDU.Variables[k].Value
-		//	fmt.Println("addressTable.ipAddrEntry.ipAdEntAddr[i]", addressTable.ipAddrEntry.ipAdEntAddr[i])
-		//}
+	//for i, variable := range walkPDU {
+	//fmt.Println("Interface Descr", i, "=", variable.Value)
+	//var strErr error
+	//var ifIndexInt int64 = 0
+	//var ifIndexStr string = ""
+	//ifIndexInt, strErr = strconv.ParseInt(variable.Value.(string), 10, 16)
+	//ifIndexInt, strErr = variable.Value
+	//	fmt.Println("i=", "walkPDU[i]=", walkPDU[i])   // TESTING ONLY
+	//	fmt.Println("variable=", variable)             // TESTING ONLY
+	//	fmt.Println("variable.Name=", variable.Name)   // TESTING ONLY
+	//	fmt.Println("variable.Value=", variable.Value) // TESTING ONLY
+	//ifIndexStr := variable.Value.(string)
+	//if strErr != nil {
+	//	log.Fatalf("Get() err: %v", strErr)
+	//}
+	//interfaceTable.ifEntry.ifIndex[i] = int(ifIndexInt)
+	//interfaceTable.ifEntry.ifIndex[i] = ifIndexInt
+	//	interfaceTable.ifEntry.ifIndex[i] = ifIndexStr
+	//	fmt.Println("interfaceTable.ifEntry.ifindex[i]", interfaceTable.ifEntry.ifIndex[i])
+	//for k := 0; k < int(nbrOfInterfacesInt); k++ {
+	//	fmt.Println("walkPDU=", walkPDU)
+	//addressTable.ipAddrEntry.ipAdEntAddr[i] = walkPDU.Variables[k].Value
+	//	fmt.Println("addressTable.ipAddrEntry.ipAdEntAddr[i]", addressTable.ipAddrEntry.ipAdEntAddr[i])
+	//}
+	//}
+
+	for i := 0; i < nbrOfInterfaces; i++ {
+
 	}
 
 	// get ipAddrTable
