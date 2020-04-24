@@ -59,7 +59,6 @@
             "env": {},
             "args": ["-l", "-f", "/temp/V15N-vsp-2011-11-21-GPS.xml"]
         },
-
         {
             "name": "govisn -di -co",
             "type": "go",
@@ -68,9 +67,9 @@
             "remotePath": "",
             "port": 2345,
             "host": "127.0.0.1",
-            "program": "${file}",
+            "program": "/Users/kevin/go/src/govisn",
             "env": {},
-            "args": ["-di 10.0.0.5", "-co idontknow"]
+            "args": ["-di", "10.0.0.5", "-co", "idontknow"]
         }
     ]
 }
