@@ -48,132 +48,154 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 				ifIndexOID  string
 				ifIndexType string
 				ifIndex     int
+				Logger      string
 			}
 
 			ifDescrRow []struct {
 				ifDescrOID  string
 				ifDescrType string
 				ifDescr     string
+				Logger      string
 			}
 
 			ifTypeRow []struct {
 				ifTypeOID  string
 				ifTypeType string
 				ifType     int
+				Logger     string
 			}
 
 			ifMtuRow []struct {
 				ifMtuOID  string
 				ifMtuType string
 				ifMtu     int32
+				Logger    string
 			}
 
 			ifSpeedRow []struct {
 				ifSpeedOID  string
 				ifSpeedType string
 				ifSpeed     uint32
+				Logger      string
 			}
 
 			ifPhysAddressRow []struct {
 				ifPhysAddressOID  string
 				ifPhysAddressType string
 				ifPhysAddress     string
+				Logger            string
 			}
 
 			ifAdminStatusRow []struct {
 				ifAdminStatusOID  string
 				ifAdminStatusType string
 				ifAdminStatus     string
+				Logger            string
 			}
 
 			ifOperStatusRow []struct {
 				ifOperStatusOID  string
 				ifOperStatusType string
 				ifOperStatus     string
+				Logger           string
 			}
 
 			ifLastChangeRow []struct {
 				ifLastChangeOID  string
 				ifLastChangeType string
 				ifLastChange     uint32
+				Logger           string
 			}
 
 			ifInOctetsRow []struct {
 				ifInOctetsOID  string
 				ifInOctetsType string
 				ifInOctets     uint32
+				Logger         string
 			}
 
 			ifInUcastPktsRow []struct {
 				ifInUcastPktsOID  string
 				ifInUcastPktsType string
 				ifInUcastPkts     uint32
+				Logger            string
 			}
 
 			ifInNUcastPktsRow []struct {
 				ifInNUcastPktsOID  string // deprecated
 				ifInNUcastPktsType string // deprecated
 				ifInNUcastPkts     uint32 // deprecated
+				Logger             string
 			}
 
 			ifInDiscardsRow []struct {
 				ifInDiscardsOID  string
 				ifInDiscardsType string
 				ifInDiscards     uint32
+				Logger           string
 			}
 
 			ifInErrorsRow []struct {
 				ifInErrorsOID  string
 				ifInErrorsType string
 				ifInErrors     uint32
+				Logger         string
 			}
 
 			ifInUnknownProtosRow []struct {
 				ifInUnknownProtosOID  string
 				ifInUnknownProtosType string
 				ifInUnknownProtos     uint32
+				Logger                string
 			}
 
 			ifOutOctetsRow []struct {
 				ifOutOctetsOID  string
 				ifOutOctetsType string
 				ifOutOctets     uint32
+				Logger          string
 			}
 
 			ifOutUcastPktsRow []struct {
 				ifOutUcastPktsOID  string
 				ifOutUcastPktsType string
 				ifOutUcastPkts     uint32
+				Logger             string
 			}
 
 			ifOutNUcastPktsRow []struct {
 				ifOutNucastPktsOID  string // deprecated
 				ifOutNucastPktsType string // deprecated
 				ifOutNUcastPkts     uint32 //deprecated
+				Logger              string
 			}
 
 			ifOutDiscardsRow []struct {
 				ifOutDiscardsOID  string
 				ifOutDiscardsType string
 				ifOutDiscards     uint32
+				Logger            string
 			}
 
 			ifOutErrorsRow []struct {
 				ifOutErrorsOID  string
 				ifOutErrorsType string
 				ifOutErrors     uint32
+				Logger          string
 			}
 
 			ifOutQLenRow []struct {
 				ifOutQLenOID  string
 				ifOutQLenType string
 				ifOutQLen     uint32 // deprecated
+				Logger        string
 			}
 
 			IfOutSpecificRow []struct {
 				ifOutSpecficOID    string
 				ifOutSpecificType  string
 				ifSpecificSpecific string // deprecated
+				Logger             string
 			}
 		}
 	}
@@ -363,8 +385,8 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	//}
 	//}
 
-	for i := 0; i < nbrOfInterfaces; i++ {
-
+	for i := 0; i < nbrOfInterfaces.(int); i++ {
+		interfaceTable.ifEntry.ifIndexRow[0].ifIndex = walkPDU[i].Value.(int)
 	}
 
 	// get ipAddrTable
@@ -375,6 +397,8 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	}
 	if debugFlag {
 		fmt.Println("\nipAddrTable PDU=", walkPDU)
+		fmt.Println("interfaceTable=", interfaceTable)
+		return // TESTING ONLY, REMOVE AFTER TEST
 	}
 	//var ipAddrTableResult ipAddrTable
 
