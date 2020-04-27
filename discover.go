@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	//"gosnmp"
 	"log"
 	"strconv"
 	"time"
@@ -55,7 +56,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 			//ifDescrRow []struct {
 			ifDescrRow struct {
 				ifDescrOID  string
-				ifDescrType string
+				ifDescrType byte
 				ifDescr     string
 				Logger      string
 			}
@@ -415,16 +416,28 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	for i := nbrOfInterfaces; i < len(walkPDU); i++ { // skip ifIndex array within walkPDU
 
 		//for k := nbrOfInterfaces; k < len(walkPDU); k++ { // skip ifIndex array within walkPDU
-		for k := 0; k < nbrOfInterfaces; k++ { // skip ifIndex array within walkPDU
-			//interfaceTable.ifEntry.ifIndexRow[0].ifIndex = walkPDU[i].Value.(int)
-			ifDescr := string(walkPDU[i].Value.([]uint8))
-			fmt.Println("ifDesc=", ifDescr)
-			//interfaceTable.ifEntry.ifDescrRow[k].ifDescr = string(walkPDU[k].Value.([]uint8))
-			interfaceTable.ifEntry.ifDescrRow.ifDescr = ifDescr
-			if debugFlag {
-				println("ifDesc(", k, ")=", interfaceTable.ifEntry.ifDescrRow.ifDescr)
-			}
+		//for k := 0; k < nbrOfInterfaces; k++ { // skip ifIndex array within walkPDU
+		//interfaceTable.ifEntry.ifIndexRow[0].ifIndex = walkPDU[i].Value.(int)
+		//ifDescr := string(walkPDU[i].Value.([]uint8))
+		//fmt.Println("ifDesc=", ifDescr)
+		//interfaceTable.ifEntry.ifDescrRow[k].ifDescr = string(walkPDU[k].Value.([]uint8))
+		//interfaceTable.ifEntry.ifDescrRow.ifDescr = ifDescr
+		interfaceTable.ifEntry.ifDescrRow.ifDescrOID = walkPDU[i].Name
+		interfaceTable.ifEntry.ifDescrRow.ifDescrType = byte(walkPDU[i].Type)
+		interfaceTable.ifEntry.ifDescrRow.ifDescr = string(walkPDU[i].Value.([]uint8))
+		if debugFlag {
+			//println("ifDesc(", k, ")=", interfaceTable.ifEntry.ifDescrRow.ifDescr)
+			println("ifDesc(", i, ")=", interfaceTable.ifEntry.ifDescrRow.ifDescr)
 		}
+		// TODO
+		// write ifDesc to database
+		// add ifType to interfaceTable
+		// add ifMTU to interfaceTable
+		// Add ifSpeed to interfaceTable
+		// Add ifPhyAddress to interfaceTable
+		// Add ifOutOctets to interfaceTable
+
+		//}
 		fmt.Println("i=", i) // TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
 	}
 
