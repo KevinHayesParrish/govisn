@@ -44,41 +44,47 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	//}
 	type ifTable struct {
 		ifEntry struct {
-			ifIndexRow []struct {
+			//ifIndexRow []struct {
+			ifIndexRow struct {
 				ifIndexOID  string
 				ifIndexType string
 				ifIndex     int
 				Logger      string
 			}
 
-			ifDescrRow []struct {
+			//ifDescrRow []struct {
+			ifDescrRow struct {
 				ifDescrOID  string
 				ifDescrType string
 				ifDescr     string
 				Logger      string
 			}
 
-			ifTypeRow []struct {
+			//ifTypeRow []struct {
+			ifTypeRow struct {
 				ifTypeOID  string
 				ifTypeType string
 				ifType     int
 				Logger     string
 			}
 
-			ifMtuRow []struct {
+			//ifMtuRow []struct {
+			ifMtuRow struct {
 				ifMtuOID  string
 				ifMtuType string
 				ifMtu     int32
 				Logger    string
 			}
 
-			ifSpeedRow []struct {
+			//ifSpeedRow []struct {
+			ifSpeedRow struct {
 				ifSpeedOID  string
 				ifSpeedType string
 				ifSpeed     uint32
 				Logger      string
 			}
 
+			//ifPhysAddressRow []struct {
 			ifPhysAddressRow []struct {
 				ifPhysAddressOID  string
 				ifPhysAddressType string
@@ -86,112 +92,128 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 				Logger            string
 			}
 
-			ifAdminStatusRow []struct {
+			//ifAdminStatusRow []struct {
+			ifAdminStatusRow struct {
 				ifAdminStatusOID  string
 				ifAdminStatusType string
 				ifAdminStatus     string
 				Logger            string
 			}
 
-			ifOperStatusRow []struct {
+			//ifOperStatusRow []struct {
+			ifOperStatusRow struct {
 				ifOperStatusOID  string
 				ifOperStatusType string
 				ifOperStatus     string
 				Logger           string
 			}
 
-			ifLastChangeRow []struct {
+			//ifLastChangeRow []struct {
+			ifLastChangeRow struct {
 				ifLastChangeOID  string
 				ifLastChangeType string
 				ifLastChange     uint32
 				Logger           string
 			}
 
-			ifInOctetsRow []struct {
+			//ifInOctetsRow []struct {
+			ifInOctetsRow struct {
 				ifInOctetsOID  string
 				ifInOctetsType string
 				ifInOctets     uint32
 				Logger         string
 			}
 
-			ifInUcastPktsRow []struct {
+			//ifInUcastPktsRow []struct {
+			ifInUcastPktsRow struct {
 				ifInUcastPktsOID  string
 				ifInUcastPktsType string
 				ifInUcastPkts     uint32
 				Logger            string
 			}
 
-			ifInNUcastPktsRow []struct {
+			//ifInNUcastPktsRow []struct {
+			ifInNUcastPktsRow struct {
 				ifInNUcastPktsOID  string // deprecated
 				ifInNUcastPktsType string // deprecated
 				ifInNUcastPkts     uint32 // deprecated
 				Logger             string
 			}
 
-			ifInDiscardsRow []struct {
+			//ifInDiscardsRow []struct {
+			ifInDiscardsRow struct {
 				ifInDiscardsOID  string
 				ifInDiscardsType string
 				ifInDiscards     uint32
 				Logger           string
 			}
 
-			ifInErrorsRow []struct {
+			//ifInErrorsRow []struct {
+			ifInErrorsRow struct {
 				ifInErrorsOID  string
 				ifInErrorsType string
 				ifInErrors     uint32
 				Logger         string
 			}
 
-			ifInUnknownProtosRow []struct {
+			//ifInUnknownProtosRow []struct {
+			ifInUnknownProtosRow struct {
 				ifInUnknownProtosOID  string
 				ifInUnknownProtosType string
 				ifInUnknownProtos     uint32
 				Logger                string
 			}
 
-			ifOutOctetsRow []struct {
+			//ifOutOctetsRow []struct {
+			ifOutOctetsRow struct {
 				ifOutOctetsOID  string
 				ifOutOctetsType string
 				ifOutOctets     uint32
 				Logger          string
 			}
 
-			ifOutUcastPktsRow []struct {
+			//ifOutUcastPktsRow []struct {
+			ifOutUcastPktsRow struct {
 				ifOutUcastPktsOID  string
 				ifOutUcastPktsType string
 				ifOutUcastPkts     uint32
 				Logger             string
 			}
 
-			ifOutNUcastPktsRow []struct {
+			//ifOutNUcastPktsRow []struct {
+			ifOutNUcastPktsRow struct {
 				ifOutNucastPktsOID  string // deprecated
 				ifOutNucastPktsType string // deprecated
 				ifOutNUcastPkts     uint32 //deprecated
 				Logger              string
 			}
 
-			ifOutDiscardsRow []struct {
+			//ifOutDiscardsRow []struct {
+			ifOutDiscardsRow struct {
 				ifOutDiscardsOID  string
 				ifOutDiscardsType string
 				ifOutDiscards     uint32
 				Logger            string
 			}
 
-			ifOutErrorsRow []struct {
+			//ifOutErrorsRow []struct {
+			ifOutErrorsRow struct {
 				ifOutErrorsOID  string
 				ifOutErrorsType string
 				ifOutErrors     uint32
 				Logger          string
 			}
 
-			ifOutQLenRow []struct {
+			//ifOutQLenRow []struct {
+			ifOutQLenRow struct {
 				ifOutQLenOID  string
 				ifOutQLenType string
 				ifOutQLen     uint32 // deprecated
 				Logger        string
 			}
 
-			IfOutSpecificRow []struct {
+			//IfOutSpecificRow []struct {
+			IfOutSpecificRow struct {
 				ifOutSpecficOID    string
 				ifOutSpecificType  string
 				ifSpecificSpecific string // deprecated
@@ -334,8 +356,8 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	}
 	if debugFlag {
 		fmt.Println("ifNumber walkPDU=", getPDU)
-	} // TESTING ONLY
-	nbrOfInterfaces := getPDU.Variables[0].Value
+	}
+	nbrOfInterfaces := getPDU.Variables[0].Value.(int)
 	if debugFlag {
 		fmt.Println("nbrOfInterfaces =", nbrOfInterfaces)
 	}
@@ -385,8 +407,25 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	//}
 	//}
 
-	for i := 0; i < nbrOfInterfaces.(int); i++ {
-		interfaceTable.ifEntry.ifIndexRow[0].ifIndex = walkPDU[i].Value.(int)
+	//for i := 0; i < nbrOfInterfaces; i++ {
+
+	if debugFlag {
+		fmt.Println("len(walkPDU)=", len(walkPDU))
+	}
+	for i := nbrOfInterfaces; i < len(walkPDU); i++ { // skip ifIndex array within walkPDU
+
+		//for k := nbrOfInterfaces; k < len(walkPDU); k++ { // skip ifIndex array within walkPDU
+		for k := 0; k < nbrOfInterfaces; k++ { // skip ifIndex array within walkPDU
+			//interfaceTable.ifEntry.ifIndexRow[0].ifIndex = walkPDU[i].Value.(int)
+			ifDescr := string(walkPDU[i].Value.([]uint8))
+			fmt.Println("ifDesc=", ifDescr)
+			//interfaceTable.ifEntry.ifDescrRow[k].ifDescr = string(walkPDU[k].Value.([]uint8))
+			interfaceTable.ifEntry.ifDescrRow.ifDescr = ifDescr
+			if debugFlag {
+				println("ifDesc(", k, ")=", interfaceTable.ifEntry.ifDescrRow.ifDescr)
+			}
+		}
+		fmt.Println("i=", i) // TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
 	}
 
 	// get ipAddrTable
