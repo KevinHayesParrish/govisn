@@ -15,210 +15,164 @@ import (
  */
 
 //DiscoverVersion is the file version number
-const DiscoverVersion = "0.0.1"
+const DiscoverVersion = "0.1.0"
 
 func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
 
-	//type ifTable struct {
-	//	ifEntry struct {
-	//		ifIndex           []int
-	//		ifDescr           []string
-	//		ifType            []string
-	//		ifMtu             []int32
-	//		ifSpeed           []int32
-	//		ifPhysAddress     []string
-	//		ifAdminStatus     []string
-	//		ifOperStatus      []string
-	//		ifLastChange      []uint32
-	//		ifInOctets        []uint32
-	//		ifInNUcastPkts    []uint32
-	//		ifInDiscards      []uint32
-	//		ifInErrors        []uint32
-	//		ifInUnknownProtos []uint32
-	//		ifOutOctets       []uint32
-	//		ifOutNUcastPkts   []uint32
-	//		ifOutDiscards     []uint32
-	//		ifOutErrors       []uint32
-	//		ifOutQLen         []uint32 // deprecated
-	//		ifSpecific        []string // deprecated
-	//	}
-	//}
 	type ifTable struct {
 		ifEntry struct {
-			//ifIndexRow []struct {
-			ifIndexRow struct {
-				ifIndexOID  string
-				ifIndexType string
-				ifIndex     int
-				Logger      string
-			}
+			//			ifIndexRow struct {
+			ifIndexOID    string
+			ifIndexType   byte
+			ifIndex       int
+			ifIndexLogger string
+			//			}
 
-			//ifDescrRow []struct {
-			ifDescrRow struct {
-				ifDescrOID  string
-				ifDescrType byte
-				ifDescr     string
-				Logger      string
-			}
+			//			ifDescrRow struct {
+			ifDescrOID    string
+			ifDescrType   byte
+			ifDescr       string
+			ifDescrLogger string
+			//			}
 
-			//ifTypeRow []struct {
-			ifTypeRow struct {
-				ifTypeOID  string
-				ifTypeType string
-				ifType     int
-				Logger     string
-			}
+			//			ifTypeRow struct {
+			ifTypeOID    string
+			ifTypeType   byte
+			ifType       int
+			ifTypeLogger string
+			//			}
 
-			//ifMtuRow []struct {
 			ifMtuRow struct {
-				ifMtuOID  string
-				ifMtuType string
-				ifMtu     int32
-				Logger    string
+				ifMtuOID    string
+				ifMtuType   byte
+				ifMtu       int32
+				ifMTULogger string
 			}
 
-			//ifSpeedRow []struct {
 			ifSpeedRow struct {
-				ifSpeedOID  string
-				ifSpeedType string
-				ifSpeed     uint32
-				Logger      string
+				ifSpeedOID    string
+				ifSpeedType   byte
+				ifSpeed       uint32
+				ifSpeedLogger string
 			}
 
-			//ifPhysAddressRow []struct {
 			ifPhysAddressRow []struct {
-				ifPhysAddressOID  string
-				ifPhysAddressType string
-				ifPhysAddress     string
-				Logger            string
+				ifPhysAddressOID    string
+				ifPhysAddressType   byte
+				ifPhysAddress       string
+				ifPhysAddressLogger string
 			}
 
-			//ifAdminStatusRow []struct {
 			ifAdminStatusRow struct {
-				ifAdminStatusOID  string
-				ifAdminStatusType string
-				ifAdminStatus     string
-				Logger            string
+				ifAdminStatusOID    string
+				ifAdminStatusType   byte
+				ifAdminStatus       string
+				ifAdminStatusLogger string
 			}
 
-			//ifOperStatusRow []struct {
 			ifOperStatusRow struct {
-				ifOperStatusOID  string
-				ifOperStatusType string
-				ifOperStatus     string
-				Logger           string
+				ifOperStatusOID    string
+				ifOperStatusType   byte
+				ifOperStatus       string
+				ifOperStatusLogger string
 			}
 
-			//ifLastChangeRow []struct {
 			ifLastChangeRow struct {
-				ifLastChangeOID  string
-				ifLastChangeType string
-				ifLastChange     uint32
-				Logger           string
+				ifLastChangeOID    string
+				ifLastChangeType   byte
+				ifLastChange       uint32
+				ifLastChangeLogger string
 			}
 
-			//ifInOctetsRow []struct {
 			ifInOctetsRow struct {
-				ifInOctetsOID  string
-				ifInOctetsType string
-				ifInOctets     uint32
-				Logger         string
+				ifInOctetsOID    string
+				ifInOctetsType   byte
+				ifInOctets       uint32
+				ifInOctetsLogger string
 			}
 
-			//ifInUcastPktsRow []struct {
 			ifInUcastPktsRow struct {
-				ifInUcastPktsOID  string
-				ifInUcastPktsType string
-				ifInUcastPkts     uint32
-				Logger            string
+				ifInUcastPktsOID    string
+				ifInUcastPktsType   byte
+				ifInUcastPkts       uint32
+				ifInUcastPktsLogger string
 			}
 
-			//ifInNUcastPktsRow []struct {
 			ifInNUcastPktsRow struct {
-				ifInNUcastPktsOID  string // deprecated
-				ifInNUcastPktsType string // deprecated
-				ifInNUcastPkts     uint32 // deprecated
-				Logger             string
+				ifInNUcastPktsOID    string // deprecated
+				ifInNUcastPktsType   byte   // deprecated
+				ifInNUcastPkts       uint32 // deprecated
+				ifInNUcastPktsLogger string
 			}
 
-			//ifInDiscardsRow []struct {
 			ifInDiscardsRow struct {
-				ifInDiscardsOID  string
-				ifInDiscardsType string
-				ifInDiscards     uint32
-				Logger           string
+				ifInDiscardsOID    string
+				ifInDiscardsType   byte
+				ifInDiscards       uint32
+				ifInDiscardsLogger string
 			}
 
-			//ifInErrorsRow []struct {
 			ifInErrorsRow struct {
-				ifInErrorsOID  string
-				ifInErrorsType string
-				ifInErrors     uint32
-				Logger         string
+				ifInErrorsOID    string
+				ifInErrorsType   byte
+				ifInErrors       uint32
+				ifInErrorsLogger string
 			}
 
-			//ifInUnknownProtosRow []struct {
 			ifInUnknownProtosRow struct {
-				ifInUnknownProtosOID  string
-				ifInUnknownProtosType string
-				ifInUnknownProtos     uint32
-				Logger                string
+				ifInUnknownProtosOID    string
+				ifInUnknownProtosType   byte
+				ifInUnknownProtos       uint32
+				ifInUnknownProtosLogger string
 			}
 
-			//ifOutOctetsRow []struct {
 			ifOutOctetsRow struct {
-				ifOutOctetsOID  string
-				ifOutOctetsType string
-				ifOutOctets     uint32
-				Logger          string
+				ifOutOctetsOID    string
+				ifOutOctetsType   byte
+				ifOutOctets       uint32
+				ifOutOctetsLogger string
 			}
 
-			//ifOutUcastPktsRow []struct {
 			ifOutUcastPktsRow struct {
-				ifOutUcastPktsOID  string
-				ifOutUcastPktsType string
-				ifOutUcastPkts     uint32
-				Logger             string
+				ifOutUcastPktsOID    string
+				ifOutUcastPktsType   byte
+				ifOutUcastPkts       uint32
+				ifOutUcastPktsLogger string
 			}
 
-			//ifOutNUcastPktsRow []struct {
 			ifOutNUcastPktsRow struct {
-				ifOutNucastPktsOID  string // deprecated
-				ifOutNucastPktsType string // deprecated
-				ifOutNUcastPkts     uint32 //deprecated
-				Logger              string
+				ifOutNucastPktsOID    string // deprecated
+				ifOutNucastPktsType   byte   // deprecated
+				ifOutNUcastPkts       uint32 //deprecated
+				ifOutNUcastPktsLogger string
 			}
 
-			//ifOutDiscardsRow []struct {
 			ifOutDiscardsRow struct {
-				ifOutDiscardsOID  string
-				ifOutDiscardsType string
-				ifOutDiscards     uint32
-				Logger            string
+				ifOutDiscardsOID    string
+				ifOutDiscardsType   byte
+				ifOutDiscards       uint32
+				ifOutDiscardsLogger string
 			}
 
-			//ifOutErrorsRow []struct {
 			ifOutErrorsRow struct {
-				ifOutErrorsOID  string
-				ifOutErrorsType string
-				ifOutErrors     uint32
-				Logger          string
+				ifOutErrorsOID    string
+				ifOutErrorsType   byte
+				ifOutErrors       uint32
+				ifOutErrorsLogger string
 			}
 
-			//ifOutQLenRow []struct {
 			ifOutQLenRow struct {
-				ifOutQLenOID  string
-				ifOutQLenType string
-				ifOutQLen     uint32 // deprecated
-				Logger        string
+				ifOutQLenOID    string
+				ifOutQLenType   byte
+				ifOutQLen       uint32 // deprecated
+				ifOutQLenLogger string
 			}
 
-			//IfOutSpecificRow []struct {
 			IfOutSpecificRow struct {
-				ifOutSpecficOID    string
-				ifOutSpecificType  string
-				ifSpecificSpecific string // deprecated
-				Logger             string
+				ifOutSpecficOID          string
+				ifOutSpecificType        byte
+				ifSpecificSpecific       string // deprecated
+				ifSpecificSpecificLogger string
 			}
 		}
 	}
@@ -251,12 +205,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		}
 	}
 
-	fmt.Println("\nfunc discover started.\ndebugFlag=", debugFlag)
-
-	// get Target and Port from environment
-	//	envTarget := os.Getenv("GOSNMP_TARGET")
-	//envTarget := snmpTarget
-	//	envPort := os.Getenv("GOSNMP_PORT")
+	fmt.Println("\nfunc discover version", DiscoverVersion, "started.\ndebugFlag=", debugFlag)
 
 	snmpPort := "161"
 	if len(snmpTarget) <= 0 {
@@ -279,17 +228,6 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		}
 	}
 
-	// Build our own GoSNMP struct, rather than using g.Default.
-	// Do verbose logging of packets.
-	//params := &g.GoSNMP{
-	//	Target: envTarget,
-	//	Port:   uint16(port),
-	//	Community: "public",
-	//	Version:   g.Version2c,
-	//	Timeout:   time.Duration(2) * time.Second,
-	//	Logger:    log.New(os.Stdout, "govisn.discover: ", 0), // TESTING ONLY
-	//}
-
 	// GoSNMP struct
 	params := &g.GoSNMP{
 		Target:    snmpTarget,
@@ -310,13 +248,6 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	}
 	defer params.Conn.Close()
 
-	// Retrive sysName, sysDescr, sysContact, sysLocation
-	//oids := []string{
-	//	"1.3.6.1.2.1.1.5.0", // sysName
-	//	"1.3.6.1.2.1.1.1.0", // sysDescr
-	//	"1.3.6.1.2.1.1.4.0", // sysContact
-	//	"1.3.6.1.2.1.1.6.0", // sysLocation
-	//}
 	oids := []string{
 		sysNameOID + ".0",     // sysName
 		sysDescrOID + ".0",    // sysDescr
@@ -364,8 +295,6 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	}
 
 	// get ifTable
-	//ifTable, err3 := params.WalkAll("1.3.6.1.2.1.2.2")
-	//ifTable, walkError := params.WalkAll(ifTableOID)
 	walkPDU, walkError := params.WalkAll(ifTableOID)
 	if walkError != nil {
 		log.Fatalf("Get() err: %v", err2)
@@ -377,69 +306,46 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	//var interfaceTable ifTable
 	var interfaceTable ifTable
 
-	//nbrOfInterfacesInt, strErr := strconv.ParseInt(nbrOfInterfaces.(string), 10, 32)
-	//if strErr != nil {
-	//	log.Fatalf("Get() err: %v", strErr)
-	//}
-	//var i int32 = 0
-	//for i, variable := range walkPDU {
-	//fmt.Println("Interface Descr", i, "=", variable.Value)
-	//var strErr error
-	//var ifIndexInt int64 = 0
-	//var ifIndexStr string = ""
-	//ifIndexInt, strErr = strconv.ParseInt(variable.Value.(string), 10, 16)
-	//ifIndexInt, strErr = variable.Value
-	//	fmt.Println("i=", "walkPDU[i]=", walkPDU[i])   // TESTING ONLY
-	//	fmt.Println("variable=", variable)             // TESTING ONLY
-	//	fmt.Println("variable.Name=", variable.Name)   // TESTING ONLY
-	//	fmt.Println("variable.Value=", variable.Value) // TESTING ONLY
-	//ifIndexStr := variable.Value.(string)
-	//if strErr != nil {
-	//	log.Fatalf("Get() err: %v", strErr)
-	//}
-	//interfaceTable.ifEntry.ifIndex[i] = int(ifIndexInt)
-	//interfaceTable.ifEntry.ifIndex[i] = ifIndexInt
-	//	interfaceTable.ifEntry.ifIndex[i] = ifIndexStr
-	//	fmt.Println("interfaceTable.ifEntry.ifindex[i]", interfaceTable.ifEntry.ifIndex[i])
-	//for k := 0; k < int(nbrOfInterfacesInt); k++ {
-	//	fmt.Println("walkPDU=", walkPDU)
-	//addressTable.ipAddrEntry.ipAdEntAddr[i] = walkPDU.Variables[k].Value
-	//	fmt.Println("addressTable.ipAddrEntry.ipAdEntAddr[i]", addressTable.ipAddrEntry.ipAdEntAddr[i])
-	//}
-	//}
-
-	//for i := 0; i < nbrOfInterfaces; i++ {
-
 	if debugFlag {
 		fmt.Println("len(walkPDU)=", len(walkPDU))
 	}
 	for i := nbrOfInterfaces; i < len(walkPDU); i++ { // skip ifIndex array within walkPDU
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifIndexOID = walkPDU[k].Name
+			interfaceTable.ifEntry.ifIndexType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifIndex = walkPDU[i].Value.(int)
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifDescrOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifDescrType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifDescr = string(walkPDU[i].Value.([]uint8))
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifTypeOID = walkPDU[k].Name
+			interfaceTable.ifEntry.ifTypeType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifType = walkPDU[i].Value.(int)
+		}
 
-		//for k := nbrOfInterfaces; k < len(walkPDU); k++ { // skip ifIndex array within walkPDU
-		//for k := 0; k < nbrOfInterfaces; k++ { // skip ifIndex array within walkPDU
-		//interfaceTable.ifEntry.ifIndexRow[0].ifIndex = walkPDU[i].Value.(int)
-		//ifDescr := string(walkPDU[i].Value.([]uint8))
-		//fmt.Println("ifDesc=", ifDescr)
-		//interfaceTable.ifEntry.ifDescrRow[k].ifDescr = string(walkPDU[k].Value.([]uint8))
-		//interfaceTable.ifEntry.ifDescrRow.ifDescr = ifDescr
-		interfaceTable.ifEntry.ifDescrRow.ifDescrOID = walkPDU[i].Name
-		interfaceTable.ifEntry.ifDescrRow.ifDescrType = byte(walkPDU[i].Type)
-		interfaceTable.ifEntry.ifDescrRow.ifDescr = string(walkPDU[i].Value.([]uint8))
 		if debugFlag {
 			//println("ifDesc(", k, ")=", interfaceTable.ifEntry.ifDescrRow.ifDescr)
-			println("ifDesc(", i, ")=", interfaceTable.ifEntry.ifDescrRow.ifDescr)
+			println("ifDesc(", i, ")=", interfaceTable.ifEntry.ifDescr)
 		}
 		// TODO
-		// write ifDesc to database
 		// add ifType to interfaceTable
 		// add ifMTU to interfaceTable
 		// Add ifSpeed to interfaceTable
 		// Add ifPhyAddress to interfaceTable
 		// Add ifOutOctets to interfaceTable
+		// write Router table row to database
+		// write RouterMac table row to database
 
 		//}
-		fmt.Println("i=", i) // TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
+		//fmt.Println("i=", i) // TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
 	}
+
+	if debugFlag { //  TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
+		goto end //  TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
+	} //  TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
 
 	// get ipAddrTable
 	//var addressTable ipAddrTable
@@ -463,4 +369,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		fmt.Println("\nipRouteTable PDU=", walkPDU)
 	}
 	//var ipRouteTableResult ipRouteTable
+
+end:
+	return
 }
