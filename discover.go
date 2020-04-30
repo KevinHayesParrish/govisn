@@ -56,7 +56,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 				ifSpeedLogger string
 			}
 
-			ifPhysAddressRow []struct {
+			ifPhysAddressRow struct {
 				ifPhysAddressOID    string
 				ifPhysAddressType   byte
 				ifPhysAddress       string
@@ -309,26 +309,30 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	if debugFlag {
 		fmt.Println("len(walkPDU)=", len(walkPDU))
 	}
-	for i := nbrOfInterfaces; i < len(walkPDU); i++ { // skip ifIndex array within walkPDU
-		for k := i; k < k+nbrOfInterfaces; k++ {
-			interfaceTable.ifEntry.ifIndexOID = walkPDU[k].Name
+	//for i := nbrOfInterfaces; i < len(walkPDU); i++ { // skip ifIndex array within walkPDU
+	for i := 0; i < len(walkPDU); i++ { // skip ifIndex array within walkPDU
+		for k := 0; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifIndexOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifIndexType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifIndex = walkPDU[i].Value.(int)
 		}
-		for k := i; k < k+nbrOfInterfaces; k++ {
+		for k := 0; k < k+nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifDescrOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifDescrType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifDescr = string(walkPDU[i].Value.([]uint8))
+			// Add
 		}
 		for k := i; k < k+nbrOfInterfaces; k++ {
-			interfaceTable.ifEntry.ifTypeOID = walkPDU[k].Name
+			interfaceTable.ifEntry.ifTypeOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifTypeType = byte(walkPDU[i].Type)
-			interfaceTable.ifEntry.ifType = walkPDU[i].Value.(int)
+			interfaceTable.ifEntry.ifType = walkPDU[k].Value.(int)
 		}
 
 		if debugFlag {
 			//println("ifDesc(", k, ")=", interfaceTable.ifEntry.ifDescrRow.ifDescr)
 			println("ifDesc(", i, ")=", interfaceTable.ifEntry.ifDescr)
+			println("ifIndex(", i, ")=", interfaceTable.ifEntry.ifIndex)
+			println("ifType(", i, ")=", interfaceTable.ifEntry.ifType)
 		}
 		// TODO
 		// add ifType to interfaceTable
