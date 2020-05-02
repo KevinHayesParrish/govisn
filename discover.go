@@ -21,187 +21,187 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 
 	type ifTable struct {
 		ifEntry struct {
-			//			ifIndexRow struct {
-			ifIndexOID    string
-			ifIndexType   byte
-			ifIndex       int
-			ifIndexLogger string
-			//			}
+			ifIndexRow []struct {
+				ifIndexOID    string
+				ifIndexType   byte
+				ifIndex       int
+				ifIndexLogger string
+			}
 
-			//			ifDescrRow struct {
-			ifDescrOID    string
-			ifDescrType   byte
-			ifDescr       string
-			ifDescrLogger string
-			//			}
+			ifDescrRow []struct {
+				ifDescrOID    string
+				ifDescrType   byte
+				ifDescr       string
+				ifDescrLogger string
+			}
 
-			//			ifTypeRow struct {
-			ifTypeOID    string
-			ifTypeType   byte
-			ifType       int
-			ifTypeLogger string
-			//			}
+			ifTypeRow []struct {
+				ifTypeOID    string
+				ifTypeType   byte
+				ifType       int
+				ifTypeLogger string
+			}
 
-			ifMtuRow struct {
+			ifMtuRow []struct {
 				ifMtuOID    string
 				ifMtuType   byte
 				ifMtu       int32
 				ifMTULogger string
 			}
 
-			ifSpeedRow struct {
+			ifSpeedRow []struct {
 				ifSpeedOID    string
 				ifSpeedType   byte
 				ifSpeed       uint32
 				ifSpeedLogger string
 			}
 
-			ifPhysAddressRow struct {
+			ifPhysAddressRow []struct {
 				ifPhysAddressOID    string
 				ifPhysAddressType   byte
 				ifPhysAddress       string
 				ifPhysAddressLogger string
 			}
 
-			ifAdminStatusRow struct {
+			ifAdminStatusRow []struct {
 				ifAdminStatusOID    string
 				ifAdminStatusType   byte
 				ifAdminStatus       string
 				ifAdminStatusLogger string
 			}
 
-			ifOperStatusRow struct {
+			ifOperStatusRow []struct {
 				ifOperStatusOID    string
 				ifOperStatusType   byte
 				ifOperStatus       string
 				ifOperStatusLogger string
 			}
 
-			ifLastChangeRow struct {
+			ifLastChangeRow []struct {
 				ifLastChangeOID    string
 				ifLastChangeType   byte
 				ifLastChange       uint32
 				ifLastChangeLogger string
 			}
 
-			ifInOctetsRow struct {
+			ifInOctetsRow []struct {
 				ifInOctetsOID    string
 				ifInOctetsType   byte
 				ifInOctets       uint32
 				ifInOctetsLogger string
 			}
 
-			ifInUcastPktsRow struct {
+			ifInUcastPktsRow []struct {
 				ifInUcastPktsOID    string
 				ifInUcastPktsType   byte
 				ifInUcastPkts       uint32
 				ifInUcastPktsLogger string
 			}
 
-			ifInNUcastPktsRow struct {
+			ifInNUcastPktsRow []struct {
 				ifInNUcastPktsOID    string // deprecated
 				ifInNUcastPktsType   byte   // deprecated
 				ifInNUcastPkts       uint32 // deprecated
 				ifInNUcastPktsLogger string
 			}
 
-			ifInDiscardsRow struct {
+			ifInDiscardsRow []struct {
 				ifInDiscardsOID    string
 				ifInDiscardsType   byte
 				ifInDiscards       uint32
 				ifInDiscardsLogger string
 			}
 
-			ifInErrorsRow struct {
+			ifInErrorsRow []struct {
 				ifInErrorsOID    string
 				ifInErrorsType   byte
 				ifInErrors       uint32
 				ifInErrorsLogger string
 			}
 
-			ifInUnknownProtosRow struct {
+			ifInUnknownProtosRow []struct {
 				ifInUnknownProtosOID    string
 				ifInUnknownProtosType   byte
 				ifInUnknownProtos       uint32
 				ifInUnknownProtosLogger string
 			}
 
-			ifOutOctetsRow struct {
+			ifOutOctetsRow []struct {
 				ifOutOctetsOID    string
 				ifOutOctetsType   byte
 				ifOutOctets       uint32
 				ifOutOctetsLogger string
 			}
 
-			ifOutUcastPktsRow struct {
+			ifOutUcastPktsRow []struct {
 				ifOutUcastPktsOID    string
 				ifOutUcastPktsType   byte
 				ifOutUcastPkts       uint32
 				ifOutUcastPktsLogger string
 			}
 
-			ifOutNUcastPktsRow struct {
-				ifOutNucastPktsOID    string // deprecated
-				ifOutNucastPktsType   byte   // deprecated
+			ifOutNUcastPktsRow []struct {
+				ifOutNUcastPktsOID    string // deprecated
+				ifOutNUcastPktsType   byte   // deprecated
 				ifOutNUcastPkts       uint32 //deprecated
 				ifOutNUcastPktsLogger string
 			}
 
-			ifOutDiscardsRow struct {
+			ifOutDiscardsRow []struct {
 				ifOutDiscardsOID    string
 				ifOutDiscardsType   byte
 				ifOutDiscards       uint32
 				ifOutDiscardsLogger string
 			}
 
-			ifOutErrorsRow struct {
+			ifOutErrorsRow []struct {
 				ifOutErrorsOID    string
 				ifOutErrorsType   byte
 				ifOutErrors       uint32
 				ifOutErrorsLogger string
 			}
 
-			ifOutQLenRow struct {
+			ifOutQLenRow []struct {
 				ifOutQLenOID    string
 				ifOutQLenType   byte
 				ifOutQLen       uint32 // deprecated
 				ifOutQLenLogger string
 			}
 
-			IfOutSpecificRow struct {
-				ifOutSpecficOID          string
-				ifOutSpecificType        byte
-				ifSpecificSpecific       string // deprecated
-				ifSpecificSpecificLogger string
+			ifSpecificRow []struct {
+				ifSpecificOID    string
+				ifSpecificType   byte
+				ifSpecific       string // deprecated
+				ifSpecificLogger string
 			}
 		}
 	}
 
 	type ipAddrTable struct {
 		ipAddrEntry struct {
-			ipAdEntAddr         []string
-			ipAdEntIfIndex      []int32
-			ipAdEntNetMask      []string
-			ipAdEntBcastAddr    []int32
-			ipAdEntReasmMaxSize []int32
+			ipAdEntAddr         string
+			ipAdEntIfIndex      int32
+			ipAdEntNetMask      string
+			ipAdEntBcastAddr    int32
+			ipAdEntReasmMaxSize int32
 		}
 	}
 
 	type ipRouteTable struct {
 		ipRouteEntry struct {
-			ipRouteDest    []string
-			ipRouteIfIndex []int32
-			ipRouteMetric1 []int32
-			ipRouteMetric2 []int32
-			ipRouteMetric3 []int32
-			ipRouteMetric4 []int32
-			ipRouteNextHop []string
-			ipRouteType    []string
-			ipRouteProto   []string
-			ipRouteAge     []int32
-			ipRouteMask    []string
-			ipRouteMetric5 []int32
-			ipRouteInfo    []string
+			ipRouteDest    string
+			ipRouteIfIndex int32
+			ipRouteMetric1 int32
+			ipRouteMetric2 int32
+			ipRouteMetric3 int32
+			ipRouteMetric4 int32
+			ipRouteNextHop string
+			ipRouteType    string
+			ipRouteProto   string
+			ipRouteAge     int32
+			ipRouteMask    string
+			ipRouteMetric5 int32
+			ipRouteInfo    string
 		}
 	}
 
@@ -312,28 +312,138 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	//for i := nbrOfInterfaces; i < len(walkPDU); i++ { // skip ifIndex array within walkPDU
 	for i := 0; i < len(walkPDU); i++ { // skip ifIndex array within walkPDU
 		for k := 0; k < k+nbrOfInterfaces; k++ {
-			interfaceTable.ifEntry.ifIndexOID = walkPDU[i].Name
-			interfaceTable.ifEntry.ifIndexType = byte(walkPDU[i].Type)
-			interfaceTable.ifEntry.ifIndex = walkPDU[i].Value.(int)
+			interfaceTable.ifEntry.ifIndexRow[k].ifIndexOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifIndexRow[k].ifIndexType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifIndexRow[k].ifIndex = walkPDU[i].Value.(int)
+			i++
 		}
 		for k := 0; k < k+nbrOfInterfaces; k++ {
-			interfaceTable.ifEntry.ifDescrOID = walkPDU[i].Name
-			interfaceTable.ifEntry.ifDescrType = byte(walkPDU[i].Type)
-			interfaceTable.ifEntry.ifDescr = string(walkPDU[i].Value.([]uint8))
-			// Add
+			interfaceTable.ifEntry.ifDescrRow[k].ifDescrOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifDescrRow[k].ifDescrType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifDescrRow[k].ifDescr = string(walkPDU[i].Value.([]uint8))
+			i++
 		}
 		for k := i; k < k+nbrOfInterfaces; k++ {
-			interfaceTable.ifEntry.ifTypeOID = walkPDU[i].Name
-			interfaceTable.ifEntry.ifTypeType = byte(walkPDU[i].Type)
-			interfaceTable.ifEntry.ifType = walkPDU[k].Value.(int)
+			interfaceTable.ifEntry.ifTypeRow[k].ifTypeOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifTypeRow[k].ifTypeType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifTypeRow[k].ifType = walkPDU[i].Value.(int)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifMtuRow[k].ifMtuOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifMtuRow[k].ifMtuType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifMtuRow[k].ifMtu = walkPDU[i].Value.(int32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifSpeedRow[k].ifSpeedOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifSpeedRow[k].ifSpeedType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifSpeedRow[k].ifSpeed = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifPhysAddressRow[k].ifPhysAddressOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifPhysAddressRow[k].ifPhysAddressType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifPhysAddressRow[k].ifPhysAddress = string(walkPDU[i].Value.([]uint8))
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifAdminStatusRow[k].ifAdminStatusOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifAdminStatusRow[k].ifAdminStatusType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifAdminStatusRow[k].ifAdminStatus = string(walkPDU[i].Value.(int))
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifOperStatusRow[k].ifOperStatusOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifOperStatusRow[k].ifOperStatusType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifOperStatusRow[k].ifOperStatus = string(walkPDU[i].Value.(int))
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifLastChangeRow[k].ifLastChangeOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifLastChangeRow[k].ifLastChangeType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifLastChangeRow[k].ifLastChange = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifInOctetsRow[k].ifInOctetsOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifInOctetsRow[k].ifInOctetsType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifInOctetsRow[k].ifInOctets = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifInUcastPktsRow[k].ifInUcastPktsOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifInUcastPktsRow[k].ifInUcastPktsType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifInUcastPktsRow[k].ifInUcastPkts = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifInNUcastPktsRow[k].ifInNUcastPktsOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifInNUcastPktsRow[k].ifInNUcastPktsType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifInNUcastPktsRow[k].ifInNUcastPkts = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifInDiscardsRow[k].ifInDiscardsOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifInDiscardsRow[k].ifInDiscardsType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifInDiscardsRow[k].ifInDiscards = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifInErrorsRow[k].ifInErrorsOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifInErrorsRow[k].ifInErrorsType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifInErrorsRow[k].ifInErrors = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifInUnknownProtosRow[k].ifInUnknownProtosOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifInUnknownProtosRow[k].ifInUnknownProtosType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifInUnknownProtosRow[k].ifInUnknownProtos = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifOutOctetsRow[k].ifOutOctetsOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifOutOctetsRow[k].ifOutOctetsType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifOutOctetsRow[k].ifOutOctets = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifOutUcastPktsRow[k].ifOutUcastPktsOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifOutUcastPktsRow[k].ifOutUcastPktsType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifOutUcastPktsRow[k].ifOutUcastPkts = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifOutNUcastPktsRow[k].ifOutNUcastPktsOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifOutNUcastPktsRow[k].ifOutNUcastPktsType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifOutNUcastPktsRow[k].ifOutNUcastPkts = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifOutDiscardsRow[k].ifOutDiscardsOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifOutDiscardsRow[k].ifOutDiscardsType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifOutDiscardsRow[k].ifOutDiscards = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifOutErrorsRow[k].ifOutErrorsOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifOutErrorsRow[k].ifOutErrorsType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifOutErrorsRow[k].ifOutErrors = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifOutQLenRow[k].ifOutQLenOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifOutQLenRow[k].ifOutQLenType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifOutQLenRow[k].ifOutQLen = walkPDU[i].Value.(uint32)
+			i++
+		}
+		for k := i; k < k+nbrOfInterfaces; k++ {
+			interfaceTable.ifEntry.ifSpecificRow[k].ifSpecificOID = walkPDU[i].Name
+			interfaceTable.ifEntry.ifSpecificRow[k].ifSpecificType = byte(walkPDU[i].Type)
+			interfaceTable.ifEntry.ifSpecificRow[k].ifSpecific = walkPDU[i].Value.(string)
+			i++
 		}
 
-		if debugFlag {
-			//println("ifDesc(", k, ")=", interfaceTable.ifEntry.ifDescrRow.ifDescr)
-			println("ifDesc(", i, ")=", interfaceTable.ifEntry.ifDescr)
-			println("ifIndex(", i, ")=", interfaceTable.ifEntry.ifIndex)
-			println("ifType(", i, ")=", interfaceTable.ifEntry.ifType)
-		}
 		// TODO
 		// add ifType to interfaceTable
 		// add ifMTU to interfaceTable
