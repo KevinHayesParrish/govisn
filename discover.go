@@ -357,7 +357,12 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifPhysAddressOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifPhysAddressType = byte(walkPDU[i].Type)
-			interfaceTable.ifEntry.ifPhysAddress = walkPDU[i].Value.([]byte)
+			//			interfaceTable.ifEntry.ifPhysAddress = walkPDU[i].Value.([]byte)
+			//var physAddrInt [12]byte
+			physAddrInt := walkPDU[i].Value.([]int)
+			var physAddrHex []int
+			physAddrHex[0], err = strconv.Atoi(fmt.Sprintf("%x", physAddrInt[0]))
+
 			if debugFlag {
 				fmt.Println("ifPhysAddress=", interfaceTable.ifEntry.ifPhysAddress)
 			}
