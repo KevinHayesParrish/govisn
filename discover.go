@@ -38,7 +38,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 			//	ifTypeRow []struct {
 			ifTypeOID    string
 			ifTypeType   byte
-			ifType       int
+			ifType       string
 			ifTypeLogger string
 			//	}
 
@@ -333,7 +333,16 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifTypeOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifTypeType = byte(walkPDU[i].Type)
-			interfaceTable.ifEntry.ifType = walkPDU[i].Value.(int)
+			//			interfaceTable.ifEntry.ifType = walkPDU[i].Value.(int)
+			ifTypeInt := walkPDU[i].Value.(int)
+			switch ifTypeInt {
+			case 1:
+				interfaceTable.ifEntry.ifType = "other(1)"
+			case 6:
+				interfaceTable.ifEntry.ifType = "ethernetCsmacd(6)"
+			default:
+				interfaceTable.ifEntry.ifType = "other"
+			}
 			if debugFlag {
 				fmt.Println("ifType=", interfaceTable.ifEntry.ifType)
 			}
@@ -396,7 +405,15 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifAdminStatusOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifAdminStatusType = byte(walkPDU[i].Type)
-			interfaceTable.ifEntry.ifAdminStatus = string(walkPDU[i].Value.(int))
+			ifAdminStatusInt := walkPDU[i].Value.(int)
+			switch ifAdminStatusInt {
+			case 1:
+				interfaceTable.ifEntry.ifAdminStatus = "up(1)"
+			case 2:
+				interfaceTable.ifEntry.ifAdminStatus = "down(2)"
+			case 3:
+				interfaceTable.ifEntry.ifAdminStatus = "testing(3)"
+			}
 			if debugFlag {
 				fmt.Println("ifAdminStatus=", interfaceTable.ifEntry.ifAdminStatus)
 			}
@@ -405,7 +422,16 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifOperStatusOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOperStatusType = byte(walkPDU[i].Type)
-			interfaceTable.ifEntry.ifOperStatus = string(walkPDU[i].Value.(int))
+			//			interfaceTable.ifEntry.ifOperStatus = string(walkPDU[i].Value.(int))
+			ifAdminStatusInt := walkPDU[i].Value.(int)
+			switch ifAdminStatusInt {
+			case 1:
+				interfaceTable.ifEntry.ifOperStatus = "up(1)"
+			case 2:
+				interfaceTable.ifEntry.ifOperStatus = "down(2)"
+			case 3:
+				interfaceTable.ifEntry.ifOperStatus = "testing(3)"
+			}
 			if debugFlag {
 				fmt.Println("ifOperStatus=", interfaceTable.ifEntry.ifOperStatus)
 			}
