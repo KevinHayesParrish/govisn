@@ -369,17 +369,21 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 				physAddrUint8 := physAddrUint[l]
 				physAddrHex[l] = fmt.Sprintf("%x", physAddrUint8)
 			}
-			interfaceTable.ifEntry.ifPhysAddress = physAddrHex[0] +
-				":" +
-				physAddrHex[1] +
-				":" +
-				physAddrHex[2] +
-				":" +
-				physAddrHex[3] +
-				":" +
-				physAddrHex[4] +
-				":" +
-				physAddrHex[5]
+			if len(physAddrUint) > 0 {
+				interfaceTable.ifEntry.ifPhysAddress = physAddrHex[0] +
+					":" +
+					physAddrHex[1] +
+					":" +
+					physAddrHex[2] +
+					":" +
+					physAddrHex[3] +
+					":" +
+					physAddrHex[4] +
+					":" +
+					physAddrHex[5]
+			} else {
+				interfaceTable.ifEntry.ifPhysAddress = "Null0"
+			}
 
 			if debugFlag {
 				fmt.Println("ifPhysAddress=", interfaceTable.ifEntry.ifPhysAddress)
