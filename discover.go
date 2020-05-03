@@ -362,9 +362,9 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 				fmt.Println("ifPhysAddress=", interfaceTable.ifEntry.ifPhysAddress)
 			}
 
-			// TODO: Write RouterMac row to database
-
 			i++
+
+			// TODO: Write RouterMac row to database
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifAdminStatusOID = walkPDU[i].Name
