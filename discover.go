@@ -59,7 +59,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 			//	ifPhysAddressRow []struct {
 			ifPhysAddressOID    string
 			ifPhysAddressType   byte
-			ifPhysAddress       string
+			ifPhysAddress       []byte
 			ifPhysAddressLogger string
 			//	}
 
@@ -357,7 +357,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifPhysAddressOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifPhysAddressType = byte(walkPDU[i].Type)
-			interfaceTable.ifEntry.ifPhysAddress = string(walkPDU[i].Value.([]uint8))
+			interfaceTable.ifEntry.ifPhysAddress = walkPDU[i].Value.([]byte)
 			if debugFlag {
 				fmt.Println("ifPhysAddress=", interfaceTable.ifEntry.ifPhysAddress)
 			}
