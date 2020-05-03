@@ -57,9 +57,10 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 			//	}
 
 			//	ifPhysAddressRow []struct {
-			ifPhysAddressOID    string
-			ifPhysAddressType   byte
-			ifPhysAddress       []byte
+			ifPhysAddressOID  string
+			ifPhysAddressType byte
+			//ifPhysAddress       []byte
+			ifPhysAddress       string
 			ifPhysAddressLogger string
 			//	}
 
@@ -301,7 +302,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		log.Fatalf("Get() err: %v", err2)
 	}
 	if debugFlag {
-		fmt.Println("\nifTable PDU=", walkPDU)
+		//		fmt.Println("\nifTable PDU=", walkPDU)
 	}
 
 	var interfaceTable ifTable
@@ -359,9 +360,31 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 			interfaceTable.ifEntry.ifPhysAddressType = byte(walkPDU[i].Type)
 			//			interfaceTable.ifEntry.ifPhysAddress = walkPDU[i].Value.([]byte)
 			//var physAddrInt [12]byte
-			physAddrInt := walkPDU[i].Value.([]int)
-			var physAddrHex []int
-			physAddrHex[0], err = strconv.Atoi(fmt.Sprintf("%x", physAddrInt[0]))
+			physAddrUint := walkPDU[i].Value.([]byte)
+			//physAddrUint8 := physAddrUint[0]
+			//var physAddrInt []int
+			//for j := 0; j < 12; j++ {
+			//	physAddrInt[j] = int(physAddrUint[j])
+			//}
+			var physAddrHex [6]string
+
+			//physAddrHex[0] = fmt.Sprintf("%x", physAddrUint8)
+
+			for l := 0; l < 6; l++ {
+				physAddrUint8 := physAddrUint[l]
+				physAddrHex[l] = fmt.Sprintf("%x", physAddrUint8)
+			}
+			interfaceTable.ifEntry.ifPhysAddress = physAddrHex[0] +
+				":" +
+				physAddrHex[1] +
+				":" +
+				physAddrHex[2] +
+				":" +
+				physAddrHex[3] +
+				":" +
+				physAddrHex[4] +
+				":" +
+				physAddrHex[5]
 
 			if debugFlag {
 				fmt.Println("ifPhysAddress=", interfaceTable.ifEntry.ifPhysAddress)
