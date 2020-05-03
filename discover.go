@@ -302,7 +302,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		log.Fatalf("Get() err: %v", err2)
 	}
 	if debugFlag {
-		//		fmt.Println("\nifTable PDU=", walkPDU)
+		fmt.Println("\nifTable PDU=", walkPDU)
 	}
 
 	var interfaceTable ifTable
@@ -358,19 +358,14 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifPhysAddressOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifPhysAddressType = byte(walkPDU[i].Type)
-			//			interfaceTable.ifEntry.ifPhysAddress = walkPDU[i].Value.([]byte)
-			//var physAddrInt [12]byte
 			physAddrUint := walkPDU[i].Value.([]byte)
-			//physAddrUint8 := physAddrUint[0]
-			//var physAddrInt []int
-			//for j := 0; j < 12; j++ {
-			//	physAddrInt[j] = int(physAddrUint[j])
-			//}
 			var physAddrHex [6]string
 
-			//physAddrHex[0] = fmt.Sprintf("%x", physAddrUint8)
-
 			for l := 0; l < 6; l++ {
+				if len(physAddrUint) == 0 {
+					interfaceTable.ifEntry.ifPhysAddress = "Null0"
+					break
+				}
 				physAddrUint8 := physAddrUint[l]
 				physAddrHex[l] = fmt.Sprintf("%x", physAddrUint8)
 			}
@@ -542,6 +537,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	} // End of Interfaces code
 
 	if debugFlag { //  TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
+		fmt.Println("End of Interfaces code. Temporary Termination during code development.")
 		goto end //  TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
 	} //  TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
 
