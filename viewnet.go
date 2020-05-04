@@ -58,6 +58,7 @@ const routerRadius float64 = 0.5
 //const globeRadius float64 = 1.5
 const globeRadius float64 = 63.7
 
+/*
 // Router is the structure representing a network router
 type Router struct {
 	System struct {
@@ -67,6 +68,7 @@ type Router struct {
 		UpTime      string
 		Contact     string
 		Location    string
+		Services    *big.Int
 		GPS         struct {
 			Latitude  string
 			Longitude string
@@ -109,6 +111,7 @@ type Link struct {
 	NextHopName     string
 	NextHopIP       string
 }
+*/
 
 func main() {
 	flag.Parse() // Scan the arguments list
