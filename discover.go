@@ -141,7 +141,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 
 	//statement, _ := database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
-	interfaces(debugFlag, snmpTarget, community, maxHopsStr, params)
+	discoverInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params)
 
 	// get ipAddrTable
 	//var addressTable ipAddrTable
@@ -174,7 +174,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	}
 }
 
-func interfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP) {
+func discoverInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP) {
 	type ifTable struct {
 		ifEntry struct {
 			ifIndexOID    string
