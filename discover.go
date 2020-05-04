@@ -142,7 +142,22 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	database := initDB()
 
 	// TODO: Write Router row to database
-	writeRouterToDb(database, router)
+	//writeRouterToDb(database, router)
+	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	statement.Exec()
+
+	Name := router.System.Name
+	RouterIDUint32 := crc32.ChecksumIEEE([]byte(Name))
+	Description := router.System.Description
+	UpTime := router.System.UpTime
+	Contact := router.System.Contact
+	Location := router.System.Location
+	//Services := router.System.Services
+	GpsLat := router.System.GPS.Latitude
+	GpsLong := router.System.GPS.Longitude
+	GpsAlt := router.System.GPS.Altitude
+
+	statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
 
 	discoverInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params)
 
