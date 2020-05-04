@@ -1,9 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
-	//"gosnmp"
 	"log"
+	"math/big"
 	"strconv"
 	"time"
 
@@ -14,168 +15,21 @@ import (
 * TODO:
  */
 
-//DiscoverVersion is the file version number
-const DiscoverVersion = "0.1.0"
+//DISCOVERYVERSION is the file version number
+const DISCOVERYVERSION = "0.1.2"
 
 func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
 
-	type ifTable struct {
-		ifEntry struct {
-			//	ifIndexRow []struct {
-			ifIndexOID    string
-			ifIndexType   byte
-			ifIndex       int
-			ifIndexLogger string
-			//	}
-
-			//	ifDescrRow []struct {
-			ifDescrOID    string
-			ifDescrType   byte
-			ifDescr       string
-			ifDescrLogger string
-			//	}
-
-			//	ifTypeRow []struct {
-			ifTypeOID    string
-			ifTypeType   byte
-			ifType       string
-			ifTypeLogger string
-			//	}
-
-			//	ifMtuRow []struct {
-			ifMtuOID    string
-			ifMtuType   byte
-			ifMtu       int
-			ifMTULogger string
-			//	}
-
-			//	ifSpeedRow []struct {
-			ifSpeedOID    string
-			ifSpeedType   byte
-			ifSpeed       uint
-			ifSpeedLogger string
-			//	}
-
-			//	ifPhysAddressRow []struct {
-			ifPhysAddressOID  string
-			ifPhysAddressType byte
-			//ifPhysAddress       []byte
-			ifPhysAddress       string
-			ifPhysAddressLogger string
-			//	}
-
-			//	ifAdminStatusRow []struct {
-			ifAdminStatusOID    string
-			ifAdminStatusType   byte
-			ifAdminStatus       string
-			ifAdminStatusLogger string
-			//	}
-
-			//	ifOperStatusRow []struct {
-			ifOperStatusOID    string
-			ifOperStatusType   byte
-			ifOperStatus       string
-			ifOperStatusLogger string
-			//	}
-
-			//	ifLastChangeRow []struct {
-			ifLastChangeOID    string
-			ifLastChangeType   byte
-			ifLastChange       uint32
-			ifLastChangeLogger string
-			//	}
-
-			//	ifInOctetsRow []struct {
-			ifInOctetsOID    string
-			ifInOctetsType   byte
-			ifInOctets       uint
-			ifInOctetsLogger string
-			//	}
-
-			//	ifInUcastPktsRow []struct {
-			ifInUcastPktsOID    string
-			ifInUcastPktsType   byte
-			ifInUcastPkts       uint
-			ifInUcastPktsLogger string
-			//	}
-
-			//	ifInNUcastPktsRow []struct {
-			ifInNUcastPktsOID    string // deprecated
-			ifInNUcastPktsType   byte   // deprecated
-			ifInNUcastPkts       uint   // deprecated
-			ifInNUcastPktsLogger string
-			//	}
-
-			//	ifInDiscardsRow []struct {
-			ifInDiscardsOID    string
-			ifInDiscardsType   byte
-			ifInDiscards       uint
-			ifInDiscardsLogger string
-			//	}
-
-			//	ifInErrorsRow []struct {
-			ifInErrorsOID    string
-			ifInErrorsType   byte
-			ifInErrors       uint
-			ifInErrorsLogger string
-			//	}
-
-			//	ifInUnknownProtosRow []struct {
-			ifInUnknownProtosOID    string
-			ifInUnknownProtosType   byte
-			ifInUnknownProtos       uint
-			ifInUnknownProtosLogger string
-			//	}
-
-			//	ifOutOctetsRow []struct {
-			ifOutOctetsOID    string
-			ifOutOctetsType   byte
-			ifOutOctets       uint
-			ifOutOctetsLogger string
-			//	}
-
-			//	ifOutUcastPktsRow []struct {
-			ifOutUcastPktsOID    string
-			ifOutUcastPktsType   byte
-			ifOutUcastPkts       uint
-			ifOutUcastPktsLogger string
-			//	}
-
-			//	ifOutNUcastPktsRow []struct {
-			ifOutNUcastPktsOID    string // deprecated
-			ifOutNUcastPktsType   byte   // deprecated
-			ifOutNUcastPkts       uint   //deprecated
-			ifOutNUcastPktsLogger string
-			//	}
-
-			//	ifOutDiscardsRow []struct {
-			ifOutDiscardsOID    string
-			ifOutDiscardsType   byte
-			ifOutDiscards       uint
-			ifOutDiscardsLogger string
-			//	}
-
-			//	ifOutErrorsRow []struct {
-			ifOutErrorsOID    string
-			ifOutErrorsType   byte
-			ifOutErrors       uint
-			ifOutErrorsLogger string
-			//	}
-
-			//	ifOutQLenRow []struct {
-			ifOutQLenOID    string
-			ifOutQLenType   byte
-			ifOutQLen       uint // deprecated
-			ifOutQLenLogger string
-			//	}
-
-			//	ifSpecificRow []struct {
-			ifSpecificOID    string
-			ifSpecificType   byte
-			ifSpecific       string // deprecated
-			ifSpecificLogger string
-			//	}
-		}
+	type Router struct {
+		sysName     string
+		sysDescr    string
+		sysUpTime   uint32
+		sysContact  string
+		sysLocation string
+		sysServices *big.Int
+		GpsLat      string
+		GpsLong     string
+		GpsAlt      string
 	}
 
 	type ipAddrTable struct {
@@ -206,7 +60,18 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		}
 	}
 
-	fmt.Println("\nfunc discover version", DiscoverVersion, "started.\ndebugFlag=", debugFlag)
+	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.\ndebugFlag=", debugFlag)
+
+	maxHops, _ := strconv.Atoi(maxHopsStr)
+	// Discover network, constrained by input parm maximum hops away from snmpTarget node
+	for i := 0; i <= maxHops; i++ {
+		if debugFlag {
+			fmt.Println("Discover iteration")
+		}
+	}
+
+	// Get Router attributes
+	var router Router
 
 	snmpPort := "161"
 	if len(snmpTarget) <= 0 {
@@ -221,14 +86,6 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	}
 	port, _ := strconv.ParseUint(snmpPort, 10, 16)
 
-	maxHops, _ := strconv.Atoi(maxHopsStr)
-	// Discover network, constrained by input parm maximum hops away from snmpTarget node
-	for i := 0; i <= maxHops; i++ {
-		if debugFlag {
-			fmt.Println("Discover iteration")
-		}
-	}
-
 	// GoSNMP struct
 	params := &g.GoSNMP{
 		Target:    snmpTarget,
@@ -237,6 +94,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		Version:   g.Version2c,
 		Timeout:   time.Duration(2) * time.Second,
 		Logger:    nil,
+		MaxOids:   5,
 	}
 
 	if debugFlag {
@@ -256,32 +114,180 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		sysLocationOID + ".0", // sysLocation
 		sysServicesOID + ".0", // sysServices
 	}
-	result, err2 := params.Get(oids) // Get() accepts up to g.MAX_OIDS
-	if err2 != nil {
-		log.Fatalf("Get() err: %v", err2)
+
+	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
+	if err != nil {
+		log.Fatalf("Get() err: %v", err)
 	}
-	//	if debugFlag {
-	//		fmt.Println("\ngovisn.discover.results=", result)
-	//	}
 
-	for i, variable := range result.Variables {
-		fmt.Printf("%d: oid: %s ", i, variable.Name)
+	router.sysName = string(result.Variables[0].Value.([]byte))
+	router.sysDescr = string(result.Variables[1].Value.([]byte))
+	router.sysContact = string(result.Variables[2].Value.([]byte))
+	router.sysLocation = string(result.Variables[3].Value.([]byte))
+	router.sysServices = g.ToBigInt(result.Variables[4].Value)
 
-		// the Value of each variable returned by Get() implements
-		// interface{}. You could do a type switch...
-		switch variable.Type {
-		case g.OctetString:
-
-			fmt.Printf("string: %s\n", string(variable.Value.([]byte)))
-		default:
-			// ... or often you're just interested in numeric values.
-			// ToBigInt() will return the Value as a BigInt, for plugging
-			// into your calculations.
-			fmt.Printf("number: %d\n", g.ToBigInt(variable.Value))
-		}
+	if debugFlag {
+		fmt.Println("router.sysName=", router.sysName)
+		fmt.Println("router.sysDescr=", router.sysDescr)
+		fmt.Println("router.sysName=", router.sysName)
+		fmt.Println("router.sysContact=", router.sysContact)
+		fmt.Println("router.sysLocation=", router.sysLocation)
+		fmt.Println("router.sysServices=", router.sysServices)
 	}
 
 	// TODO: Write Router row to database
+
+	//database := initDB()
+
+	//statement, _ := database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+
+	interfaces(debugFlag, snmpTarget, community, maxHopsStr, params)
+
+	// get ipAddrTable
+	//var addressTable ipAddrTable
+	//	walkPDU, walkError := params.WalkAll(ipAddrTableOID)
+	//	if walkError != nil {
+	//		log.Fatalf("Get() err: %v", err2)
+	//	}
+
+	// TODO: Write RouterIp Row to database
+
+	//var ipAddrTableResult ipAddrTable
+
+	// get ipRouteTable
+	//	walkPDU, walkError = params.WalkAll(ipRouteTableOID)
+	//	if walkError != nil {
+	//		log.Fatalf("Get() err: %v", err2)
+	//	}
+	//	if debugFlag {
+	//		fmt.Println("\nipRouteTable PDU=", walkPDU)
+	//	}
+
+	// TODO: Write RouterIp Row to database
+
+	//var ipRouteTableResult ipRouteTable
+
+	// TODO: Write Links row to database
+
+	if debugFlag {
+		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
+	}
+}
+
+func interfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP) {
+	type ifTable struct {
+		ifEntry struct {
+			ifIndexOID    string
+			ifIndexType   byte
+			ifIndex       int
+			ifIndexLogger string
+
+			ifDescrOID    string
+			ifDescrType   byte
+			ifDescr       string
+			ifDescrLogger string
+
+			ifTypeOID    string
+			ifTypeType   byte
+			ifType       string
+			ifTypeLogger string
+
+			ifMtuOID    string
+			ifMtuType   byte
+			ifMtu       int
+			ifMTULogger string
+
+			ifSpeedOID    string
+			ifSpeedType   byte
+			ifSpeed       uint
+			ifSpeedLogger string
+
+			ifPhysAddressOID    string
+			ifPhysAddressType   byte
+			ifPhysAddress       string
+			ifPhysAddressLogger string
+
+			ifAdminStatusOID    string
+			ifAdminStatusType   byte
+			ifAdminStatus       string
+			ifAdminStatusLogger string
+
+			ifOperStatusOID    string
+			ifOperStatusType   byte
+			ifOperStatus       string
+			ifOperStatusLogger string
+
+			ifLastChangeOID    string
+			ifLastChangeType   byte
+			ifLastChange       uint32
+			ifLastChangeLogger string
+
+			ifInOctetsOID    string
+			ifInOctetsType   byte
+			ifInOctets       uint
+			ifInOctetsLogger string
+
+			ifInUcastPktsOID    string
+			ifInUcastPktsType   byte
+			ifInUcastPkts       uint
+			ifInUcastPktsLogger string
+
+			ifInNUcastPktsOID    string // deprecated
+			ifInNUcastPktsType   byte   // deprecated
+			ifInNUcastPkts       uint   // deprecated
+			ifInNUcastPktsLogger string
+
+			ifInDiscardsOID    string
+			ifInDiscardsType   byte
+			ifInDiscards       uint
+			ifInDiscardsLogger string
+
+			ifInErrorsOID    string
+			ifInErrorsType   byte
+			ifInErrors       uint
+			ifInErrorsLogger string
+
+			ifInUnknownProtosOID    string
+			ifInUnknownProtosType   byte
+			ifInUnknownProtos       uint
+			ifInUnknownProtosLogger string
+
+			ifOutOctetsOID    string
+			ifOutOctetsType   byte
+			ifOutOctets       uint
+			ifOutOctetsLogger string
+
+			ifOutUcastPktsOID    string
+			ifOutUcastPktsType   byte
+			ifOutUcastPkts       uint
+			ifOutUcastPktsLogger string
+
+			ifOutNUcastPktsOID    string // deprecated
+			ifOutNUcastPktsType   byte   // deprecated
+			ifOutNUcastPkts       uint   //deprecated
+			ifOutNUcastPktsLogger string
+
+			ifOutDiscardsOID    string
+			ifOutDiscardsType   byte
+			ifOutDiscards       uint
+			ifOutDiscardsLogger string
+
+			ifOutErrorsOID    string
+			ifOutErrorsType   byte
+			ifOutErrors       uint
+			ifOutErrorsLogger string
+
+			ifOutQLenOID    string
+			ifOutQLenType   byte
+			ifOutQLen       uint // deprecated
+			ifOutQLenLogger string
+
+			ifSpecificOID    string
+			ifSpecificType   byte
+			ifSpecific       string // deprecated
+			ifSpecificLogger string
+		}
+	}
 
 	// get Number of Interfaces
 	ifNumberArray := []string{ifNumberOID + ".0"}
@@ -299,7 +305,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	// get ifTable
 	walkPDU, walkError := params.WalkAll(ifTableOID)
 	if walkError != nil {
-		log.Fatalf("Get() err: %v", err2)
+		log.Fatalf("Get() err: %v", walkError)
 	}
 	if debugFlag {
 		fmt.Println("\nifTable PDU=", walkPDU)
@@ -566,42 +572,47 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 
 	} // End of Interfaces code
 
-	if debugFlag { //  TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
-		fmt.Println("End of Interfaces code. Temporary Termination during code development.")
-		goto end //  TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
-	} //  TROUBLESHOOTING ONLY. REMOVE AFTER TROUBLESHOOTING
+}
 
-	// get ipAddrTable
-	//var addressTable ipAddrTable
-	walkPDU, walkError = params.WalkAll(ipAddrTableOID)
-	if walkError != nil {
-		log.Fatalf("Get() err: %v", err2)
-	}
-	if debugFlag {
-		fmt.Println("\nipAddrTable PDU=", walkPDU)
-		fmt.Println("interfaceTable=", interfaceTable)
-		return // TESTING ONLY, REMOVE AFTER TEST
-	}
+func initDB() *sql.DB {
+	initDbVersion := "0.0.1"
+	fmt.Println("initDB version:", initDbVersion)
+	database, _ := sql.Open("sqlite3", "./govisionDiscoveredDb.db")
 
-	// TODO: Write RouterIp Row to database
+	/*
+	 *	Add Routers table to DB
+	 */
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	statement.Exec()
+	//	 statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
-	//var ipAddrTableResult ipAddrTable
+	/*
+	 *	Add RouteTable table to DB
+	 */
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, NextHop TEXT)")
+	statement.Exec()
+	// 	statement, _ = database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, NextHop) VALUES (?, ?, ?)")
 
-	// get ipRouteTable
-	walkPDU, walkError = params.WalkAll(ipRouteTableOID)
-	if walkError != nil {
-		log.Fatalf("Get() err: %v", err2)
-	}
-	if debugFlag {
-		fmt.Println("\nipRouteTable PDU=", walkPDU)
-	}
+	/*
+	 *	Add RouterIP table to DB
+	 */
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IpAddr TEXT)")
+	statement.Exec()
+	//	statement, _ = database.Prepare("INSERT INTO RouterIp (RouterID, IpAddr) VALUES (?, ?)")
 
-	// TODO: Write RouterIp Row to database
+	/*
+	 *	Add RouterMac table to DB
+	 */
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
+	statement.Exec()
+	//	statement, _ = database.Prepare("INSERT INTO RouterMac (RourterID, MacAddr) VALUES (?, ?)")
 
-	//var ipRouteTableResult ipRouteTable
+	/*
+	 *	Add Links table to DB
+	 */
+	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
+	statement.Exec()
+	//	statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
 
-	// TODO: Write Links row to database
-
-end:
-	return
+	return database
 }
