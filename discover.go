@@ -647,9 +647,18 @@ func writeRouterToDb(database *sql.DB, router Router) {
 	Contact := router.System.Contact
 	Location := router.System.Location
 	//Services := router.System.Services
-	GpsLat := router.System.GPS.Latitude
-	GpsLong := router.System.GPS.Longitude
-	GpsAlt := router.System.GPS.Altitude
+	GpsLat, err := strconv.ParseFloat(router.System.GPS.Latitude, 32)
+	if err != nil {
+		log.Fatalf("GpsLat Atoi err: %v", err)
+	}
+	GpsLong, err := strconv.ParseFloat(router.System.GPS.Longitude, 32)
+	if err != nil {
+		log.Fatalf("GpsLong Atoi err: %v", err)
+	}
+	GpsAlt, err := strconv.ParseFloat(router.System.GPS.Altitude, 32)
+	if err != nil {
+		log.Fatalf("GpsAlt Atoi err: %v", err)
+	}
 
 	statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
 
