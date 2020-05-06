@@ -8,11 +8,12 @@ type Router struct {
 		RouterID    int
 		Name        string
 		Description string
-		UpTime      string
-		Contact     string
-		Location    string
-		Services    *big.Int
-		GPS         struct {
+		//		UpTime      string
+		UpTime   uint32
+		Contact  string
+		Location string
+		Services *big.Int
+		GPS      struct {
 			Latitude  string
 			Longitude string
 			Altitude  string
