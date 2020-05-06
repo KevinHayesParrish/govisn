@@ -596,12 +596,18 @@ func discoverInterfaces(debugFlag bool, snmpTarget string, community string, max
 func initDB() *sql.DB {
 	initDbVersion := "0.0.1"
 	fmt.Println("initDB version:", initDbVersion)
-	database, _ := sql.Open("sqlite3", "./govisnDiscoveredDb.db")
+	database, err := sql.Open("sqlite3", "./govisnDiscoveredDb.db")
+	if err != nil {
+		log.Fatalf("sql.Open() err: %v", err)
+	}
 
 	/*
 	 *	Add Routers table to DB
 	 */
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	if err != nil {
+		log.Fatalf("Router Table Create err: %v", err)
+	}
 	statement.Exec()
 	//	 statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
@@ -609,6 +615,9 @@ func initDB() *sql.DB {
 	 *	Add RouteTable table to DB
 	 */
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, NextHop TEXT)")
+	if err != nil {
+		log.Fatalf("RouteTable Create err: %v", err)
+	}
 	statement.Exec()
 	// 	statement, _ = database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, NextHop) VALUES (?, ?, ?)")
 
@@ -616,6 +625,9 @@ func initDB() *sql.DB {
 	 *	Add RouterIP table to DB
 	 */
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IpAddr TEXT)")
+	if err != nil {
+		log.Fatalf("RouterIP Create err: %v", err)
+	}
 	statement.Exec()
 	//	statement, _ = database.Prepare("INSERT INTO RouterIp (RouterID, IpAddr) VALUES (?, ?)")
 
@@ -623,13 +635,20 @@ func initDB() *sql.DB {
 	 *	Add RouterMac table to DB
 	 */
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
+	if err != nil {
+		log.Fatalf("RouterMac Create err: %v", err)
+	}
 	statement.Exec()
-	//	statement, _ = database.Prepare("INSERT INTO RouterMac (RourterID, MacAddr) VALUES (?, ?)")
+
+	//	statement, _ = database.Prepare("INSERT INTO RouterMac (RouterID, MacAddr) VALUES (?, ?)")
 
 	/*
 	 *	Add Links table to DB
 	 */
 	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
+	if err != nil {
+		log.Fatalf("Links Create err: %v", err)
+	}
 	statement.Exec()
 	//	statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
 
@@ -637,8 +656,15 @@ func initDB() *sql.DB {
 }
 
 func writeRouterToDb(database *sql.DB, router Router) {
-	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-	statement.Exec()
+	statement, err := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		log.Fatalf("Router Insert Prepare err: %v", err)
+	}
+	//	statement.Exec()
+	_, err = statement.Exec()
+	if err != nil {
+		log.Fatalf("Router Insert Exec err: %v", err)
+	}
 
 	Name := router.System.Name
 	RouterIDUint32 := crc32.ChecksumIEEE([]byte(Name))
