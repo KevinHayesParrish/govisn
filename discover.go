@@ -20,50 +20,6 @@ const DISCOVERYVERSION = "0.1.2"
 
 func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
 
-	/*
-		type Router struct {
-			sysName     string
-			sysDescr    string
-			sysUpTime   uint32
-			sysContact  string
-			sysLocation string
-			sysServices *big.Int
-			GpsLat      string
-			GpsLong     string
-			GpsAlt      string
-		}
-	*/
-
-	/*
-		type ipAddrTable struct {
-			ipAddrEntry struct {
-				ipAdEntAddr         string
-				ipAdEntIfIndex      int32
-				ipAdEntNetMask      string
-				ipAdEntBcastAddr    int32
-				ipAdEntReasmMaxSize int32
-			}
-		}
-
-		type ipRouteTable struct {
-			ipRouteEntry struct {
-				ipRouteDest    string
-				ipRouteIfIndex int32
-				ipRouteMetric1 int32
-				ipRouteMetric2 int32
-				ipRouteMetric3 int32
-				ipRouteMetric4 int32
-				ipRouteNextHop string
-				ipRouteType    string
-				ipRouteProto   string
-				ipRouteAge     int32
-				ipRouteMask    string
-				ipRouteMetric5 int32
-				ipRouteInfo    string
-			}
-		}
-	*/
-
 	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.\ndebugFlag=", debugFlag)
 
 	maxHops, _ := strconv.Atoi(maxHopsStr)
@@ -98,7 +54,8 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 		Version:   g.Version2c,
 		Timeout:   time.Duration(2) * time.Second,
 		Logger:    nil,
-		MaxOids:   5,
+		//		MaxOids:   5,
+		MaxOids: 6,
 	}
 
 	if debugFlag {
@@ -114,6 +71,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	oids := []string{
 		sysNameOID + ".0",     // sysName
 		sysDescrOID + ".0",    // sysDescr
+		sysUpTimeOID + ".0",   // sysUpTime
 		sysContactOID + ".0",  // sysContact
 		sysLocationOID + ".0", // sysLocation
 		sysServicesOID + ".0", // sysServices
@@ -126,9 +84,11 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 
 	router.System.Name = string(result.Variables[0].Value.([]byte))
 	router.System.Description = string(result.Variables[1].Value.([]byte))
-	router.System.Contact = string(result.Variables[2].Value.([]byte))
-	router.System.Location = string(result.Variables[3].Value.([]byte))
-	router.System.Services = g.ToBigInt(result.Variables[4].Value)
+	//	router.System.UpTime = string(result.Variables[2].Value.(uint32))
+	router.System.UpTime = result.Variables[2].Value.(uint32)
+	router.System.Contact = string(result.Variables[3].Value.([]byte))
+	router.System.Location = string(result.Variables[4].Value.([]byte))
+	router.System.Services = g.ToBigInt(result.Variables[5].Value)
 
 	if debugFlag {
 		fmt.Println("router.System.Name=", router.System.Name)
