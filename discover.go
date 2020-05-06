@@ -93,6 +93,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	if debugFlag {
 		fmt.Println("router.System.Name=", router.System.Name)
 		fmt.Println("router.System.Description=", router.System.Description)
+		fmt.Println("router.System.UpTime=", router.System.UpTime)
 		fmt.Println("router.System.Contact=", router.System.Contact)
 		fmt.Println("router.System.Location=", router.System.Location)
 		fmt.Println("router.System.Services=", router.System.Services)
