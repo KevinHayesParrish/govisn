@@ -197,7 +197,8 @@ func main() {
 	var RouterID int
 	var SystemName string
 	var SystemDesc string
-	var UpTime string
+	//	var UpTime string
+	var UpTime uint32
 	var Contact string
 	var Location string
 	var GpsLat string
