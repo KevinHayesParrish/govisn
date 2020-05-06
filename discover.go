@@ -442,7 +442,7 @@ func discoverInterfaces(debugFlag bool, snmpTarget string, community string, max
 func initDB() *sql.DB {
 	initDbVersion := "0.0.1"
 	fmt.Println("initDB version:", initDbVersion)
-	database, err := sql.Open("sqlite3", "./govisnDiscoveredDb.db")
+	database, err := sql.Open("sqlite3", "./govisnDiscoveredNet.db")
 	if err != nil {
 		log.Fatalf("sql.Open() err: %v", err)
 	}
