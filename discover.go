@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"hash/crc32"
 	"log"
+	"net"
 	"strconv"
+	"strings"
 	"time"
 
 	g "github.com/soniah/gosnmp"
@@ -16,7 +18,7 @@ import (
  */
 
 //DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.1.2"
+const DISCOVERYVERSION = "0.2.0"
 
 func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
 
@@ -89,6 +91,34 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	router.System.Contact = string(result.Variables[3].Value.([]byte))
 	router.System.Location = string(result.Variables[4].Value.([]byte))
 	router.System.Services = g.ToBigInt(result.Variables[5].Value)
+
+	/*
+		// Retrieve GPS data from DNS
+	*/
+	fmt.Println("DNS TXT records=", getGPS("server.parrish.home")) // TESTING ONLY
+
+	// get FQDN with IP Address
+	//	fqdn := getIPADDR(net.ParseIP(snmpTarget))
+	fqdn := getIPADDR(snmpTarget)
+	// get GPS data from DNS
+	gpsDNS := getGPS(fqdn[0])
+	for m := 0; m < len(gpsDNS); m++ {
+		s := gpsDNS[m]
+		// Split TXT record into prefix and value
+		sr := strings.Split(s, "=")
+		if sr[0] == "Long" {
+			router.System.GPS.Longitude = sr[1]
+			break
+		}
+		if sr[0] == "Lat" {
+			router.System.GPS.Latitude = sr[1]
+			break
+		}
+		if sr[0] == "Alt" {
+			router.System.GPS.Longitude = sr[1]
+			break
+		}
+	}
 
 	if debugFlag {
 		fmt.Println("router.System.Name=", router.System.Name)
@@ -535,4 +565,33 @@ func writeRouterToDb(database *sql.DB, router Router) {
 
 	statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
 
+}
+
+func getIPADDR(ipAddr string) []string {
+	names, err := net.LookupAddr(ipAddr)
+	if err != nil {
+		panic(err)
+	}
+	if len(names) == 0 {
+		fmt.Printf("no record")
+	}
+	for _, name := range names {
+		fmt.Printf("%s\n", name)
+	}
+	return names
+}
+
+func getGPS(sysName string) []string {
+	txts, err := net.LookupTXT(sysName)
+	if err != nil {
+		panic(err)
+	}
+	if len(txts) == 0 {
+		fmt.Printf("no record")
+	}
+	for _, txt := range txts {
+		//dig +short gmail.com txt
+		fmt.Printf("%s\n", txt)
+	}
+	return txts
 }
