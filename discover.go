@@ -101,22 +101,24 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	//	fqdn := getIPADDR(net.ParseIP(snmpTarget))
 	fqdn := getIPADDR(snmpTarget)
 	// get GPS data from DNS
-	gpsDNS := getGPS(fqdn[0])
-	for m := 0; m < len(gpsDNS); m++ {
-		s := gpsDNS[m]
-		// Split TXT record into prefix and value
-		sr := strings.Split(s, "=")
-		if sr[0] == "Long" {
-			router.System.GPS.Longitude = sr[1]
-			break
-		}
-		if sr[0] == "Lat" {
-			router.System.GPS.Latitude = sr[1]
-			break
-		}
-		if sr[0] == "Alt" {
-			router.System.GPS.Longitude = sr[1]
-			break
+	if len(fqdn) > 0 {
+		gpsDNS := getGPS(fqdn[0])
+		for n := 0; n < len(gpsDNS); n++ {
+			s := gpsDNS[n]
+			// Split TXT record into prefix and value
+			sr := strings.Split(s, "=")
+			if sr[0] == "Long" {
+				router.System.GPS.Longitude = sr[1]
+				//				break
+			}
+			if sr[0] == "Lat" {
+				router.System.GPS.Latitude = sr[1]
+				//				break
+			}
+			if sr[0] == "Alt" {
+				router.System.GPS.Altitude = sr[1]
+				//				break
+			}
 		}
 	}
 
@@ -570,10 +572,12 @@ func writeRouterToDb(database *sql.DB, router Router) {
 func getIPADDR(ipAddr string) []string {
 	names, err := net.LookupAddr(ipAddr)
 	if err != nil {
-		panic(err)
+		//		panic(err)
+		fmt.Println("No reverse lookup found for", ipAddr)
 	}
 	if len(names) == 0 {
-		fmt.Printf("no record")
+		fmt.Println("No FQDN records for", ipAddr)
+		return names
 	}
 	for _, name := range names {
 		fmt.Printf("%s\n", name)
