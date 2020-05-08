@@ -86,7 +86,6 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 
 	router.System.Name = string(result.Variables[0].Value.([]byte))
 	router.System.Description = string(result.Variables[1].Value.([]byte))
-	//	router.System.UpTime = string(result.Variables[2].Value.(uint32))
 	router.System.UpTime = result.Variables[2].Value.(uint32)
 	router.System.Contact = string(result.Variables[3].Value.([]byte))
 	router.System.Location = string(result.Variables[4].Value.([]byte))
@@ -98,7 +97,6 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	fmt.Println("DNS TXT records=", getGPS("server.parrish.home")) // TESTING ONLY
 
 	// get FQDN with IP Address
-	//	fqdn := getIPADDR(net.ParseIP(snmpTarget))
 	fqdn := getIPADDR(snmpTarget)
 	// get GPS data from DNS
 	if len(fqdn) > 0 {
@@ -109,15 +107,12 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 			sr := strings.Split(s, "=")
 			if sr[0] == "Long" {
 				router.System.GPS.Longitude = sr[1]
-				//				break
 			}
 			if sr[0] == "Lat" {
 				router.System.GPS.Latitude = sr[1]
-				//				break
 			}
 			if sr[0] == "Alt" {
 				router.System.GPS.Altitude = sr[1]
-				//				break
 			}
 		}
 	}
@@ -134,8 +129,7 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	// Initialize the database
 	database := initDB()
 
-	// TODO: Write Router row to database
-	//writeRouterToDb(database, router)
+	// Write Router row to database
 	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	statement.Exec()
 
@@ -237,7 +231,6 @@ func discoverInterfaces(debugFlag bool, snmpTarget string, community string, max
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifTypeOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifTypeType = byte(walkPDU[i].Type)
-			//			interfaceTable.ifEntry.ifType = walkPDU[i].Value.(int)
 			ifTypeInt := walkPDU[i].Value.(int)
 			switch ifTypeInt {
 			case 1:
@@ -326,7 +319,6 @@ func discoverInterfaces(debugFlag bool, snmpTarget string, community string, max
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifOperStatusOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOperStatusType = byte(walkPDU[i].Type)
-			//			interfaceTable.ifEntry.ifOperStatus = string(walkPDU[i].Value.(int))
 			ifAdminStatusInt := walkPDU[i].Value.(int)
 			switch ifAdminStatusInt {
 			case 1:
@@ -572,7 +564,6 @@ func writeRouterToDb(database *sql.DB, router Router) {
 func getIPADDR(ipAddr string) []string {
 	names, err := net.LookupAddr(ipAddr)
 	if err != nil {
-		//		panic(err)
 		fmt.Println("No reverse lookup found for", ipAddr)
 	}
 	if len(names) == 0 {
@@ -594,7 +585,6 @@ func getGPS(sysName string) []string {
 		fmt.Printf("no record")
 	}
 	for _, txt := range txts {
-		//dig +short gmail.com txt
 		fmt.Printf("%s\n", txt)
 	}
 	return txts
