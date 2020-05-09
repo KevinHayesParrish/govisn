@@ -18,9 +18,10 @@ import (
  */
 
 //DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.2.0"
+const DISCOVERYVERSION = "0.2.1"
 
-func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
+//func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
+func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
 
 	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.\ndebugFlag=", debugFlag)
 
@@ -127,7 +128,8 @@ func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr st
 	}
 
 	// Initialize the database
-	database := initDB()
+	//	database := initDB()
+	database := initDB(dbName)
 
 	// Write Router row to database
 	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
@@ -464,10 +466,11 @@ func discoverInterfaces(debugFlag bool, snmpTarget string, community string, max
 
 }
 
-func initDB() *sql.DB {
-	initDbVersion := "0.0.1"
+func initDB(dbName string) *sql.DB {
+	initDbVersion := "0.0.2"
 	fmt.Println("initDB version:", initDbVersion)
-	database, err := sql.Open("sqlite3", "./govisnDiscoveredNet.db")
+	//	database, err := sql.Open("sqlite3", "./govisnDiscoveredNet.db")
+	database, err := sql.Open("sqlite3", dbName)
 	if err != nil {
 		log.Fatalf("sql.Open() err: %v", err)
 	}

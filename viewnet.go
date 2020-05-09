@@ -37,7 +37,9 @@ var versionFlag = flag.Bool("v", false, "Print the version number.")
 var debugFlag = flag.Bool("de", false, "Print Debug statements.")
 var sampleNetworkDB = flag.Bool("cr", false, "Create a sample database.")
 var loadDBFlag = flag.Bool("l", false, "Load a database from an XML document.")
-var networkXML = "discoverednetwork.xml"
+
+//var networkXML = "discoverednetwork.xml"
+var networkXML = "govisnDiscoveredNet.db"
 
 //DbName is the name of the discovered network database file or name of XML input file
 var DbName = flag.String("f", "discoverednetwork.db", "Name of the discovered network database -or-\nName of the XML input file, if combined with -l option.")
@@ -73,10 +75,14 @@ func main() {
 	if *testArangoDb {
 		testarango()
 	}
+	if *DbName != "govisnDiscoveredNet.db" {
+		networkXML = *DbName
+	}
 	if *loadDBFlag {
-		if *DbName != "discoverednetwork.db" {
-			networkXML = *DbName
-		}
+		//		if *DbName != "discoverednetwork.db" {
+		//		if *DbName != "govisnDiscoveredNet.db" {
+		//			networkXML = *DbName
+		//		}
 		loaddb(*debugFlag, networkXML)
 		return
 	}
@@ -85,7 +91,8 @@ func main() {
 		if *debugFlag {
 			fmt.Println("seed=", seed, "community=", *community)
 		}
-		discover(*debugFlag, seed, *community, *maxHops)
+		//		discover(*debugFlag, seed, *community, *maxHops)
+		discover(*debugFlag, networkXML, seed, *community, *maxHops)
 		return
 	}
 
