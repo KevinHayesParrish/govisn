@@ -93,7 +93,7 @@ func main() {
 		}
 		//		discover(*debugFlag, seed, *community, *maxHops)
 		discover(*debugFlag, dbName, seed, *community, *maxHops)
-		return
+		//		return
 	}
 
 	// Open the database containing the discovered network
@@ -114,7 +114,8 @@ func main() {
 	defer databaseForUpdate.Close()
 
 	// Retrieve the Routers table
-	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
+	//	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
+	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
 	if queryErr != nil {
 		fmt.Println("databaseForRead Query error", queryErr)
 		log.Fatal(openErr)
@@ -147,8 +148,8 @@ func main() {
 	}
 
 	var RouterID int
-	var SystemName string
-	var SystemDesc string
+	var Name string
+	var Description string
 	//	var UpTime string
 	var UpTime uint32
 	var Contact string
@@ -204,12 +205,12 @@ func main() {
 	 */
 	routerArrayIndex := 0
 	for routerRows.Next() {
-		routerRows.Scan(&RouterID, &SystemName, &SystemDesc, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
+		routerRows.Scan(&RouterID, &Name, &Description, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
 
 		// Load router struct from DB fields
 		routerArray[routerArrayIndex].System.RouterID = RouterID
 		routerArray[routerArrayIndex].System.UpTime = UpTime
-		routerArray[routerArrayIndex].System.Name = SystemName
+		routerArray[routerArrayIndex].System.Name = Name
 		routerArray[routerArrayIndex].System.Contact = Contact
 		routerArray[routerArrayIndex].System.Location = Location
 		routerArray[routerArrayIndex].System.GPS.Latitude = GpsLat
@@ -254,7 +255,7 @@ func main() {
 			fmt.Println("router =", routerArray[routerArrayIndex])
 			//			fmt.Println("router.System.Coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			fmt.Println("router.System.GPS =", routerArray[routerArrayIndex].System.GPS)
-			fmt.Println("RouterID=", RouterID, "SystemName=", SystemName)
+			fmt.Println("RouterID=", RouterID, "Name=", Name)
 		}
 
 		// Add Router object to 3D scene.
