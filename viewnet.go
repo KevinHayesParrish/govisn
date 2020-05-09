@@ -39,7 +39,7 @@ var sampleNetworkDB = flag.Bool("cr", false, "Create a sample database.")
 var loadDBFlag = flag.Bool("l", false, "Load a database from an XML document.")
 
 //var networkXML = "discoverednetwork.xml"
-var networkXML = "govisnDiscoveredNet.db"
+var dbName = "govisnDiscoveredNet.db"
 
 //DbName is the name of the discovered network database file or name of XML input file
 var DbName = flag.String("f", "discoverednetwork.db", "Name of the discovered network database -or-\nName of the XML input file, if combined with -l option.")
@@ -76,14 +76,14 @@ func main() {
 		testarango()
 	}
 	if *DbName != "govisnDiscoveredNet.db" {
-		networkXML = *DbName
+		dbName = *DbName
 	}
 	if *loadDBFlag {
 		//		if *DbName != "discoverednetwork.db" {
 		//		if *DbName != "govisnDiscoveredNet.db" {
 		//			networkXML = *DbName
 		//		}
-		loaddb(*debugFlag, networkXML)
+		loaddb(*debugFlag, dbName)
 		return
 	}
 	if discoverFlag != nil {
@@ -92,7 +92,7 @@ func main() {
 			fmt.Println("seed=", seed, "community=", *community)
 		}
 		//		discover(*debugFlag, seed, *community, *maxHops)
-		discover(*debugFlag, networkXML, seed, *community, *maxHops)
+		discover(*debugFlag, dbName, seed, *community, *maxHops)
 		return
 	}
 
