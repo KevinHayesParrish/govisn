@@ -154,7 +154,11 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 
 	statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
 
-	discoverInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params)
+	//	discoverInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params)
+	discoverInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
+
+	writeIPToDB(debugFlag, router, database)
+	//writeInterfacesToDB(debugFlag, database)
 
 	// get ipAddrTable
 	//var addressTable ipAddrTable
@@ -190,7 +194,8 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	}
 }
 
-func discoverInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP) {
+//func discoverInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP) {
+func discoverInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
 
 	// get Number of Interfaces
 	ifNumberArray := []string{ifNumberOID + ".0"}
@@ -305,6 +310,8 @@ func discoverInterfaces(debugFlag bool, snmpTarget string, community string, max
 			if debugFlag {
 				fmt.Println("ifPhysAddress=", interfaceTable.ifEntry.ifPhysAddress)
 			}
+
+			writeMacToDB(debugFlag, router, interfaceTable, database)
 
 			i++
 
@@ -534,7 +541,7 @@ func initDB(database *sql.DB) *sql.DB {
 	 *	Add Links table to DB
 	 */
 	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP TEXT)")
 	if err != nil {
 		log.Fatalf("Links Create err: %v", err)
 	}
@@ -606,4 +613,32 @@ func getGPS(sysName string) []string {
 		fmt.Printf("%s\n", txt)
 	}
 	return txts
+}
+
+func writeInterfacesToDB(debugFlag bool, database *sql.DB) {
+}
+
+func writeMacToDB(debugFlag bool, router Router, interfaceTable ifTable, database *sql.DB) {
+
+	statement, err := database.Prepare("INSERT INTO RouterMac (RouterID, MacAddr) VALUES (?, ?)")
+	if err != nil {
+		log.Fatalf("RouterMac Insert Prepare err: %v", err)
+		log.Fatal(err)
+	}
+
+	//	_, err = statement.Exec()
+	//	if err != nil {
+	//		fmt.Printf("RouterMac Insert Prepare Exec err: %v", err)
+	//		log.Fatal(err)
+	//	}
+
+	RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
+	_, err = statement.Exec(strconv.Itoa(int(RouterID)), interfaceTable.ifEntry.ifPhysAddress)
+	if err != nil {
+		fmt.Printf("RouterMac Insert Exec err: %v", err)
+		log.Fatal(err)
+	}
+}
+
+func writeIPToDB(debugFlag bool, router Router, database *sql.DB) {
 }
