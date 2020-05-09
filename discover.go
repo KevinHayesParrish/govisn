@@ -129,7 +129,13 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 
 	// Initialize the database
 	//	database := initDB()
-	database := initDB(dbName)
+	database, err := sql.Open("sqlite3", dbName)
+	if err != nil {
+		log.Fatalf("sql.Open() err: %v", err)
+	}
+	//	database := initDB(dbName)
+	//	database = initDB(dbName)
+	database = initDB(database)
 
 	// Write Router row to database
 	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
@@ -175,6 +181,9 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	//var ipRouteTableResult ipRouteTable
 
 	// TODO: Write Links row to database
+
+	// Close database
+	database.Close()
 
 	if debugFlag {
 		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
@@ -466,19 +475,21 @@ func discoverInterfaces(debugFlag bool, snmpTarget string, community string, max
 
 }
 
-func initDB(dbName string) *sql.DB {
+//func initDB(dbName string) *sql.DB {
+func initDB(database *sql.DB) *sql.DB {
 	initDbVersion := "0.0.2"
 	fmt.Println("initDB version:", initDbVersion)
 	//	database, err := sql.Open("sqlite3", "./govisnDiscoveredNet.db")
-	database, err := sql.Open("sqlite3", dbName)
-	if err != nil {
-		log.Fatalf("sql.Open() err: %v", err)
-	}
+	//	database, err := sql.Open("sqlite3", dbName)
+	//	if err != nil {
+	//		log.Fatalf("sql.Open() err: %v", err)
+	//	}
 
 	/*
 	 *	Add Routers table to DB
 	 */
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
 	if err != nil {
 		log.Fatalf("Router Table Create err: %v", err)
 	}
@@ -488,7 +499,8 @@ func initDB(dbName string) *sql.DB {
 	/*
 	 *	Add RouteTable table to DB
 	 */
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, NextHop TEXT)")
+	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, NextHop TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, NextHop TEXT)")
 	if err != nil {
 		log.Fatalf("RouteTable Create err: %v", err)
 	}
@@ -498,7 +510,8 @@ func initDB(dbName string) *sql.DB {
 	/*
 	 *	Add RouterIP table to DB
 	 */
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IpAddr TEXT)")
+	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IpAddr TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IpAddr TEXT)")
 	if err != nil {
 		log.Fatalf("RouterIP Create err: %v", err)
 	}
@@ -508,7 +521,8 @@ func initDB(dbName string) *sql.DB {
 	/*
 	 *	Add RouterMac table to DB
 	 */
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
+	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
 	if err != nil {
 		log.Fatalf("RouterMac Create err: %v", err)
 	}
@@ -519,7 +533,8 @@ func initDB(dbName string) *sql.DB {
 	/*
 	 *	Add Links table to DB
 	 */
-	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
+	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP TEXT)")
 	if err != nil {
 		log.Fatalf("Links Create err: %v", err)
 	}
