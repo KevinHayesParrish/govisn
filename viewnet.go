@@ -29,7 +29,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.8.0"
+const ViewnetVersion = "0.8.1"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -57,61 +57,6 @@ const routerRadius float64 = 0.5
 //globeRadius is the radius of the 3D object representing the earth
 //const globeRadius float64 = 1.5
 const globeRadius float64 = 63.7
-
-/*
-// Router is the structure representing a network router
-type Router struct {
-	System struct {
-		RouterID    int
-		Name        string
-		Description string
-		UpTime      string
-		Contact     string
-		Location    string
-		Services    *big.Int
-		GPS         struct {
-			Latitude  string
-			Longitude string
-			Altitude  string
-		}
-		//		Coordinates struct {
-		//			X float32
-		//			Y float32
-		//			Z float32
-		//		}
-	}
-	Addresses struct {
-		NetworkAddresses struct {
-			IPAddress []string
-		}
-		MediaAddresses struct {
-			MediaAddress string
-		}
-	}
-	Neighbors struct {
-		Neighbor []struct {
-			DestinationAddress string
-			NextHop            string
-		}
-	}
-}
-
-// Link is the structure representing a network link between two routers
-type Link struct {
-	LinkID int
-	//	FromRouter string
-	//	ToRouter   string
-	//	FromRouterName string
-	//	FromRouterIP   string
-	//	ToRouterName   string
-	//	ToRouterIP     string
-	RouterName      string
-	DestinationName string
-	DestinationIP   string
-	NextHopName     string
-	NextHopIP       string
-}
-*/
 
 func main() {
 	flag.Parse() // Scan the arguments list
