@@ -18,7 +18,7 @@ import (
  */
 
 //DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.2.1"
+const DISCOVERYVERSION = "0.2.2"
 
 //func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
 func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
@@ -100,6 +100,10 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	// get FQDN with IP Address
 	fqdn := getIPADDR(snmpTarget)
 	// get GPS data from DNS
+	router.System.GPS.Latitude = "0.0"  // initialze with float data to allow for missing GPS on DB
+	router.System.GPS.Longitude = "0.0" // initialze with float data to allow for missing GPS on DB
+	router.System.GPS.Altitude = "0.0"  // initialze with float data to allow for missing GPS on DB
+
 	if len(fqdn) > 0 {
 		gpsDNS := getGPS(fqdn[0])
 		for n := 0; n < len(gpsDNS); n++ {
