@@ -29,7 +29,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.8.1"
+const ViewnetVersion = "0.8.2"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -223,17 +223,28 @@ func main() {
 		/*
 		 * Set coordinates and altitude
 		 */
-		GpsLatFloat64, parseErr := strconv.ParseFloat(GpsLat, 64)
+		var GpsLatFloat64 = 0.0
+		//		GpsLatFloat64, parseErr := strconv.ParseFloat(GpsLat, 64)
+		var parseErr error
+		if GpsLat != "" {
+			GpsLatFloat64, parseErr = strconv.ParseFloat(GpsLat, 64)
+		}
 		if parseErr != nil {
 			fmt.Println("Error parsing GpsLat =", GpsLat)
-			log.Fatal(openErr)
+			log.Fatal(parseErr)
 		}
 		xRadianLat := Rad(GpsLatFloat64)
-		GpsLongFloat64, parseErr := strconv.ParseFloat(GpsLong, 64)
-		if parseErr != nil {
-			fmt.Println("Error parsing GpsLong", GpsLong)
-			log.Fatal(openErr)
+
+		var GpsLongFloat64 = 0.0
+		//		GpsLongFloat64, parseErr := strconv.ParseFloat(GpsLong, 64)
+		if GpsLong != "" {
+			GpsLongFloat64, parseErr = strconv.ParseFloat(GpsLong, 64)
+			if parseErr != nil {
+				fmt.Println("Error parsing GpsLong", GpsLong)
+				log.Fatal(parseErr)
+			}
 		}
+
 		xRadianLong := Rad(GpsLongFloat64)
 		x = (float32)(globeRadius * math.Sin(xRadianLat) * math.Cos(xRadianLong))
 		//		routerArray[routerArrayIndex].System.Coordinates.X = x // update router struc with x coordinate
