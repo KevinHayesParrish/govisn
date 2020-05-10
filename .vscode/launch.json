@@ -21,7 +21,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["-f", "/temp/home3.xml.db"]
+            "args": ["-f", "./test.db"]
         },
         {
             "name": "Debug govisn -d -f",
@@ -33,7 +33,7 @@
             "host": "127.0.0.1",
             "program": "${file}",
             "env": {},
-            "args": ["-d", "-f", "/temp/home3.xml.db"]
+            "args": ["-d", "-f", "./test.db"]
         },
         {
             "name": "Debug govisn -c",
