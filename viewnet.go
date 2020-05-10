@@ -29,7 +29,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.8.2"
+const ViewnetVersion = "0.8.3"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -41,14 +41,16 @@ var loadDBFlag = flag.Bool("l", false, "Load a database from an XML document.")
 //var networkXML = "discoverednetwork.xml"
 var dbName = "govisnDiscoveredNet.db"
 
-//DbName is the name of the discovered network database file or name of XML input file
-var DbName = flag.String("f", "discoverednetwork.db", "Name of the discovered network database -or-\nName of the XML input file, if combined with -l option.")
+// DbName is the name of the discovered network database file or name of XML input file
+//var DbName = flag.String("f", "discoverednetwork.db", "Name of the discovered network database -or-\nName of the XML input file, if combined with -l option.")
+var DbName = flag.String("f", "govisnDiscoveredNet.db", "Name of the discovered network database -or-\nName of the XML input file, if combined with -l option.")
 
 //testArangodb is the startup option to test accessing an ArangoDB database
 var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 
 //discoverFlag is the option to discover a network
-var discoverFlag = flag.String("di", "127.0.0.1", "Discover a network using seed IP Address")
+//var discoverFlag = flag.String("di", "127.0.0.1", "Discover a network using seed IP Address")
+var discoverFlag = flag.String("di", "", "Discover a network using seed IP Address")
 var seed = "127.0.0.1"
 var community = flag.String("co", "public", "SNMP Community ReadOnly String")
 var maxHops = flag.String("m", "0", "Scope of discovery. Maximum number of Hops from seed")
@@ -79,26 +81,19 @@ func main() {
 		dbName = *DbName
 	}
 	if *loadDBFlag {
-		//		if *DbName != "discoverednetwork.db" {
-		//		if *DbName != "govisnDiscoveredNet.db" {
-		//			networkXML = *DbName
-		//		}
 		loaddb(*debugFlag, dbName)
 		return
 	}
-	if discoverFlag != nil {
+	//	if discoverFlag != nil {
+	if *discoverFlag != "" {
 		seed = *discoverFlag
 		if *debugFlag {
 			fmt.Println("seed=", seed, "community=", *community)
 		}
-		//		discover(*debugFlag, seed, *community, *maxHops)
 		discover(*debugFlag, dbName, seed, *community, *maxHops)
-		//		return
 	}
 
 	// Open the database containing the discovered network
-	//	dbOpenString := *DbName + "?mode=wal"
-	//	database, openErr := sql.Open("sqlite3", dbOpenString)
 	databaseForRead, openErr := sql.Open("sqlite3", *DbName)
 	if openErr != nil {
 		fmt.Println("Error opening databaseForRead", *DbName)
