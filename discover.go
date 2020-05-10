@@ -95,7 +95,7 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	/*
 		// Retrieve GPS data from DNS
 	*/
-	fmt.Println("DNS TXT records=", getGPS("server.parrish.home")) // TESTING ONLY
+	//	fmt.Println("DNS TXT records=", getGPS("server.parrish.home")) // TESTING ONLY
 
 	// get FQDN with IP Address
 	fqdn := getIPADDR(snmpTarget)
@@ -125,6 +125,7 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 		fmt.Println("router.System.Contact=", router.System.Contact)
 		fmt.Println("router.System.Location=", router.System.Location)
 		fmt.Println("router.System.Services=", router.System.Services)
+		fmt.Println("router.System.GPS=", router.System.GPS)
 	}
 
 	// Initialize the database
@@ -265,7 +266,9 @@ func discoverInterfaces(debugFlag bool, snmpTarget string, community string, max
 			interfaceTable.ifEntry.ifMtuOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifMtuType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifMtu = walkPDU[i].Value.(int)
-			fmt.Println("ifMtu=", interfaceTable.ifEntry.ifMtu) // TESTING ONLY
+			if debugFlag {
+				fmt.Println("ifMtu=", interfaceTable.ifEntry.ifMtu) // TESTING ONLY
+			}
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
@@ -314,8 +317,6 @@ func discoverInterfaces(debugFlag bool, snmpTarget string, community string, max
 			writeMacToDB(debugFlag, router, interfaceTable, database)
 
 			i++
-
-			// TODO: Write RouterMac row to database
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifAdminStatusOID = walkPDU[i].Name
