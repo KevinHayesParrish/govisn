@@ -32,9 +32,9 @@
             "remotePath": "",
             "port": 2345,
             "host": "127.0.0.1",
-            "program": "${file}",
+            "program": "/Users/kevin/go/src/govisn",
             "env": {},
-            "args": ["-d", "-f", "./test.db"]
+            "args": ["-d", "-f", "/Users/kevin/test.db"]
         },
         {
             "name": "Debug govisn -c",
