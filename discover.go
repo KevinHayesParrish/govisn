@@ -159,23 +159,12 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 
 	statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
 
-	//	discoverInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params)
-	discoverInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
-
-	writeIPToDB(debugFlag, router, database)
+	getInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
 	//writeInterfacesToDB(debugFlag, database)
 
-	// get ipAddrTable
-	//var addressTable ipAddrTable
-	//	walkPDU, walkError := params.WalkAll(ipAddrTableOID)
-	//	if walkError != nil {
-	//		log.Fatalf("Get() err: %v", err2)
-	//	}
+	getIPAddresses(debugFlag, params, router, database)
 
-	// TODO: Write RouterIp Row to database
-
-	//var ipAddrTableResult ipAddrTable
-
+	writeIPRowToDB(debugFlag, router, database)
 	// get ipRouteTable
 	//	walkPDU, walkError = params.WalkAll(ipRouteTableOID)
 	//	if walkError != nil {
@@ -199,8 +188,8 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	}
 }
 
-//func discoverInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP) {
-func discoverInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
+//func getInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP) {
+func getInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
 
 	// get Number of Interfaces
 	ifNumberArray := []string{ifNumberOID + ".0"}
@@ -620,8 +609,8 @@ func getGPS(sysName string) []string {
 	return txts
 }
 
-func writeInterfacesToDB(debugFlag bool, database *sql.DB) {
-}
+//func writeInterfacesToDB(debugFlag bool, database *sql.DB) {
+//}
 
 func writeMacToDB(debugFlag bool, router Router, interfaceTable ifTable, database *sql.DB) {
 
@@ -645,5 +634,60 @@ func writeMacToDB(debugFlag bool, router Router, interfaceTable ifTable, databas
 	}
 }
 
-func writeIPToDB(debugFlag bool, router Router, database *sql.DB) {
+func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *sql.DB) {
+	// get ipAddrTable
+	walkPDU, err := params.WalkAll(ipAdEntAddrOID)
+	if err != nil {
+		log.Fatalf("Get(walkPDU) err: %v", err)
+	}
+	if debugFlag {
+		fmt.Println("\nipAdEntAddr PDU=", walkPDU)
+	}
+
+	var ipTable ipAddrTable
+
+	for i := 0; i < (len(walkPDU)); i++ {
+		//		for k := 0; k < nbrOfInterfaces; k++ {
+		//			ipTable.ifAddrEntry.ipAdEntOID = walkPDU[i].Name
+		//			ipTable.ifEntry.ipAdEntAddrType = byte(walkPDU[i].Type)
+		ipTable.ipAddrEntry.ipAdEntAddr = walkPDU[i].Value.(string)
+		if debugFlag {
+			fmt.Println("ipAdEntAddr=", ipTable.ipAddrEntry.ipAdEntAddr)
+		}
+	}
+
+	walkPDU, err = params.WalkAll(ipAdEntIfIndex)
+	if err != nil {
+		log.Fatalf("Get(walkPDU) err: %v", err)
+	}
+	for i := 0; i < (len(walkPDU)); i++ {
+		ipTable.ipAddrEntry.ipAdEntIfIndex = walkPDU[i].Value.(int)
+		if debugFlag {
+			fmt.Println("ipAdEntIfIndex=", ipTable.ipAddrEntry.ipAdEntIfIndex)
+		}
+	}
+	walkPDU, err = params.WalkAll(ipAdEntNetMask)
+	for i := 0; i < (len(walkPDU)); i++ {
+		ipTable.ipAddrEntry.ipAdEntNetMask = walkPDU[i].Value.(string)
+		if debugFlag {
+			fmt.Println("ipAdEntNetMask=", ipTable.ipAddrEntry.ipAdEntNetMask)
+		}
+	}
+	walkPDU, err = params.WalkAll(ipAdEntBcastAddr)
+	for i := 0; i < (len(walkPDU)); i++ {
+		ipTable.ipAddrEntry.ipAdEntBcastAddr = walkPDU[i].Value.(int)
+		if debugFlag {
+			fmt.Println("ipAdEntBcastAddr=", ipTable.ipAddrEntry.ipAdEntBcastAddr)
+		}
+	}
+	walkPDU, err = params.WalkAll(ipAdEntReasmMaxSize)
+	for i := 0; i < (len(walkPDU)); i++ {
+		ipTable.ipAddrEntry.ipAdEntReasmMaxSize = walkPDU[i].Value.(int)
+		if debugFlag {
+			fmt.Println("ipAdEntReasmMaxSize=", ipTable.ipAddrEntry.ipAdEntReasmMaxSize)
+		}
+	}
+}
+
+func writeIPRowToDB(debugFlag bool, router Router, database *sql.DB) {
 }
