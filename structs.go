@@ -157,10 +157,10 @@ type ifTable struct {
 type ipAddrTable struct {
 	ipAddrEntry struct {
 		ipAdEntAddr         string
-		ipAdEntIfIndex      int32
+		ipAdEntIfIndex      int
 		ipAdEntNetMask      string
-		ipAdEntBcastAddr    int32
-		ipAdEntReasmMaxSize int32
+		ipAdEntBcastAddr    int
+		ipAdEntReasmMaxSize int
 	}
 }
 
