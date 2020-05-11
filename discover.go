@@ -489,7 +489,7 @@ func initDB(database *sql.DB) *sql.DB {
 	/*
 	 *	Add Routers table to DB
 	 */
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	//statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
 	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
 	if err != nil {
 		log.Fatalf("Router Table Create err: %v", err)
@@ -512,7 +512,9 @@ func initDB(database *sql.DB) *sql.DB {
 	 *	Add RouterIP table to DB
 	 */
 	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IpAddr TEXT)")
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IpAddr TEXT)")
+	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IpAddr TEXT)")
+	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT UNIQUE)")
 	if err != nil {
 		log.Fatalf("RouterIP Create err: %v", err)
 	}
@@ -523,7 +525,8 @@ func initDB(database *sql.DB) *sql.DB {
 	 *	Add RouterMac table to DB
 	 */
 	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
+	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT UNIQUE)")
 	if err != nil {
 		log.Fatalf("RouterMac Create err: %v", err)
 	}
@@ -535,7 +538,8 @@ func initDB(database *sql.DB) *sql.DB {
 	 *	Add Links table to DB
 	 */
 	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP TEXT)")
+	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP TEXT)")
 	if err != nil {
 		log.Fatalf("Links Create err: %v", err)
 	}
@@ -629,8 +633,14 @@ func writeMacToDB(debugFlag bool, router Router, interfaceTable ifTable, databas
 	RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
 	_, err = statement.Exec(strconv.Itoa(int(RouterID)), interfaceTable.ifEntry.ifPhysAddress)
 	if err != nil {
-		fmt.Printf("RouterMac Insert Exec err: %v", err)
-		log.Fatal(err)
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			// Continue executing if this is a duplicate MAC Address. This assume this router is being processed again.
+			// In case this is a duplicate MAC Address within the network, print error output to stdoutput.
+			fmt.Println("\n****\n Non-Unique MAC Address", interfaceTable.ifEntry.ifPhysAddress, "\n This may be because this router is being re-discovered.\n If not, then this is a serious network violation condition.\n****")
+		} else {
+			fmt.Printf("RouterMac Insert Exec err: %v", err)
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -661,13 +671,26 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 			fmt.Printf("RouterIp Prepare Insert Exec err: %v", err)
 			log.Fatal(err)
 		}
-
+		//		if err != nil {
 		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
 		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr)
 		if err != nil {
-			fmt.Printf("RouterIp Exec Insert Exec err: %v", err)
-			log.Fatal(err)
+			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+				// Continue executing if this is a duplicate MAC Address. This assume this router is being processed again.
+				// In case this is a duplicate MAC Address within the network, print error output to stdoutput.
+				fmt.Println("\n****\n Non-Unique IP Address", ipTable.ipAddrEntry.ipAdEntAddr, "\n This may be because this router is being re-discovered.\n If not, then this is a serious network violation condition.\n****")
+			} else {
+				fmt.Printf("RouterIp Exec Insert Exec err: %v", err)
+				log.Fatal(err)
+			}
 		}
+
+		//		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
+		//		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr)
+		//		if err != nil {
+		//			fmt.Printf("RouterIp Exec Insert Exec err: %v", err)
+		//			log.Fatal(err)
+		//		}
 
 	}
 
