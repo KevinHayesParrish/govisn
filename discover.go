@@ -654,6 +654,21 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 		if debugFlag {
 			fmt.Println("ipAdEntAddr=", ipTable.ipAddrEntry.ipAdEntAddr)
 		}
+
+		// Add row to RouterIp table
+		statement, err := database.Prepare("INSERT INTO RouterIp (RouterID, IpAddr) VALUES (?, ?)")
+		if err != nil {
+			fmt.Printf("RouterIp Prepare Insert Exec err: %v", err)
+			log.Fatal(err)
+		}
+
+		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
+		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr)
+		if err != nil {
+			fmt.Printf("RouterIp Exec Insert Exec err: %v", err)
+			log.Fatal(err)
+		}
+
 	}
 
 	walkPDU, err = params.WalkAll(ipAdEntIfIndex)
