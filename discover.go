@@ -726,6 +726,10 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 }
 
 func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *sql.DB) {
+
+	// TODO: DB record must be written within the for loop that parses the PDU arrays.
+	//       Remove the second nexthop for loop. loop contains dest and nexthop parses, then DB row add.
+
 	// get ipRouteTable
 	ipRouteDestPDU, err := params.WalkAll(ipRouteDestOID)
 	if err != nil {
