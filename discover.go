@@ -18,7 +18,7 @@ import (
  */
 
 //DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.2.2"
+const DISCOVERYVERSION = "0.2.3"
 
 //func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
 func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
@@ -511,10 +511,8 @@ func initDB(database *sql.DB) *sql.DB {
 	/*
 	 *	Add RouterIP table to DB
 	 */
-	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IpAddr TEXT)")
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER, IpAddr TEXT)")
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT)")
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT UNIQUE)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT)")
+	//statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT UNIQUE)")
 	if err != nil {
 		log.Fatalf("RouterIP Create err: %v", err)
 	}
@@ -524,9 +522,8 @@ func initDB(database *sql.DB) *sql.DB {
 	/*
 	 *	Add RouterMac table to DB
 	 */
-	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT UNIQUE)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
+	//statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT UNIQUE)")
 	if err != nil {
 		log.Fatalf("RouterMac Create err: %v", err)
 	}
