@@ -18,6 +18,8 @@ const ipAdEntNetMask string = "1.3.6.1.2.1.4.20.1.3"
 const ipAdEntBcastAddr string = "1.3.6.1.2.1.4.20.1.4"
 const ipAdEntReasmMaxSize string = "1.3.6.1.2.1.4.20.1.5"
 const ipRouteTableOID string = "1.3.6.1.2.1.4.21"
+const ipRouteDestOID string = "1.3.6.1.2.1.4.21.1.1"
+const ipRouteNextHopOID string = "1.3.6.1.2.1.4.21.1.7"
 
 // Asn1BER is the type of the SNMP PDU
 type Asn1BER byte
