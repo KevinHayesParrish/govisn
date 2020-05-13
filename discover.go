@@ -14,11 +14,13 @@ import (
 )
 
 /*
-* TODO:
- */
+ * TODO:
+ 	* Add code to walk route table to discover all routers
+ 	* Write Links row to database
+*/
 
-//DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.2.4"
+// DISCOVERYVERSION is the file version number
+const DISCOVERYVERSION = "0.3.0"
 
 func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
 
@@ -70,117 +72,121 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	}
 	defer params.Conn.Close()
 
-	oids := []string{
-		sysNameOID + ".0",     // sysName
-		sysDescrOID + ".0",    // sysDescr
-		sysUpTimeOID + ".0",   // sysUpTime
-		sysContactOID + ".0",  // sysContact
-		sysLocationOID + ".0", // sysLocation
-		sysServicesOID + ".0", // sysServices
-	}
+	getRouterInfo(debugFlag, snmpTarget, community, maxHopsStr, params, router)
 
-	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
-	if err != nil {
-		log.Fatalf("Get() err: %v", err)
-	}
+	/*
+		oids := []string{
+			sysNameOID + ".0",     // sysName
+			sysDescrOID + ".0",    // sysDescr
+			sysUpTimeOID + ".0",   // sysUpTime
+			sysContactOID + ".0",  // sysContact
+			sysLocationOID + ".0", // sysLocation
+			sysServicesOID + ".0", // sysServices
+		}
 
-	router.System.Name = string(result.Variables[0].Value.([]byte))
-	router.System.Description = string(result.Variables[1].Value.([]byte))
-	router.System.UpTime = result.Variables[2].Value.(uint32)
-	router.System.Contact = string(result.Variables[3].Value.([]byte))
-	router.System.Location = string(result.Variables[4].Value.([]byte))
-	router.System.Services = g.ToBigInt(result.Variables[5].Value)
+		result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
+		if err != nil {
+			log.Fatalf("Get() err: %v", err)
+		}
 
+		router.System.Name = string(result.Variables[0].Value.([]byte))
+		router.System.Description = string(result.Variables[1].Value.([]byte))
+		router.System.UpTime = result.Variables[2].Value.(uint32)
+		router.System.Contact = string(result.Variables[3].Value.([]byte))
+		router.System.Location = string(result.Variables[4].Value.([]byte))
+		router.System.Services = g.ToBigInt(result.Variables[5].Value)
+	*/
 	/*
 		// Retrieve GPS data from DNS
 	*/
+	/*
+		// get FQDN with IP Address
+		fqdn := getIPADDR(snmpTarget)
+		// get GPS data from DNS
+		router.System.GPS.Latitude = "0.0"  // initialze with float data to allow for missing GPS on DB
+		router.System.GPS.Longitude = "0.0" // initialze with float data to allow for missing GPS on DB
+		router.System.GPS.Altitude = "0.0"  // initialze with float data to allow for missing GPS on DB
 
-	// get FQDN with IP Address
-	fqdn := getIPADDR(snmpTarget)
-	// get GPS data from DNS
-	router.System.GPS.Latitude = "0.0"  // initialze with float data to allow for missing GPS on DB
-	router.System.GPS.Longitude = "0.0" // initialze with float data to allow for missing GPS on DB
-	router.System.GPS.Altitude = "0.0"  // initialze with float data to allow for missing GPS on DB
-
-	if len(fqdn) > 0 {
-		gpsDNS := getGPS(fqdn[0])
-		for n := 0; n < len(gpsDNS); n++ {
-			s := gpsDNS[n]
-			// Split TXT record into prefix and value
-			sr := strings.Split(s, "=")
-			if sr[0] == "Long" {
-				router.System.GPS.Longitude = sr[1]
-			}
-			if sr[0] == "Lat" {
-				router.System.GPS.Latitude = sr[1]
-			}
-			if sr[0] == "Alt" {
-				router.System.GPS.Altitude = sr[1]
+		if len(fqdn) > 0 {
+			gpsDNS := getGPS(fqdn[0])
+			for n := 0; n < len(gpsDNS); n++ {
+				s := gpsDNS[n]
+				// Split TXT record into prefix and value
+				sr := strings.Split(s, "=")
+				if sr[0] == "Long" {
+					router.System.GPS.Longitude = sr[1]
+				}
+				if sr[0] == "Lat" {
+					router.System.GPS.Latitude = sr[1]
+				}
+				if sr[0] == "Alt" {
+					router.System.GPS.Altitude = sr[1]
+				}
 			}
 		}
-	}
 
-	if debugFlag {
-		fmt.Println("router.System.Name=", router.System.Name)
-		fmt.Println("router.System.Description=", router.System.Description)
-		fmt.Println("router.System.UpTime=", router.System.UpTime)
-		fmt.Println("router.System.Contact=", router.System.Contact)
-		fmt.Println("router.System.Location=", router.System.Location)
-		fmt.Println("router.System.Services=", router.System.Services)
-		fmt.Println("router.System.GPS=", router.System.GPS)
-	}
-
-	// Initialize the database
-	database, err := sql.Open("sqlite3", dbName)
-	if err != nil {
-		log.Fatalf("sql.Open() err: %v", err)
-	}
-
-	database = initDB(database)
-
-	// Write Router row to database
-	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-	statement.Exec()
-
-	Name := router.System.Name
-	RouterIDUint32 := crc32.ChecksumIEEE([]byte(Name))
-	Description := router.System.Description
-	UpTime := router.System.UpTime
-	Contact := router.System.Contact
-	Location := router.System.Location
-	//Services := router.System.Services
-	GpsLat := router.System.GPS.Latitude
-	GpsLong := router.System.GPS.Longitude
-	GpsAlt := router.System.GPS.Altitude
-
-	routerIsInDB := false
-	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
-	if err != nil {
-		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-			fmt.Println("Router", Name, "is already exists in database. Continuing discovery.")
-			routerIsInDB = true
-		} else {
-			fmt.Printf("RouterMac Insert Exec err: %v", err)
-			log.Fatal(err)
+		if debugFlag {
+			fmt.Println("router.System.Name=", router.System.Name)
+			fmt.Println("router.System.Description=", router.System.Description)
+			fmt.Println("router.System.UpTime=", router.System.UpTime)
+			fmt.Println("router.System.Contact=", router.System.Contact)
+			fmt.Println("router.System.Location=", router.System.Location)
+			fmt.Println("router.System.Services=", router.System.Services)
+			fmt.Println("router.System.GPS=", router.System.GPS)
 		}
-	}
 
-	if !routerIsInDB {
-		getInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
+		// Initialize the database
+		database, err := sql.Open("sqlite3", dbName)
+		if err != nil {
+			log.Fatalf("sql.Open() err: %v", err)
+		}
 
-		getIPAddresses(debugFlag, params, router, database)
+		database = initDB(database)
 
-		getIPRouteTable(debugFlag, params, router, database)
-	}
+		// Write Router row to database
+		statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+		statement.Exec()
 
-	// TODO: Write Links row to database
+		Name := router.System.Name
+		RouterIDUint32 := crc32.ChecksumIEEE([]byte(Name))
+		Description := router.System.Description
+		UpTime := router.System.UpTime
+		Contact := router.System.Contact
+		Location := router.System.Location
+		//Services := router.System.Services
+		GpsLat := router.System.GPS.Latitude
+		GpsLong := router.System.GPS.Longitude
+		GpsAlt := router.System.GPS.Altitude
 
-	// Close database
-	database.Close()
+		routerIsInDB := false
+		_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
+		if err != nil {
+			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+				fmt.Println("Router", Name, "is already exists in database. Continuing discovery.")
+				routerIsInDB = true
+			} else {
+				fmt.Printf("RouterMac Insert Exec err: %v", err)
+				log.Fatal(err)
+			}
+		}
 
-	if debugFlag {
-		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
-	}
+		if !routerIsInDB {
+			getInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
+
+			getIPAddresses(debugFlag, params, router, database)
+
+			getIPRouteTable(debugFlag, params, router, database)
+		}
+
+		// TODO: Write Links row to database
+
+		// Close database
+		database.Close()
+
+		if debugFlag {
+			fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
+		}
+	*/
 }
 
 func getInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
@@ -692,6 +698,121 @@ func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *
 		if err != nil {
 			log.Fatalf("RouteTable Insert err: %v", err)
 		}
+	}
+
+}
+
+func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router) {
+	oids := []string{
+		sysNameOID + ".0",     // sysName
+		sysDescrOID + ".0",    // sysDescr
+		sysUpTimeOID + ".0",   // sysUpTime
+		sysContactOID + ".0",  // sysContact
+		sysLocationOID + ".0", // sysLocation
+		sysServicesOID + ".0", // sysServices
+	}
+
+	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
+	if err != nil {
+		log.Fatalf("Get() err: %v", err)
+	}
+
+	router.System.Name = string(result.Variables[0].Value.([]byte))
+	router.System.Description = string(result.Variables[1].Value.([]byte))
+	router.System.UpTime = result.Variables[2].Value.(uint32)
+	router.System.Contact = string(result.Variables[3].Value.([]byte))
+	router.System.Location = string(result.Variables[4].Value.([]byte))
+	router.System.Services = g.ToBigInt(result.Variables[5].Value)
+
+	/*
+		// Retrieve GPS data from DNS
+	*/
+
+	// get FQDN with IP Address
+	fqdn := getIPADDR(snmpTarget)
+	// get GPS data from DNS
+	router.System.GPS.Latitude = "0.0"  // initialze with float data to allow for missing GPS on DB
+	router.System.GPS.Longitude = "0.0" // initialze with float data to allow for missing GPS on DB
+	router.System.GPS.Altitude = "0.0"  // initialze with float data to allow for missing GPS on DB
+
+	if len(fqdn) > 0 {
+		gpsDNS := getGPS(fqdn[0])
+		for n := 0; n < len(gpsDNS); n++ {
+			s := gpsDNS[n]
+			// Split TXT record into prefix and value
+			sr := strings.Split(s, "=")
+			if sr[0] == "Long" {
+				router.System.GPS.Longitude = sr[1]
+			}
+			if sr[0] == "Lat" {
+				router.System.GPS.Latitude = sr[1]
+			}
+			if sr[0] == "Alt" {
+				router.System.GPS.Altitude = sr[1]
+			}
+		}
+	}
+
+	if debugFlag {
+		fmt.Println("router.System.Name=", router.System.Name)
+		fmt.Println("router.System.Description=", router.System.Description)
+		fmt.Println("router.System.UpTime=", router.System.UpTime)
+		fmt.Println("router.System.Contact=", router.System.Contact)
+		fmt.Println("router.System.Location=", router.System.Location)
+		fmt.Println("router.System.Services=", router.System.Services)
+		fmt.Println("router.System.GPS=", router.System.GPS)
+	}
+
+	// Initialize the database
+	database, err := sql.Open("sqlite3", dbName)
+	if err != nil {
+		log.Fatalf("sql.Open() err: %v", err)
+	}
+
+	database = initDB(database)
+
+	// Write Router row to database
+	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	statement.Exec()
+
+	Name := router.System.Name
+	RouterIDUint32 := crc32.ChecksumIEEE([]byte(Name))
+	Description := router.System.Description
+	UpTime := router.System.UpTime
+	Contact := router.System.Contact
+	Location := router.System.Location
+	//Services := router.System.Services
+	GpsLat := router.System.GPS.Latitude
+	GpsLong := router.System.GPS.Longitude
+	GpsAlt := router.System.GPS.Altitude
+
+	routerIsInDB := false
+	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
+	if err != nil {
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			fmt.Println("Router", Name, "is already exists in database. Continuing discovery.")
+			routerIsInDB = true
+		} else {
+			fmt.Printf("RouterMac Insert Exec err: %v", err)
+			log.Fatal(err)
+		}
+	}
+
+	if !routerIsInDB {
+		getInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
+
+		getIPAddresses(debugFlag, params, router, database)
+
+		getIPRouteTable(debugFlag, params, router, database)
+	}
+
+	// TODO: Write Links row to database
+
+	// Close database
+	database.Close()
+
+	if debugFlag {
+		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
 	}
 
 }
