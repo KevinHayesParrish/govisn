@@ -72,7 +72,23 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	}
 	defer params.Conn.Close()
 
-	getRouterInfo(debugFlag, snmpTarget, community, maxHopsStr, params, router)
+	// Initialize the database
+	database, err := sql.Open("sqlite3", dbName)
+	if err != nil {
+		log.Fatalf("sql.Open() err: %v", err)
+	}
+	database = initDB(database)
+
+	getRouterInfo(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
+
+	// TODO: Write Links row to database
+
+	// Close database
+	database.Close()
+
+	if debugFlag {
+		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
+	}
 
 	/*
 		oids := []string{
@@ -702,7 +718,7 @@ func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *
 
 }
 
-func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router) {
+func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
 	oids := []string{
 		sysNameOID + ".0",     // sysName
 		sysDescrOID + ".0",    // sysDescr
@@ -763,14 +779,15 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 		fmt.Println("router.System.GPS=", router.System.GPS)
 	}
 
-	// Initialize the database
-	database, err := sql.Open("sqlite3", dbName)
-	if err != nil {
-		log.Fatalf("sql.Open() err: %v", err)
-	}
+	/*
+		// Initialize the database
+		database, err := sql.Open("sqlite3", dbName)
+		if err != nil {
+			log.Fatalf("sql.Open() err: %v", err)
+		}
 
-	database = initDB(database)
-
+		database = initDB(database)
+	*/
 	// Write Router row to database
 	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	statement.Exec()
@@ -806,13 +823,14 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 		getIPRouteTable(debugFlag, params, router, database)
 	}
 
-	// TODO: Write Links row to database
+	/*
+		// TODO: Write Links row to database
 
-	// Close database
-	database.Close()
+		// Close database
+		database.Close()
 
-	if debugFlag {
-		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
-	}
-
+		if debugFlag {
+			fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
+		}
+	*/
 }
