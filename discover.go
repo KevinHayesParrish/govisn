@@ -747,6 +747,7 @@ func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *
 		fmt.Println("\nipRouteNextHopPDU PDU=", ipRouteNextHopPDU)
 	}
 
+	// Parse Dest and NextHop PDUs, adding row to ipRouteTable for each PDU element.
 	var ipRouteTab ipRouteTable
 
 	for i := 0; i < (len(ipRouteDestPDU)); i++ {
@@ -754,25 +755,46 @@ func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *
 		if debugFlag {
 			fmt.Println("ipRouteDest=", ipRouteTab.ipRouteEntry.ipRouteDest)
 		}
-	}
-	for i := 0; i < (len(ipRouteNextHopPDU)); i++ {
+
 		ipRouteTab.ipRouteEntry.ipRouteNextHop = ipRouteNextHopPDU[i].Value.(string)
 		if debugFlag {
 			fmt.Println("ipRouteNextHop=", ipRouteTab.ipRouteEntry.ipRouteNextHop)
 		}
+
+		// Add row to RouteTable table
+		statement, _ := database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, NextHop) VALUES (?, ?, ?)")
+		if err != nil {
+			fmt.Printf("RouterTable Prepare Insert Exec err: %v", err)
+			log.Fatal(err)
+		}
+
+		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
+		_, err = statement.Exec(RouterID, ipRouteTab.ipRouteEntry.ipRouteDest, ipRouteTab.ipRouteEntry.ipRouteNextHop)
+		if err != nil {
+			log.Fatalf("RouteTable Insert err: %v", err)
+		}
 	}
 
-	// Add row to RouteTable table
-	statement, _ := database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, NextHop) VALUES (?, ?, ?)")
-	if err != nil {
-		fmt.Printf("RouterTable Prepare Insert Exec err: %v", err)
-		log.Fatal(err)
-	}
-	RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
-	_, err = statement.Exec(RouterID, ipRouteTab.ipRouteEntry.ipRouteDest, ipRouteTab.ipRouteEntry.ipRouteNextHop)
-	if err != nil {
-		log.Fatalf("RouteTable Insert err: %v", err)
-	}
+	/*
+		for i := 0; i < (len(ipRouteNextHopPDU)); i++ {
+			ipRouteTab.ipRouteEntry.ipRouteNextHop = ipRouteNextHopPDU[i].Value.(string)
+			if debugFlag {
+				fmt.Println("ipRouteNextHop=", ipRouteTab.ipRouteEntry.ipRouteNextHop)
+			}
+		}
+
+		// Add row to RouteTable table
+		statement, _ := database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, NextHop) VALUES (?, ?, ?)")
+		if err != nil {
+			fmt.Printf("RouterTable Prepare Insert Exec err: %v", err)
+			log.Fatal(err)
+		}
+		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
+		_, err = statement.Exec(RouterID, ipRouteTab.ipRouteEntry.ipRouteDest, ipRouteTab.ipRouteEntry.ipRouteNextHop)
+		if err != nil {
+			log.Fatalf("RouteTable Insert err: %v", err)
+		}
+	*/
 }
 
 //func writeIPRowToDB(debugFlag bool, router Router, database *sql.DB) {
