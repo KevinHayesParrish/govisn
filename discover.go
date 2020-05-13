@@ -18,9 +18,8 @@ import (
  */
 
 //DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.2.3"
+const DISCOVERYVERSION = "0.2.4"
 
-//func discover(debugFlag bool, snmpTarget string, community string, maxHopsStr string) {
 func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
 
 	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.\ndebugFlag=", debugFlag)
@@ -95,7 +94,6 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	/*
 		// Retrieve GPS data from DNS
 	*/
-	//	fmt.Println("DNS TXT records=", getGPS("server.parrish.home")) // TESTING ONLY
 
 	// get FQDN with IP Address
 	fqdn := getIPADDR(snmpTarget)
@@ -133,13 +131,11 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	}
 
 	// Initialize the database
-	//	database := initDB()
 	database, err := sql.Open("sqlite3", dbName)
 	if err != nil {
 		log.Fatalf("sql.Open() err: %v", err)
 	}
-	//	database := initDB(dbName)
-	//	database = initDB(dbName)
+
 	database = initDB(database)
 
 	// Write Router row to database
@@ -158,7 +154,6 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	GpsAlt := router.System.GPS.Altitude
 
 	routerIsInDB := false
-	//	statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
 	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
@@ -175,8 +170,6 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 
 		getIPAddresses(debugFlag, params, router, database)
 
-		//writeIPRowToDB(debugFlag, router, database)
-
 		getIPRouteTable(debugFlag, params, router, database)
 	}
 
@@ -190,7 +183,6 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	}
 }
 
-//func getInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP) {
 func getInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
 
 	// get Number of Interfaces
@@ -478,112 +470,57 @@ func getInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsS
 
 }
 
-//func initDB(dbName string) *sql.DB {
 func initDB(database *sql.DB) *sql.DB {
 	initDbVersion := "0.0.2"
 	fmt.Println("initDB version:", initDbVersion)
-	//	database, err := sql.Open("sqlite3", "./govisnDiscoveredNet.db")
-	//	database, err := sql.Open("sqlite3", dbName)
-	//	if err != nil {
-	//		log.Fatalf("sql.Open() err: %v", err)
-	//	}
 
 	/*
 	 *	Add Routers table to DB
 	 */
-	//	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
 	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY UNIQUE, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
 	if err != nil {
 		log.Fatalf("Router Table Create err: %v", err)
 	}
 	statement.Exec()
-	//	 statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
 	/*
 	 *	Add RouteTable table to DB
 	 */
-	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, NextHop TEXT)")
 	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, NextHop TEXT)")
 	if err != nil {
 		log.Fatalf("RouteTable Create err: %v", err)
 	}
 	statement.Exec()
-	// 	statement, _ = database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, NextHop) VALUES (?, ?, ?)")
 
 	/*
 	 *	Add RouterIP table to DB
 	 */
 	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT)")
-	//statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT UNIQUE)")
 	if err != nil {
 		log.Fatalf("RouterIP Create err: %v", err)
 	}
 	statement.Exec()
-	//	statement, _ = database.Prepare("INSERT INTO RouterIp (RouterID, IpAddr) VALUES (?, ?)")
 
 	/*
 	 *	Add RouterMac table to DB
 	 */
 	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
-	//statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT UNIQUE)")
 	if err != nil {
 		log.Fatalf("RouterMac Create err: %v", err)
 	}
 	statement.Exec()
 
-	//	statement, _ = database.Prepare("INSERT INTO RouterMac (RouterID, MacAddr) VALUES (?, ?)")
-
 	/*
 	 *	Add Links table to DB
 	 */
-	//	statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP TEXT)")
 	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP TEXT)")
 	if err != nil {
 		log.Fatalf("Links Create err: %v", err)
 	}
 	statement.Exec()
-	//	statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
 
 	return database
 }
-
-/*
-func writeRouterToDb(database *sql.DB, router Router) {
-	statement, err := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-	if err != nil {
-		log.Fatalf("Router Insert Prepare err: %v", err)
-	}
-	//	statement.Exec()
-	_, err = statement.Exec()
-	if err != nil {
-		log.Fatalf("Router Insert Exec err: %v", err)
-	}
-
-	Name := router.System.Name
-	RouterIDUint32 := crc32.ChecksumIEEE([]byte(Name))
-	Description := router.System.Description
-	UpTime := router.System.UpTime
-	Contact := router.System.Contact
-	Location := router.System.Location
-	//Services := router.System.Services
-	GpsLat, err := strconv.ParseFloat(router.System.GPS.Latitude, 32)
-	if err != nil {
-		log.Fatalf("GpsLat Atoi err: %v", err)
-	}
-	GpsLong, err := strconv.ParseFloat(router.System.GPS.Longitude, 32)
-	if err != nil {
-		log.Fatalf("GpsLong Atoi err: %v", err)
-	}
-	GpsAlt, err := strconv.ParseFloat(router.System.GPS.Altitude, 32)
-	if err != nil {
-		log.Fatalf("GpsAlt Atoi err: %v", err)
-	}
-
-	statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
-
-}
-*/
 
 func getIPADDR(ipAddr string) []string {
 	names, err := net.LookupAddr(ipAddr)
@@ -614,9 +551,6 @@ func getGPS(sysName string) []string {
 	return txts
 }
 
-//func writeInterfacesToDB(debugFlag bool, database *sql.DB) {
-//}
-
 func writeMacToDB(debugFlag bool, router Router, interfaceTable ifTable, database *sql.DB) {
 
 	statement, err := database.Prepare("INSERT INTO RouterMac (RouterID, MacAddr) VALUES (?, ?)")
@@ -624,12 +558,6 @@ func writeMacToDB(debugFlag bool, router Router, interfaceTable ifTable, databas
 		log.Fatalf("RouterMac Insert Prepare err: %v", err)
 		log.Fatal(err)
 	}
-
-	//	_, err = statement.Exec()
-	//	if err != nil {
-	//		fmt.Printf("RouterMac Insert Prepare Exec err: %v", err)
-	//		log.Fatal(err)
-	//	}
 
 	RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
 	_, err = statement.Exec(strconv.Itoa(int(RouterID)), interfaceTable.ifEntry.ifPhysAddress)
@@ -658,9 +586,6 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 	var ipTable ipAddrTable
 
 	for i := 0; i < (len(walkPDU)); i++ {
-		//		for k := 0; k < nbrOfInterfaces; k++ {
-		//			ipTable.ifAddrEntry.ipAdEntOID = walkPDU[i].Name
-		//			ipTable.ifEntry.ipAdEntAddrType = byte(walkPDU[i].Type)
 		ipTable.ipAddrEntry.ipAdEntAddr = walkPDU[i].Value.(string)
 		if debugFlag {
 			fmt.Println("ipAdEntAddr=", ipTable.ipAddrEntry.ipAdEntAddr)
@@ -672,7 +597,6 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 			fmt.Printf("RouterIp Prepare Insert Exec err: %v", err)
 			log.Fatal(err)
 		}
-		//		if err != nil {
 		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
 		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr)
 		if err != nil {
@@ -685,14 +609,6 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 				log.Fatal(err)
 			}
 		}
-
-		//		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
-		//		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr)
-		//		if err != nil {
-		//			fmt.Printf("RouterIp Exec Insert Exec err: %v", err)
-		//			log.Fatal(err)
-		//		}
-
 	}
 
 	walkPDU, err = params.WalkAll(ipAdEntIfIndex)
@@ -778,27 +694,4 @@ func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *
 		}
 	}
 
-	/*
-		for i := 0; i < (len(ipRouteNextHopPDU)); i++ {
-			ipRouteTab.ipRouteEntry.ipRouteNextHop = ipRouteNextHopPDU[i].Value.(string)
-			if debugFlag {
-				fmt.Println("ipRouteNextHop=", ipRouteTab.ipRouteEntry.ipRouteNextHop)
-			}
-		}
-
-		// Add row to RouteTable table
-		statement, _ := database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, NextHop) VALUES (?, ?, ?)")
-		if err != nil {
-			fmt.Printf("RouterTable Prepare Insert Exec err: %v", err)
-			log.Fatal(err)
-		}
-		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
-		_, err = statement.Exec(RouterID, ipRouteTab.ipRouteEntry.ipRouteDest, ipRouteTab.ipRouteEntry.ipRouteNextHop)
-		if err != nil {
-			log.Fatalf("RouteTable Insert err: %v", err)
-		}
-	*/
 }
-
-//func writeIPRowToDB(debugFlag bool, router Router, database *sql.DB) {
-//}
