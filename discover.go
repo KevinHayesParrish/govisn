@@ -157,27 +157,28 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	GpsLong := router.System.GPS.Longitude
 	GpsAlt := router.System.GPS.Altitude
 
-	statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
+	routerIsInDB := false
+	//	statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
+	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
+	if err != nil {
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			fmt.Println("Router", Name, "is already exists in database. Continuing discovery.")
+			routerIsInDB = true
+		} else {
+			fmt.Printf("RouterMac Insert Exec err: %v", err)
+			log.Fatal(err)
+		}
+	}
 
-	getInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
+	if !routerIsInDB {
+		getInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
 
-	getIPAddresses(debugFlag, params, router, database)
+		getIPAddresses(debugFlag, params, router, database)
 
-	//writeIPRowToDB(debugFlag, router, database)
+		//writeIPRowToDB(debugFlag, router, database)
 
-	getIPRouteTable(debugFlag, params, router, database)
-	// get ipRouteTable
-	//	walkPDU, walkError = params.WalkAll(ipRouteTableOID)
-	//	if walkError != nil {
-	//		log.Fatalf("Get() err: %v", err2)
-	//	}
-	//	if debugFlag {
-	//		fmt.Println("\nipRouteTable PDU=", walkPDU)
-	//	}
-
-	// TODO: Write RouterIp Row to database
-
-	//var ipRouteTableResult ipRouteTable
+		getIPRouteTable(debugFlag, params, router, database)
+	}
 
 	// TODO: Write Links row to database
 
@@ -490,8 +491,8 @@ func initDB(database *sql.DB) *sql.DB {
 	/*
 	 *	Add Routers table to DB
 	 */
-	//statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
-	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	//	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY UNIQUE, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
 	if err != nil {
 		log.Fatalf("Router Table Create err: %v", err)
 	}
@@ -547,6 +548,7 @@ func initDB(database *sql.DB) *sql.DB {
 	return database
 }
 
+/*
 func writeRouterToDb(database *sql.DB, router Router) {
 	statement, err := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
@@ -581,6 +583,7 @@ func writeRouterToDb(database *sql.DB, router Router) {
 	statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
 
 }
+*/
 
 func getIPADDR(ipAddr string) []string {
 	names, err := net.LookupAddr(ipAddr)
