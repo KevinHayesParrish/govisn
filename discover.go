@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"hash/crc32"
 	"log"
+	"math/big"
 	"net"
 	"strconv"
 	"strings"
@@ -20,7 +21,7 @@ import (
 */
 
 // DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.3.0"
+const DISCOVERYVERSION = "0.3.1"
 
 func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
 
@@ -385,7 +386,8 @@ func initDB(database *sql.DB) *sql.DB {
 	/*
 	 *	Add Routers table to DB
 	 */
-	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY UNIQUE, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	//	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY UNIQUE, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY UNIQUE, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, Services INTEGER, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
 	if err != nil {
 		log.Fatalf("Router Table Create err: %v", err)
 	}
@@ -626,6 +628,8 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 	router.System.Location = string(result.Variables[4].Value.([]byte))
 	router.System.Services = g.ToBigInt(result.Variables[5].Value)
 
+	services := big.NewInt(int64(router.System.Services))
+
 	/*
 		// Retrieve GPS data from DNS
 	*/
@@ -675,7 +679,8 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 		database = initDB(database)
 	*/
 	// Write Router row to database
-	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	//	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	statement.Exec()
 
 	Name := router.System.Name
@@ -684,13 +689,14 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 	UpTime := router.System.UpTime
 	Contact := router.System.Contact
 	Location := router.System.Location
-	//Services := router.System.Services
+	Services := router.System.Services
 	GpsLat := router.System.GPS.Latitude
 	GpsLong := router.System.GPS.Longitude
 	GpsAlt := router.System.GPS.Altitude
 
 	routerIsInDB := false
-	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
+	//	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) // Add router
+	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) // Add router
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			fmt.Println("Router", Name, "is already exists in database. Continuing discovery.")
