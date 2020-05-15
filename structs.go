@@ -1,7 +1,5 @@
 package main
 
-import "math/big"
-
 // Router is the structure representing a network router
 type Router struct {
 	System struct {
@@ -12,7 +10,7 @@ type Router struct {
 		UpTime   uint32
 		Contact  string
 		Location string
-		Services *big.Int
+		Services int
 		GPS      struct {
 			Latitude  string
 			Longitude string
