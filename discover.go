@@ -20,9 +20,10 @@ import (
 */
 
 // DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.3.1"
+const DISCOVERYVERSION = "0.3.2"
 
-func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
+//func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
+func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) *sql.DB {
 
 	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.")
 
@@ -89,6 +90,8 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	if debugFlag {
 		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
 	}
+
+	return database
 }
 
 func getInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {

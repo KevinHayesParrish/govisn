@@ -29,7 +29,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.8.3"
+const ViewnetVersion = "0.8.4"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -90,7 +90,11 @@ func main() {
 		if *debugFlag {
 			fmt.Println("seed=", seed, "community=", *community)
 		}
-		discover(*debugFlag, dbName, seed, *community, *maxHops)
+		//		discover(*debugFlag, dbName, seed, *community, *maxHops)
+		database := discover(*debugFlag, dbName, seed, *community, *maxHops)
+
+		// Build Links
+		database = buildLinks(*debugFlag, database)
 	}
 
 	// Open the database containing the discovered network
@@ -110,7 +114,8 @@ func main() {
 
 	// Retrieve the Routers table
 	//	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
-	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
+	//	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
+	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers")
 	if queryErr != nil {
 		fmt.Println("databaseForRead Query error", queryErr)
 		log.Fatal(openErr)
@@ -149,6 +154,7 @@ func main() {
 	var UpTime uint32
 	var Contact string
 	var Location string
+	var Services int
 	var GpsLat string
 	var GpsLong string
 	var GpsAlt string
@@ -200,7 +206,8 @@ func main() {
 	 */
 	routerArrayIndex := 0
 	for routerRows.Next() {
-		routerRows.Scan(&RouterID, &Name, &Description, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
+		//		routerRows.Scan(&RouterID, &Name, &Description, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
+		routerRows.Scan(&RouterID, &Name, &Description, &UpTime, &Contact, &Location, &Services, &GpsLat, &GpsLong, &GpsAlt)
 
 		// Load router struct from DB fields
 		routerArray[routerArrayIndex].System.RouterID = RouterID
@@ -208,6 +215,7 @@ func main() {
 		routerArray[routerArrayIndex].System.Name = Name
 		routerArray[routerArrayIndex].System.Contact = Contact
 		routerArray[routerArrayIndex].System.Location = Location
+		routerArray[routerArrayIndex].System.Services = Services
 		routerArray[routerArrayIndex].System.GPS.Latitude = GpsLat
 		routerArray[routerArrayIndex].System.GPS.Longitude = GpsLong
 		routerArray[routerArrayIndex].System.GPS.Altitude = GpsAlt
