@@ -29,7 +29,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.8.4"
+const ViewnetVersion = "0.8.5"
 const maxRouters int = 1000
 
 // The flag package provides a default help printer via -h switch
@@ -118,7 +118,7 @@ func main() {
 	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers")
 	if queryErr != nil {
 		fmt.Println("databaseForRead Query error", queryErr)
-		log.Fatal(openErr)
+		log.Fatal(queryErr)
 	}
 	if *debugFlag {
 		fmt.Println("Successful Routers table Select")
@@ -162,7 +162,10 @@ func main() {
 	//	var Y3D float32
 	//	var Z3D float32
 	//	var router Router
-	var routerArray [1000]Router
+	//	var routerArray [1000]Router
+
+	var routerArray [maxRouters]Router
+
 	var link Link
 	var LinkID int
 	//	var FromRouterName string
@@ -204,6 +207,8 @@ func main() {
 	/*
 	* Add the routers to the 3D scene
 	 */
+	var routers []Router
+	var router Router
 	routerArrayIndex := 0
 	for routerRows.Next() {
 		//		routerRows.Scan(&RouterID, &Name, &Description, &UpTime, &Contact, &Location, &GpsLat, &GpsLong, &GpsAlt)
@@ -219,6 +224,18 @@ func main() {
 		routerArray[routerArrayIndex].System.GPS.Latitude = GpsLat
 		routerArray[routerArrayIndex].System.GPS.Longitude = GpsLong
 		routerArray[routerArrayIndex].System.GPS.Altitude = GpsAlt
+
+		router.System.RouterID = RouterID
+		router.System.UpTime = UpTime
+		router.System.Name = Name
+		router.System.Contact = Contact
+		router.System.Location = Location
+		router.System.Services = Services
+		router.System.GPS.Latitude = GpsLat
+		router.System.GPS.Longitude = GpsLong
+		router.System.GPS.Altitude = GpsAlt
+
+		routers = append(routers, router)
 
 		rtr3D := geometry.NewCylinder(routerRadius, routerRadius, 0.5, 16, 2, 0, 2*math.Pi, true, true)
 		mat := material.NewPhong(math32.NewColor("DarkBlue"))
