@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"hash/crc32"
+	"log"
 
 	//"log"
 	//"math"
@@ -22,6 +24,63 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 	 * Write Links Row to database
 	 *
 	 */
+
+	routeTableRows, err := database.Query("SELECT RouterID, Name, DestAddr, NextHop FROM Routers INNER JOIN RouteTable USING (RouterID)")
+	if err != nil {
+		log.Fatalln("databaseForRead JOIN error", err.Error())
+	}
+	if debugFlag {
+		fmt.Println("Successful Routers/RouteTable JOIN")
+	}
+	defer routeTableRows.Close()
+
+	//var routers []Router
+	var router Router
+	//routerArrayIndex := 0
+	var links []Link
+	var link Link
+	var RouterID int
+	var Name string
+	var DestAddr string
+	var NextHop string
+	for routeTableRows.Next() {
+		routeTableRows.Scan(&RouterID, &Name, &DestAddr, &NextHop)
+		router.System.RouterID = RouterID
+		router.System.Name = Name
+		link.RouterName = Name
+		// calculate LinkID
+		link.LinkID = int(crc32.ChecksumIEEE([]byte(Name)))
+		link.DestinationName = ""
+		link.DestinationIP = DestAddr
+		link.NextHopName = ""
+		link.NextHopIP = NextHop
+
+		links = append(links, link)
+
+		//		statement, err := database.Prepare("INSERT INTO Links (LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP) VALUES (?, ?, ?, ?, ?, ?)")
+		//		if err != nil {
+		//			log.Fatalln("Links Insert Prepare err:", err.Error())
+		//		}
+		//		_, err = statement.Exec(link.LinkID, link.RouterName, link.DestinationName, link.DestinationIP, link.NextHopName, link.NextHopIP)
+		//		if err != nil {
+		//			log.Fatalln("Link INSERT error:", err.Error())
+		//		}
+		//		defer statement.Close()
+
+	}
+	routeTableRows.Close()
+
+	for i := 0; i < len(links); i++ {
+		statement, err := database.Prepare("INSERT INTO Links (LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP) VALUES (?, ?, ?, ?, ?, ?)")
+		if err != nil {
+			log.Fatalln("Links Insert Prepare err:", err.Error())
+		}
+		_, err = statement.Exec(links[i].LinkID, links[i].RouterName, links[i].DestinationName, links[i].DestinationIP, links[i].NextHopName, links[i].NextHopIP)
+		if err != nil {
+			log.Fatalln("Link INSERT error:", err.Error())
+		}
+		defer statement.Close()
+	}
 
 	fmt.Println("func buildLinks version", buildLinksVersion, "stopped")
 	return database
