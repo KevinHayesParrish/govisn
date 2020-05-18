@@ -23,7 +23,8 @@ import (
 const DISCOVERYVERSION = "0.3.2"
 
 //func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
-func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) *sql.DB {
+//func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) *sql.DB {
+func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string, database *sql.DB) *sql.DB {
 
 	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.")
 
@@ -74,10 +75,10 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	defer params.Conn.Close()
 
 	// Initialize the database
-	database, err := sql.Open("sqlite3", dbName)
-	if err != nil {
-		log.Fatalf("sql.Open() err: %v", err)
-	}
+	//	database, err := sql.Open("sqlite3", dbName)
+	//	if err != nil {
+	//		log.Fatalf("sql.Open() err: %v", err)
+	//	}
 	database = initDB(debugFlag, database)
 
 	getRouterInfo(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
@@ -85,7 +86,8 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	// TODO: Write Links row to database
 
 	// Close database
-	database.Close()
+	//	database.Close()
+	//	defer database.Close()
 
 	if debugFlag {
 		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
@@ -394,6 +396,7 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	if err != nil {
 		log.Fatalf("Router Table Create err: %v", err)
 	}
+	defer statement.Close()
 	statement.Exec()
 
 	/*
@@ -403,6 +406,7 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	if err != nil {
 		log.Fatalf("RouteTable Create err: %v", err)
 	}
+	defer statement.Close()
 	statement.Exec()
 
 	/*
@@ -412,6 +416,7 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	if err != nil {
 		log.Fatalf("RouterIP Create err: %v", err)
 	}
+	defer statement.Close()
 	statement.Exec()
 
 	/*
@@ -421,6 +426,7 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	if err != nil {
 		log.Fatalf("RouterMac Create err: %v", err)
 	}
+	defer statement.Close()
 	statement.Exec()
 
 	/*
@@ -430,6 +436,7 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	if err != nil {
 		log.Fatalf("Links Create err: %v", err)
 	}
+	defer statement.Close()
 	statement.Exec()
 
 	return database
@@ -471,6 +478,7 @@ func writeMacToDB(debugFlag bool, router Router, interfaceTable ifTable, databas
 		log.Fatalf("RouterMac Insert Prepare err: %v", err)
 		log.Fatal(err)
 	}
+	defer statement.Close()
 
 	RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
 	_, err = statement.Exec(strconv.Itoa(int(RouterID)), interfaceTable.ifEntry.ifPhysAddress)
@@ -484,6 +492,7 @@ func writeMacToDB(debugFlag bool, router Router, interfaceTable ifTable, databas
 			log.Fatal(err)
 		}
 	}
+	defer statement.Close()
 }
 
 func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *sql.DB) {
@@ -522,6 +531,8 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 				log.Fatal(err)
 			}
 		}
+		defer statement.Close()
+
 	}
 
 	walkPDU, err = params.WalkAll(ipAdEntIfIndex)
@@ -605,6 +616,7 @@ func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *
 		if err != nil {
 			log.Fatalf("RouteTable Insert err: %v", err)
 		}
+		defer statement.Close()
 	}
 
 }
@@ -674,6 +686,7 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 	// Write Router row to database
 	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	statement.Exec()
+	defer statement.Close()
 
 	Name := router.System.Name
 	RouterIDUint32 := crc32.ChecksumIEEE([]byte(Name))
@@ -697,6 +710,7 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 			log.Fatal(err)
 		}
 	}
+	defer statement.Close()
 
 	if !routerIsInDB {
 		getInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)

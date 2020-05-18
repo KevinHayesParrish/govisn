@@ -91,11 +91,30 @@ func main() {
 		if *debugFlag {
 			fmt.Println("seed=", seed, "community=", *community)
 		}
+
+		// Initialize the database
+		database, err := sql.Open("sqlite3", dbName)
+		if err != nil {
+			log.Fatalf("sql.Open() err: %v", err)
+		}
+
 		//		discover(*debugFlag, dbName, seed, *community, *maxHops)
-		database := discover(*debugFlag, dbName, seed, *community, *maxHops)
+		//		database := discover(*debugFlag, dbName, seed, *community, *maxHops)
+		database = discover(*debugFlag, dbName, seed, *community, *maxHops, database)
+
+		// Close database. Completed initialization and update of all tables, except Links.
+		database.Close()
+
+		// Open database. buildLinks joins Router and RouteTable tables.
+		database, err = sql.Open("sqlite3", dbName)
+		if err != nil {
+			log.Fatalf("sql.Open() err: %v", err)
+		}
 
 		// Build Links
 		database = buildLinks(*debugFlag, database)
+		database.Close()
+
 	}
 
 	// Open the database containing the discovered network
