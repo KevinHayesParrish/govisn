@@ -384,7 +384,14 @@ func getInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsS
 }
 
 func initDB(debugFlag bool, database *sql.DB) *sql.DB {
-	initDbVersion := "0.0.2"
+
+	/*
+		*
+		* TODO:
+			* Change Links table elements to be: LinkID, FromRouterName, FromRouterIP, ToRouterName, FromRouterIP
+	*/
+
+	initDbVersion := "0.0.3"
 	if debugFlag {
 		fmt.Println("initDB version:", initDbVersion)
 	}
