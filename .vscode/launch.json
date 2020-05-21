@@ -22,7 +22,7 @@
 //            "program": "${file}",
             "program": "/Users/kevin/go/src/govisn",
             "env": {},
-            "args": ["-f", "/Users/kevin/test.db"]
+            "args": ["-f", "/Users/kevin/govisnDiscoveredNet.db"]
         },
         {
             "name": "Debug govisn -d -f",
