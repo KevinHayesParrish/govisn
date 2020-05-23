@@ -147,7 +147,8 @@ func main() {
 	// Retrieve the Links table
 	//	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouter, ToRouter FROM Links")
 	//	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, FromRouterIP FROM Links")
-	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP FROM Links")
+	//	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP FROM Links")
+	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP FROM Links")
 	if queryErr != nil {
 		fmt.Println("databaseForRead Query error", queryErr)
 		log.Fatal(openErr)
@@ -192,7 +193,8 @@ func main() {
 	//	var FromRouterIP string
 	//	var ToRouterName string
 	//	var ToRouterIP string
-	var RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP string
+	//	var RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP string
+	var FromRouterName, FromRouterIP, ToRouterName, ToRouterIP string
 	var x float32
 	var y float32 = 1.0
 	var z float32 = 1.0
@@ -368,7 +370,8 @@ func main() {
 	for linkRows.Next() {
 		//		err := linkRows.Scan(&LinkID, &FromRouter, &ToRouter)
 		//		err := linkRows.Scan(&LinkID, &FromRouterName, &FromRouterIP, &ToRouterName, &ToRouterIP)
-		err := linkRows.Scan(&LinkID, &RouterName, &DestinationName, &DestinationIP, &NextHopName, &NextHopIP)
+		//		err := linkRows.Scan(&LinkID, &RouterName, &DestinationName, &DestinationIP, &NextHopName, &NextHopIP)
+		err := linkRows.Scan(&LinkID, &FromRouterName, &FromRouterIP, &ToRouterName, &ToRouterIP)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -376,7 +379,8 @@ func main() {
 		// Exclude false routes
 		//		if FromRouter == "127.0.0.0" || FromRouter == "127.0.0.1" || FromRouter == "224.0.0.0" || FromRouter == "0.0.0.0" || ToRouter == "127.0.0.0" || ToRouter == "127.0.0.1" || ToRouter == "224.0.0.0" || ToRouter == "0.0.0.0" {
 		//		if FromRouterIP == "127.0.0.0" || FromRouterIP == "127.0.0.1" || FromRouterIP == "224.0.0.0" || FromRouterIP == "0.0.0.0" || ToRouterIP == "127.0.0.0" || ToRouterIP == "127.0.0.1" || ToRouterIP == "224.0.0.0" || ToRouterIP == "0.0.0.0" {
-		if DestinationIP == "127.0.0.0" || DestinationIP == "127.0.0.1" || DestinationIP == "224.0.0.0" || DestinationIP == "0.0.0.0" || NextHopIP == "127.0.0.0" || NextHopIP == "127.0.0.1" || NextHopIP == "224.0.0.0" || NextHopIP == "0.0.0.0" {
+		//		if DestinationIP == "127.0.0.0" || DestinationIP == "127.0.0.1" || DestinationIP == "224.0.0.0" || DestinationIP == "0.0.0.0" || NextHopIP == "127.0.0.0" || NextHopIP == "127.0.0.1" || NextHopIP == "224.0.0.0" || NextHopIP == "0.0.0.0" {
+		if FromRouterIP == "127.0.0.0" || FromRouterIP == "127.0.0.1" || FromRouterIP == "224.0.0.0" || FromRouterIP == "0.0.0.0" || ToRouterIP == "127.0.0.0" || ToRouterIP == "127.0.0.1" || ToRouterIP == "224.0.0.0" || ToRouterIP == "0.0.0.0" {
 			continue
 		}
 
@@ -388,25 +392,32 @@ func main() {
 		//		link.FromRouterIP = FromRouterIP
 		//		link.ToRouterName = ToRouterName
 		//		link.ToRouterIP = ToRouterIP
-		link.RouterName = RouterName
-		link.DestinationName = DestinationName
-		link.DestinationIP = DestinationIP
-		link.NextHopName = NextHopName
-		link.NextHopIP = NextHopIP
+		//		link.RouterName = RouterName
+		//		link.DestinationName = DestinationName
+		//		link.DestinationIP = DestinationIP
+		//		link.NextHopName = NextHopName
+		//		link.NextHopIP = NextHopIP
+		link.FromRouterName = FromRouterName
+		link.FromRouterIP = FromRouterIP
+		link.ToRouterName = ToRouterName
+		link.ToRouterIP = ToRouterIP
 
 		// retrieve FromRouter coordinates from router struc
 		if *debugFlag {
 			fmt.Println("link =", link)
 			//fmt.Println("From routername=", link.FromRouter)
-			fmt.Println("From DestinationName=", link.DestinationName)
-			fmt.Println("From routername=", link.RouterName)
+			//			fmt.Println("From DestinationName=", link.DestinationName)
+			//			fmt.Println("From routername=", link.RouterName)
+			fmt.Println("FromRouterName=", link.FromRouterName)
+			fmt.Println("FromRuoterIP=", link.FromRouterIP)
 		}
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouter)
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouterName)
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.Destination)
 		//FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.DestinationName)
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.RouterName)
-		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routers, link.RouterName)
+		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routers, link.RouterName)
+		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routers, link.FromRouterName)
 		if *debugFlag {
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)
@@ -417,12 +428,15 @@ func main() {
 		// retrieve ToRouter coordinates from router struc
 		if *debugFlag {
 			//			fmt.Println("To routername=", link.ToRouter)
-			fmt.Println("To routername=", link.NextHopIP)
+			//			fmt.Println("To routername=", link.NextHopIP)
+			fmt.Println("ToRouterName=", link.ToRouterName)
+			fmt.Println("ToRouterIP=", link.ToRouterIP)
 		}
 		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.ToRouter)
 		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.ToRouterName)
 		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.NextHopName)
-		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routers, link.NextHopName)
+		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routers, link.NextHopName)
+		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routers, link.ToRouterName)
 		if *debugFlag {
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)

@@ -183,15 +183,15 @@ type ipRouteTable struct {
 // Link is the structure representing a network link between two routers
 type Link struct {
 	LinkID int
-	//	FromRouter string
-	//	ToRouter   string
-	//	FromRouterName string
-	//	FromRouterIP   string
-	//	ToRouterName   string
-	//	ToRouterIP     string
-	RouterName      string
-	DestinationName string
-	DestinationIP   string
-	NextHopName     string
-	NextHopIP       string
+	//FromRouter     string
+	//ToRouter       string
+	FromRouterName string
+	FromRouterIP   string
+	ToRouterName   string
+	ToRouterIP     string
+	//	RouterName      string
+	//	DestinationName string
+	//	DestinationIP   string
+	//	NextHopName     string
+	//	NextHopIP       string
 }

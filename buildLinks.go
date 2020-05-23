@@ -47,13 +47,17 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 		routeTableRows.Scan(&RouterID, &Name, &DestAddr, &NextHop)
 		router.System.RouterID = RouterID
 		router.System.Name = Name
-		link.RouterName = Name
+		//		link.RouterName = Name
 		// calculate LinkID
 		link.LinkID = int(crc32.ChecksumIEEE([]byte(Name)))
-		link.DestinationName = ""
-		link.DestinationIP = DestAddr
-		link.NextHopName = ""
-		link.NextHopIP = NextHop
+		//		link.DestinationName = ""
+		//		link.DestinationIP = DestAddr
+		//		link.NextHopName = ""
+		//		link.NextHopIP = NextHop
+		link.FromRouterName = Name
+		link.FromRouterIP = DestAddr
+		link.ToRouterName = ""
+		link.ToRouterIP = NextHop
 
 		links = append(links, link)
 
@@ -71,11 +75,14 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 	routeTableRows.Close()
 
 	for i := 0; i < len(links); i++ {
-		statement, err := database.Prepare("INSERT INTO Links (LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP) VALUES (?, ?, ?, ?, ?, ?)")
+		//SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, FromRouterIP FROM Links
+		//	statement, err := database.Prepare("INSERT INTO Links (LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP) VALUES (?, ?, ?, ?, ?, ?)")
+		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?)")
 		if err != nil {
 			log.Fatalln("Links Insert Prepare err:", err.Error())
 		}
-		_, err = statement.Exec(links[i].LinkID, links[i].RouterName, links[i].DestinationName, links[i].DestinationIP, links[i].NextHopName, links[i].NextHopIP)
+		//		_, err = statement.Exec(links[i].LinkID, links[i].RouterName, links[i].DestinationName, links[i].DestinationIP, links[i].NextHopName, links[i].NextHopIP)
+		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterName, links[i].FromRouterIP, links[i].ToRouterName, links[i].ToRouterIP)
 		if err != nil {
 			log.Fatalln("Link INSERT error:", err.Error())
 		}
