@@ -25,7 +25,8 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 	 *
 	 */
 
-	routeTableRows, err := database.Query("SELECT RouterID, Name, DestAddr, NextHop FROM Routers INNER JOIN RouteTable USING (RouterID)")
+	//	routeTableRows, err := database.Query("SELECT RouterID, Name, DestAddr, NextHop FROM Routers INNER JOIN RouteTable USING (RouterID)")
+	routeTableRows, err := database.Query("SELECT RouterID, Name, DestAddr, IPRouteIfIndex, NextHop FROM Routers INNER JOIN RouteTable USING (RouterID)")
 	if err != nil {
 		log.Fatalln("databaseForRead JOIN error", err.Error())
 	}
@@ -41,10 +42,13 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 	var link Link
 	var RouterID int
 	var Name string
+	//var IpIfIndex string
 	var DestAddr string
+	var IPRouteIfIndex string
 	var NextHop string
 	for routeTableRows.Next() {
-		routeTableRows.Scan(&RouterID, &Name, &DestAddr, &NextHop)
+		//		routeTableRows.Scan(&RouterID, &Name, &DestAddr, &NextHop)
+		routeTableRows.Scan(&RouterID, &Name, &DestAddr, &IPRouteIfIndex, &NextHop)
 		router.System.RouterID = RouterID
 		router.System.Name = Name
 		//		link.RouterName = Name
@@ -53,24 +57,40 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 		//		link.NextHopName = ""
 		//		link.NextHopIP = NextHop
 
-		link.FromRouterName = Name
+		// link.FromRouterName = Name from scan routerrows
+		link.FromRouterName = Name // Current router
 
-		//		link.FromRouterIP = DestAddr
-
-		// Get FromrRouter name and address
 		//   Determine router interface using ipRouteIfIndex. This is the index of the interface. We can use this to get the interface IP address.
-		fromRouterIPs := getHostIP(Name)
-		link.FromRouterIP = fromRouterIPs[0]
 
-		//		link.ToRouterName = ""
-
-		routerNames := getRtrName(NextHop)
-		if len(routerNames) < 1 {
-			link.ToRouterName = ""
-		} else {
-			link.ToRouterName = routerNames[0]
+		// Query Select IpAddr from RouterIp where IfIndex == IPRouteIfIndex
+		//args := [1]string{IPRouteIfIndex}
+		//args := IPRouteIfIndex
+		queryRouterRows, queryRtrErr := database.Query("SELECT IpAddr, IfIndex FROM RouterIp WHERE IfIndex = $1", IPRouteIfIndex)
+		if queryRtrErr != nil {
+			fmt.Println("Query where RouterIp.IfIndex = IPRouteIfIndex", queryRtrErr)
+			log.Fatal(queryRtrErr)
 		}
 
+		// link.FromRouterIP = IpAddr returned from Select statement
+		var ipAddr string
+		for queryRouterRows.Next() {
+			queryRouterRows.Scan(&ipAddr)
+			link.FromRouterIP = ipAddr
+		}
+		// Query Select router from RouterIP where IpAddr == NextHop
+		queryRouterRows, queryRtrErr = database.Query("SELECT IpAddr, IfIndex FROM RouterIp WHERE IfIndex = $1", NextHop)
+		if queryRtrErr != nil {
+			fmt.Println("Query where RouterIp.IPRouteIfIndex = NextHop", queryRtrErr)
+			log.Fatal(queryRtrErr)
+		}
+		// link.ToRouterName = Name from Select statement
+		for queryRouterRows.Next() {
+			queryRouterRows.Scan(&ipAddr)
+			rtrNames := getRtrName(ipAddr)
+			link.ToRouterName = rtrNames[0]
+		}
+
+		// link.ToRouterIP = NextHop from scan routerrows
 		link.ToRouterIP = NextHop
 
 		// calculate LinkID
