@@ -48,16 +48,34 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 		router.System.RouterID = RouterID
 		router.System.Name = Name
 		//		link.RouterName = Name
-		// calculate LinkID
-		link.LinkID = int(crc32.ChecksumIEEE([]byte(Name)))
 		//		link.DestinationName = ""
 		//		link.DestinationIP = DestAddr
 		//		link.NextHopName = ""
 		//		link.NextHopIP = NextHop
+
 		link.FromRouterName = Name
-		link.FromRouterIP = DestAddr
-		link.ToRouterName = ""
+
+		//		link.FromRouterIP = DestAddr
+
+		// Get FromrRouter name and address
+		//   Determine router interface using ipRouteIfIndex. This is the index of the interface. We can use this to get the interface IP address.
+		fromRouterIPs := getHostIP(Name)
+		link.FromRouterIP = fromRouterIPs[0]
+
+		//		link.ToRouterName = ""
+
+		routerNames := getRtrName(NextHop)
+		if len(routerNames) < 1 {
+			link.ToRouterName = ""
+		} else {
+			link.ToRouterName = routerNames[0]
+		}
+
 		link.ToRouterIP = NextHop
+
+		// calculate LinkID
+		//		link.LinkID = int(crc32.ChecksumIEEE([]byte(Name)))
+		link.LinkID = int(crc32.ChecksumIEEE([]byte(link.FromRouterIP + link.ToRouterIP)))
 
 		links = append(links, link)
 
