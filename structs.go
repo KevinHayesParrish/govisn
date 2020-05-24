@@ -165,17 +165,17 @@ type ipAddrTable struct {
 type ipRouteTable struct {
 	ipRouteEntry struct {
 		ipRouteDest    string
-		ipRouteIfIndex int32
-		ipRouteMetric1 int32
-		ipRouteMetric2 int32
-		ipRouteMetric3 int32
-		ipRouteMetric4 int32
+		ipRouteIfIndex int
+		ipRouteMetric1 int
+		ipRouteMetric2 int
+		ipRouteMetric3 int
+		ipRouteMetric4 int
 		ipRouteNextHop string
 		ipRouteType    string
 		ipRouteProto   string
-		ipRouteAge     int32
+		ipRouteAge     int
 		ipRouteMask    string
-		ipRouteMetric5 int32
+		ipRouteMetric5 int
 		ipRouteInfo    string
 	}
 }
