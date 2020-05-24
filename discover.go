@@ -440,7 +440,8 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	 *	Add Links table to DB
 	 */
 	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP TEXT)")
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
+	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
 	if err != nil {
 		log.Fatalf("Links Create err: %v", err)
 	}
@@ -450,7 +451,7 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	return database
 }
 
-func getIPADDR(ipAddr string) []string {
+func getRtrName(ipAddr string) []string {
 	names, err := net.LookupAddr(ipAddr)
 	if err != nil {
 		fmt.Println("No reverse lookup found for", ipAddr)
@@ -463,6 +464,18 @@ func getIPADDR(ipAddr string) []string {
 	//		fmt.Printf("%s\n", name)
 	//	}
 	return names
+}
+
+func getHostIP(routerName string) []string {
+	addrs, err := net.LookupHost(routerName)
+	if err != nil {
+		fmt.Println("No Hostname lookup found for", routerName)
+	}
+	if len(addrs) == 0 {
+		fmt.Println("No Hostname records for", routerName)
+		return addrs
+	}
+	return addrs
 }
 
 func getGPS(sysName string) []string {
@@ -656,7 +669,7 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 	*/
 
 	// get FQDN with IP Address
-	fqdn := getIPADDR(snmpTarget)
+	fqdn := getRtrName(snmpTarget)
 
 	// get GPS data from DNS
 	router.System.GPS.Latitude = "0.0"  // initialze with float data to allow for missing GPS on DB
