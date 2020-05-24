@@ -16,11 +16,12 @@ import (
 /*
  * TODO:
  	* Add code to walk route table to discover all routers
- 	* Write Links row to database
+	 * Write Links row to database
+	 * Write ipRouteIfIndex to RouteTable. This will help later when building Links
 */
 
 // DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.3.2"
+const DISCOVERYVERSION = "0.3.3"
 
 //func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
 //func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) *sql.DB {
@@ -409,7 +410,8 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	/*
 	 *	Add RouteTable table to DB
 	 */
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, NextHop TEXT)")
+	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, NextHop TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, IPRouteIfIndex TEXT, NextHop TEXT)")
 	if err != nil {
 		log.Fatalf("RouteTable Create err: %v", err)
 	}
@@ -419,7 +421,8 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	/*
 	 *	Add RouterIP table to DB
 	 */
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT)")
+	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT, IfIndex TEXT)")
 	if err != nil {
 		log.Fatalf("RouterIP Create err: %v", err)
 	}
@@ -439,9 +442,8 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	/*
 	 *	Add Links table to DB
 	 */
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP TEXT)")
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
+	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
 	if err != nil {
 		log.Fatalf("Links Create err: %v", err)
 	}
@@ -522,29 +524,37 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 	if err != nil {
 		log.Fatalf("Get(walkPDU) err: %v", err)
 	}
+	ifIndexPDU, err := params.WalkAll(ipAdEntIfIndex)
+	if err != nil {
+		log.Fatalf("Get(ifIndexPDU) err: %v", err)
+	}
 	if debugFlag {
 		fmt.Println("\nipAdEntAddr PDU=", walkPDU)
+		fmt.Println("\nifIndex PDU=", ifIndexPDU)
 	}
 
 	var ipTable ipAddrTable
 
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntAddr = walkPDU[i].Value.(string)
+		ipTable.ipAddrEntry.ipAdEntIfIndex = ifIndexPDU[i].Value.(int)
 		if debugFlag {
 			fmt.Println("ipAdEntAddr=", ipTable.ipAddrEntry.ipAdEntAddr)
 		}
 
 		// Add row to RouterIp table
-		statement, err := database.Prepare("INSERT INTO RouterIp (RouterID, IpAddr) VALUES (?, ?)")
+		//		statement, err := database.Prepare("INSERT INTO RouterIp (RouterID, IpAddr) VALUES (?, ?)")
+		statement, err := database.Prepare("INSERT INTO RouterIp (RouterID, IpAddr, IfIndex) VALUES (?, ?, ?)")
 		if err != nil {
 			fmt.Printf("RouterIp Prepare Insert Exec err: %v", err)
 			log.Fatal(err)
 		}
 		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
-		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr)
+		//		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr)
+		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr, ipTable.ipAddrEntry.ipAdEntIfIndex)
 		if err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-				// Continue executing if this is a duplicate MAC Address. This assume this router is being processed again.
+				// Continue executing if this is a duplicate IP Address. This assume this router is being processed again.
 				// In case this is a duplicate MAC Address within the network, print error output to stdoutput.
 				fmt.Println("\n****\n Non-Unique IP Address", ipTable.ipAddrEntry.ipAdEntAddr, "\n This may be because this router is being re-discovered.\n If not, then this is a serious network violation condition.\n****")
 			} else {
@@ -556,16 +566,16 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 
 	}
 
-	walkPDU, err = params.WalkAll(ipAdEntIfIndex)
-	if err != nil {
-		log.Fatalf("Get(walkPDU) err: %v", err)
-	}
-	for i := 0; i < (len(walkPDU)); i++ {
-		ipTable.ipAddrEntry.ipAdEntIfIndex = walkPDU[i].Value.(int)
-		if debugFlag {
-			fmt.Println("ipAdEntIfIndex=", ipTable.ipAddrEntry.ipAdEntIfIndex)
-		}
-	}
+	//	walkPDU, err = params.WalkAll(ipAdEntIfIndex)
+	//	if err != nil {
+	//		log.Fatalf("Get(walkPDU) err: %v", err)
+	//	}
+	//	for i := 0; i < (len(walkPDU)); i++ {
+	//		ipTable.ipAddrEntry.ipAdEntIfIndex = walkPDU[i].Value.(int)
+	//		if debugFlag {
+	//			fmt.Println("ipAdEntIfIndex=", ipTable.ipAddrEntry.ipAdEntIfIndex)
+	//		}
+	//	}
 	walkPDU, err = params.WalkAll(ipAdEntNetMask)
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntNetMask = walkPDU[i].Value.(string)
@@ -603,6 +613,14 @@ func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *
 		fmt.Println("\nipRouteDestPDU PDU=", ipRouteDestPDU)
 	}
 
+	ipRouteIfIndexPDU, err := params.WalkAll(ipRouteIfIndexOID)
+	if err != nil {
+		log.Fatalf("Get(ipRouteIfIndexPDU) err: %v", err)
+	}
+	if debugFlag {
+		fmt.Println("\nipRouteIfIndexPDU PDU=", ipRouteIfIndexPDU)
+	}
+
 	ipRouteNextHopPDU, err := params.WalkAll(ipRouteNextHopOID)
 	if err != nil {
 		log.Fatalf("Get(ipRouteNextHopPDU) err: %v", err)
@@ -616,24 +634,28 @@ func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *
 
 	for i := 0; i < (len(ipRouteDestPDU)); i++ {
 		ipRouteTab.ipRouteEntry.ipRouteDest = ipRouteDestPDU[i].Value.(string)
-		if debugFlag {
-			fmt.Println("ipRouteDest=", ipRouteTab.ipRouteEntry.ipRouteDest)
-		}
-
+		//		if debugFlag {
+		//			fmt.Println("ipRouteDest=", ipRouteTab.ipRouteEntry.ipRouteDest)
+		//		}
+		ipRouteTab.ipRouteEntry.ipRouteIfIndex = ipRouteIfIndexPDU[i].Value.(int)
 		ipRouteTab.ipRouteEntry.ipRouteNextHop = ipRouteNextHopPDU[i].Value.(string)
 		if debugFlag {
+			fmt.Println("ipRouteDest=", ipRouteTab.ipRouteEntry.ipRouteDest)
+			fmt.Println("ipRouteIfIndex=", ipRouteTab.ipRouteEntry.ipRouteIfIndex)
 			fmt.Println("ipRouteNextHop=", ipRouteTab.ipRouteEntry.ipRouteNextHop)
 		}
 
 		// Add row to RouteTable table
-		statement, _ := database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, NextHop) VALUES (?, ?, ?)")
+		//		statement, _ := database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, NextHop) VALUES (?, ?, ?)")
+		statement, _ := database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, IPRouteIfIndex, NextHop) VALUES (?, ?, ?, ?)")
 		if err != nil {
 			fmt.Printf("RouterTable Prepare Insert Exec err: %v", err)
 			log.Fatal(err)
 		}
 
 		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
-		_, err = statement.Exec(RouterID, ipRouteTab.ipRouteEntry.ipRouteDest, ipRouteTab.ipRouteEntry.ipRouteNextHop)
+		//		_, err = statement.Exec(RouterID, ipRouteTab.ipRouteEntry.ipRouteDest, ipRouteTab.ipRouteEntry.ipRouteNextHop)
+		_, err = statement.Exec(RouterID, ipRouteTab.ipRouteEntry.ipRouteDest, ipRouteTab.ipRouteEntry.ipRouteIfIndex, ipRouteTab.ipRouteEntry.ipRouteNextHop)
 		if err != nil {
 			log.Fatalf("RouteTable Insert err: %v", err)
 		}
