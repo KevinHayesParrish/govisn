@@ -400,7 +400,7 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	/*
 	 *	Add Routers table to DB
 	 */
-	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY UNIQUE, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, Services INTEGER, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
+	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY UNIQUE, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, Services INTEGER, GpsLat REAL, GpsLong REAL, GpsAlt REAL)")
 	if err != nil {
 		log.Fatalf("Router Table Create err: %v", err)
 	}
