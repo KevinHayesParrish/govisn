@@ -51,46 +51,41 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 		routeTableRows.Scan(&RouterID, &Name, &DestAddr, &IPRouteIfIndex, &NextHop)
 		router.System.RouterID = RouterID
 		router.System.Name = Name
-		//		link.RouterName = Name
-		//		link.DestinationName = ""
-		//		link.DestinationIP = DestAddr
-		//		link.NextHopName = ""
-		//		link.NextHopIP = NextHop
-
-		// link.FromRouterName = Name from scan routerrows
-		link.FromRouterName = Name // Current router
 
 		//   Determine router interface using ipRouteIfIndex. This is the index of the interface. We can use this to get the interface IP address.
 
-		// Query Select IpAddr from RouterIp where IfIndex == IPRouteIfIndex
-		//args := [1]string{IPRouteIfIndex}
-		//args := IPRouteIfIndex
-		queryRouterRows, queryRtrErr := database.Query("SELECT IpAddr, IfIndex FROM RouterIp WHERE IfIndex = $1", IPRouteIfIndex)
-		if queryRtrErr != nil {
-			fmt.Println("Query where RouterIp.IfIndex = IPRouteIfIndex", queryRtrErr)
-			log.Fatal(queryRtrErr)
+		link.FromRouterName = Name // Current router
+
+		// Find FromRouterIP by DNS lookup by name
+		fromIPs := getHostIP(Name)
+		link.FromRouterIP = fromIPs[0]
+		if len(fromIPs) < 1 {
+			fmt.Println("No Router IP Address the link from Router", Name)
+			link.FromRouterIP = ""
+		} else {
+			link.FromRouterIP = fromIPs[0]
 		}
 
-		// link.FromRouterIP = IpAddr returned from Select statement
+		// Find ToRouterName
+		var routerID string
 		var ipAddr string
-		for queryRouterRows.Next() {
-			queryRouterRows.Scan(&ipAddr)
-			link.FromRouterIP = ipAddr
-		}
-		// Query Select router from RouterIP where IpAddr == NextHop
-		queryRouterRows, queryRtrErr = database.Query("SELECT IpAddr, IfIndex FROM RouterIp WHERE IfIndex = $1", NextHop)
+		var ifIndex string
+		queryRouterRows, queryRtrErr := database.Query("SELECT RouterID, IpAddr, IfIndex FROM RouterIp WHERE ipAddr = $1 AND IfIndex = $2", DestAddr, IPRouteIfIndex)
 		if queryRtrErr != nil {
 			fmt.Println("Query where RouterIp.IPRouteIfIndex = NextHop", queryRtrErr)
 			log.Fatal(queryRtrErr)
 		}
-		// link.ToRouterName = Name from Select statement
 		for queryRouterRows.Next() {
-			queryRouterRows.Scan(&ipAddr)
+			queryRouterRows.Scan(&routerID, &ipAddr, ifIndex)
 			rtrNames := getRtrName(ipAddr)
-			link.ToRouterName = rtrNames[0]
+			if len(rtrNames) < 1 {
+				fmt.Println("No Router Name for Route Destination", ipAddr)
+				link.ToRouterName = ""
+			} else {
+				link.ToRouterName = rtrNames[0]
+			}
 		}
 
-		// link.ToRouterIP = NextHop from scan routerrows
 		link.ToRouterIP = NextHop
 
 		// calculate LinkID
