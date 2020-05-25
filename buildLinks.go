@@ -76,6 +76,8 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 			fmt.Println("Query where RouterIp.IPRouteIfIndex = NextHop", queryRtrErr)
 			log.Fatal(queryRtrErr)
 		}
+		defer queryRouterRows.Close()
+
 		for queryRouterRows.Next() {
 			queryRouterRows.Scan(&routerID, &ipAddr, ifIndex)
 			rtrNames := getRtrName(ipAddr)
