@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"hash/crc32"
 	"log"
+	"strings"
 
 	//"log"
 	//"math"
@@ -117,7 +118,11 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 		//		_, err = statement.Exec(links[i].LinkID, links[i].RouterName, links[i].DestinationName, links[i].DestinationIP, links[i].NextHopName, links[i].NextHopIP)
 		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterName, links[i].FromRouterIP, links[i].ToRouterName, links[i].ToRouterIP)
 		if err != nil {
-			log.Fatalln("Link INSERT error:", err.Error())
+			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+				fmt.Println("Link alrady exists. Continue building links.")
+			} else {
+				log.Fatalln("Link INSERT error:", err.Error())
+			}
 		}
 		defer statement.Close()
 	}
