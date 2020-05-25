@@ -26,7 +26,9 @@ import (
 
 /*
 * TODO:
- */
+	* put 3D Scene creation in separate func and call with a startup option.
+	* This is necessary to insure the network is discovered before links are visualized.
+*/
 
 //ViewnetVersion is the file version number
 const ViewnetVersion = "0.8.6"
