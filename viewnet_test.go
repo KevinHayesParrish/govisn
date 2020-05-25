@@ -87,7 +87,7 @@ func Test_getRouterCoordinates(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			//			got, got1, got2 := getRouterCoordinates(tt.args.debug, tt.args.routerArray, tt.args.routerName)
-			got, got1, got2 := getRouterCoordinates(tt.args.debug, tt.args.routers, tt.args.routerName)
+			got, got1, got2 := getRouterCoordinatesName(tt.args.debug, tt.args.routers, tt.args.routerName)
 			if got != tt.want {
 				t.Errorf("getRouterCoordinates() got = %v, want %v", got, tt.want)
 			}
