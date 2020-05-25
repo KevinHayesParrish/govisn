@@ -411,18 +411,13 @@ func main() {
 			fmt.Println("FromRouterName=", link.FromRouterName)
 			fmt.Println("FromRuoterIP=", link.FromRouterIP)
 		}
-		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouter)
-		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.FromRouterName)
-		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.Destination)
-		//FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.DestinationName)
-		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.RouterName)
-		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routers, link.RouterName)
-		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinates(*debugFlag, routers, link.FromRouterName)
+		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinatesName(*debugFlag, routers, link.FromRouterName)
 		if *debugFlag {
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)
 			fmt.Println("router coordinates =", routers[routerArrayIndex].System.GPS)
-			fmt.Println("returned from getRouterCoordinates func: FromRouterX=", FromRouterX, "FromRouterY=", FromRouterY, "FromRouterZ=", FromRouterZ)
+			//			fmt.Println("returned from getRouterCoordinates func: FromRouterX=", FromRouterX, "FromRouterY=", FromRouterY, "FromRouterZ=", FromRouterZ)
+			fmt.Println("returned from getRouterCoordinatesName func: FromRouterX=", FromRouterX, "FromRouterY=", FromRouterY, "FromRouterZ=", FromRouterZ)
 		}
 
 		// retrieve ToRouter coordinates from router struc
@@ -432,16 +427,12 @@ func main() {
 			fmt.Println("ToRouterName=", link.ToRouterName)
 			fmt.Println("ToRouterIP=", link.ToRouterIP)
 		}
-		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.ToRouter)
-		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.ToRouterName)
-		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routerArray, link.NextHopName)
-		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routers, link.NextHopName)
-		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinates(*debugFlag, routers, link.ToRouterName)
+		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesName(*debugFlag, routers, link.ToRouterName)
+		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesIP(*debugFlag, databaseForRead, link.ToRouterIP)
 		if *debugFlag {
-			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
-			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)
 			fmt.Println("router coordinates =", routers[routerArrayIndex].System.GPS)
-			fmt.Println("returned from getRouterCoordinates func: ToRouterX=", ToRouterX, "ToRouterY=", ToRouterY, "ToRouterZ=", ToRouterZ)
+			//			fmt.Println("returned from getRouterCoordinates func: ToRouterX=", ToRouterX, "ToRouterY=", ToRouterY, "ToRouterZ=", ToRouterZ)
+			fmt.Println("returned from getRouterCoordinatesIP func: ToRouterX=", ToRouterX, "ToRouterY=", ToRouterY, "ToRouterZ=", ToRouterZ)
 		}
 
 		// Add link object to the 3D scene
@@ -499,44 +490,3 @@ func Rad(d float64) float64 { return d * constX }
 
 // Deg converts radians to degrees
 func Deg(r float64) float64 { return r / constX }
-
-// Get Router Coordinates from routerArray
-//func getRouterCoordinates(debug bool, routerArray [1000]Router, routerName string) (float32, float32, float32) {
-func getRouterCoordinates(debug bool, routers []Router, routerName string) (float32, float32, float32) {
-	var x float32
-	var y float32
-	var z float32
-
-	//	for i := 0; i < len(routerArray); i++ {
-	for i := 0; i < len(routers); i++ {
-		//		if routerArray[i].System.Name == "" {
-		//			break // end of routerArray entries
-		//		}
-		//		if routerArray[i].System.Name == routerName {
-		if routers[i].System.Name == routerName {
-			//			x = routerArray[i].System.Coordinates.X
-			//			x1, err := strconv.ParseFloat(routerArray[i].System.GPS.Longitude, 32)
-			x1, err := strconv.ParseFloat(routers[i].System.GPS.Longitude, 32)
-			if err != nil {
-				panic(err)
-			}
-			x = (float32)(x1)
-			//			y = routerArray[i].System.Coordinates.Y
-			//			y1, err := strconv.ParseFloat(routerArray[i].System.GPS.Latitude, 32)
-			y1, err := strconv.ParseFloat(routers[i].System.GPS.Latitude, 32)
-			if err != nil {
-				panic(err)
-			}
-			y = (float32)(y1)
-			//			z = routerArray[i].System.Coordinates.Z
-			//			z1, err := strconv.ParseFloat(routerArray[i].System.GPS.Altitude, 32)
-			z1, err := strconv.ParseFloat(routers[i].System.GPS.Altitude, 32)
-			if err != nil {
-				panic(err)
-			}
-			z = (float32)(z1)
-			break
-		}
-	}
-	return x, y, z
-}
