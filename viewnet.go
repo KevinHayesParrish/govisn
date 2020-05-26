@@ -31,7 +31,7 @@ import (
 */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.8.6"
+const ViewnetVersion = "0.8.7"
 
 //const maxRouters int = 1000
 
@@ -133,6 +133,10 @@ func main() {
 	}
 	defer databaseForUpdate.Close()
 
+	databaseForRead = visualizeNetwork(*debugFlag, databaseForRead)
+}
+
+func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	// Retrieve the Routers table
 	//	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
 	//	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
@@ -141,7 +145,8 @@ func main() {
 		fmt.Println("databaseForRead Query error", queryErr)
 		log.Fatal(queryErr)
 	}
-	if *debugFlag {
+	//	if *debugFlag {
+	if debugFlag {
 		fmt.Println("Successful Routers table Select")
 	}
 
@@ -152,9 +157,10 @@ func main() {
 	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP FROM Links")
 	if queryErr != nil {
 		fmt.Println("databaseForRead Query error", queryErr)
-		log.Fatal(openErr)
+		log.Fatal(queryErr)
 	}
-	if *debugFlag {
+	//	if *debugFlag {
+	if debugFlag {
 		fmt.Println("Successful Links table Select")
 	}
 
@@ -166,7 +172,7 @@ func main() {
 	})
 	if appErr != nil {
 		fmt.Println("Error Creating 3D g3n app", *DbName)
-		log.Fatal(openErr)
+		log.Fatal(appErr)
 	}
 
 	var RouterID int
@@ -224,7 +230,8 @@ func main() {
 	globeMesh.SetPosition(0, 0, 0)
 	app.Scene().Add(globeMesh)
 
-	if *debugFlag {
+	//	if *debugFlag {
+	if debugFlag {
 		fmt.Println("Beginning routerRows.Next loop; adding routers to 3D scene.")
 	}
 	/*
@@ -307,7 +314,8 @@ func main() {
 		//		routerArray[routerArrayIndex].System.GPS.Altitude = fmt.Sprintf("%f", z) // update router struc with z coordinate.
 		routers[routerArrayIndex].System.GPS.Altitude = fmt.Sprintf("%f", z) // update router struc with z coordinate.
 
-		if *debugFlag {
+		//		if *debugFlag {
+		if debugFlag {
 			fmt.Println("x =", x, "y =", y, "z", z)
 			//			fmt.Println("router =", routerArray[routerArrayIndex])
 			fmt.Println("router =", routers[routerArrayIndex])
@@ -361,7 +369,8 @@ func main() {
 	}
 	defer routerRows.Close()
 
-	if *debugFlag {
+	//	if *debugFlag {
+	if debugFlag {
 		fmt.Println("Beginning linkRows.Next loop; adding links to the 3D scene")
 	}
 	/*
@@ -404,7 +413,8 @@ func main() {
 		link.ToRouterIP = ToRouterIP
 
 		// retrieve FromRouter coordinates from router struc
-		if *debugFlag {
+		//		if *debugFlag {
+		if debugFlag {
 			fmt.Println("link =", link)
 			//fmt.Println("From routername=", link.FromRouter)
 			//			fmt.Println("From DestinationName=", link.DestinationName)
@@ -412,8 +422,10 @@ func main() {
 			fmt.Println("FromRouterName=", link.FromRouterName)
 			fmt.Println("FromRuoterIP=", link.FromRouterIP)
 		}
-		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinatesName(*debugFlag, routers, link.FromRouterName)
-		if *debugFlag {
+		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinatesName(*debugFlag, routers, link.FromRouterName)
+		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinatesName(debugFlag, routers, link.FromRouterName)
+		//		if *debugFlag {
+		if debugFlag {
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
 			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)
 			fmt.Println("router coordinates =", routers[routerArrayIndex].System.GPS)
@@ -422,15 +434,18 @@ func main() {
 		}
 
 		// retrieve ToRouter coordinates from router struc
-		if *debugFlag {
+		//		if *debugFlag {
+		if debugFlag {
 			//			fmt.Println("To routername=", link.ToRouter)
 			//			fmt.Println("To routername=", link.NextHopIP)
 			fmt.Println("ToRouterName=", link.ToRouterName)
 			fmt.Println("ToRouterIP=", link.ToRouterIP)
 		}
 		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesName(*debugFlag, routers, link.ToRouterName)
-		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesIP(*debugFlag, databaseForRead, link.ToRouterIP)
-		if *debugFlag {
+		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesIP(*debugFlag, databaseForRead, link.ToRouterIP)
+		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesIP(debugFlag, databaseForRead, link.ToRouterIP)
+		//		if *debugFlag {
+		if debugFlag {
 			fmt.Println("router coordinates =", routers[routerArrayIndex].System.GPS)
 			//			fmt.Println("returned from getRouterCoordinates func: ToRouterX=", ToRouterX, "ToRouterY=", ToRouterY, "ToRouterZ=", ToRouterZ)
 			fmt.Println("returned from getRouterCoordinatesIP func: ToRouterX=", ToRouterX, "ToRouterY=", ToRouterY, "ToRouterZ=", ToRouterZ)
@@ -448,7 +463,8 @@ func main() {
 			FromRouterX, FromRouterY, FromRouterZ,
 			ToRouterX, ToRouterY, ToRouterZ,
 		)
-		if *debugFlag {
+		//		if *debugFlag {
+		if debugFlag {
 			fmt.Println("link vertices=", vertices)
 		}
 		colors := math32.NewArrayF32(0, 0)
@@ -482,6 +498,8 @@ func main() {
 		}
 	}
 	app.Run()
+
+	return databaseForRead
 }
 
 const constX = math.Pi / 180
