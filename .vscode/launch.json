@@ -83,6 +83,18 @@
             "program": "/Users/kevin/go/src/govisn",
             "env": {},
             "args": ["-di", "10.0.0.5", "-co", "idontknow", "-de"]
+        },
+        {
+            "name": "govisn -vi -f",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "remotePath": "",
+            "port": 2345,
+            "host": "127.0.0.1",
+            "program": "/Users/kevin/go/src/govisn",
+            "env": {},
+            "args": ["-vi", "-f", "/Users/kevin/test.db"]
         }
        ]
 }
