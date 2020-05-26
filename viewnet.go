@@ -6,21 +6,9 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"os"
-	"strconv"
 
 	//	"github.com/g3n/g3nd/material"
 
-	"github.com/g3n/engine/geometry"
-	"github.com/g3n/engine/gls"
-	"github.com/g3n/engine/graphic"
-	"github.com/g3n/engine/light"
-
-	"github.com/g3n/engine/material"
-	"github.com/g3n/engine/math32"
-	"github.com/g3n/engine/text"
-	"github.com/g3n/engine/texture"
-	"github.com/g3n/engine/util/application"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -31,7 +19,7 @@ import (
 */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.8.8"
+const ViewnetVersion = "0.8.9"
 
 //const maxRouters int = 1000
 
@@ -139,6 +127,7 @@ func main() {
 	}
 }
 
+/*
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	// Retrieve the Routers table
 	//	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
@@ -237,10 +226,13 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	if debugFlag {
 		fmt.Println("Beginning routerRows.Next loop; adding routers to 3D scene.")
 	}
-	/*
-	* Add the routers to the 3D scene
-	 */
-	var routers []Router
+*/
+
+/*
+* Add the routers to the 3D scene
+ */
+/*
+	 var routers []Router
 	var router Router
 	routerArrayIndex := 0
 	for routerRows.Next() {
@@ -275,8 +267,9 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		cylinderMesh := graphic.NewMesh(rtr3D, mat)
 		/*
 		 * Set coordinates and altitude
-		 */
-		var GpsLatFloat64 = 0.0
+*/
+/*
+		 var GpsLatFloat64 = 0.0
 		//		GpsLatFloat64, parseErr := strconv.ParseFloat(GpsLat, 64)
 		var parseErr error
 		if GpsLat != "" {
@@ -378,7 +371,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	}
 	/*
 	* Add the links to the 3D scene
-	 */
+*/
+/*
 	var FromRouterX, FromRouterY, FromRouterZ, ToRouterX, ToRouterY, ToRouterZ float32
 	for linkRows.Next() {
 		//		err := linkRows.Scan(&LinkID, &FromRouter, &ToRouter)
@@ -478,14 +472,16 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
 
 		linkGeom.AddVBO(gls.NewVBO(colors).AddAttrib(gls.VertexColor))
+*/
 
-		/*
-			linkFromVector := math32.NewVector3(FromRouterX, FromRouterY, FromRouterZ)
-			linkToVector := math32.NewVector3(ToRouterX, ToRouterY, ToRouterZ)
-			linkLine := math32.NewLine3(linkFromVector, linkToVector)
-			linkGeom.AddVBO(gls.NewVBO(linkLine))
-		*/
+/*
+	linkFromVector := math32.NewVector3(FromRouterX, FromRouterY, FromRouterZ)
+	linkToVector := math32.NewVector3(ToRouterX, ToRouterY, ToRouterZ)
+	linkLine := math32.NewLine3(linkFromVector, linkToVector)
+	linkGeom.AddVBO(gls.NewVBO(linkLine))
+*/
 
+/*
 		// Creates basic material
 		mat := material.NewBasic()
 
@@ -504,6 +500,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	return databaseForRead
 }
+*/
 
 const constX = math.Pi / 180
 
