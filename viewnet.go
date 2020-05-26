@@ -26,7 +26,7 @@ import (
 
 /*
 * TODO:
-	* put 3D Scene creation in separate func and call with a startup option.
+	* Put 3D Scene creation in separate func and call with a startup option.
 	* This is necessary to insure the network is discovered before links are visualized.
 */
 
@@ -94,14 +94,13 @@ func main() {
 			fmt.Println("seed=", seed, "community=", *community)
 		}
 
-		// Initialize the database
+		// Open the database connection
 		database, err := sql.Open("sqlite3", dbName)
 		if err != nil {
 			log.Fatalf("sql.Open() err: %v", err)
 		}
 
-		//		discover(*debugFlag, dbName, seed, *community, *maxHops)
-		//		database := discover(*debugFlag, dbName, seed, *community, *maxHops)
+		// Discover the network
 		database = discover(*debugFlag, dbName, seed, *community, *maxHops, database)
 
 		// Close database. Completed initialization and update of all tables, except Links.
