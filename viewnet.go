@@ -31,7 +31,7 @@ import (
 */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.8.7"
+const ViewnetVersion = "0.8.8"
 
 //const maxRouters int = 1000
 
@@ -57,6 +57,7 @@ var discoverFlag = flag.String("di", "", "Discover a network using seed IP Addre
 var seed = "127.0.0.1"
 var community = flag.String("co", "public", "SNMP Community ReadOnly String")
 var maxHops = flag.String("m", "0", "Scope of discovery. Maximum number of Hops from seed")
+var visualizeFlag = flag.Bool("vi", false, "Visualize the Network.")
 
 //routerRadius is the radius of the 3D object representing a network router
 const routerRadius float64 = 0.5
@@ -133,7 +134,9 @@ func main() {
 	}
 	defer databaseForUpdate.Close()
 
-	databaseForRead = visualizeNetwork(*debugFlag, databaseForRead)
+	if *visualizeFlag {
+		databaseForRead = visualizeNetwork(*debugFlag, databaseForRead)
+	}
 }
 
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
