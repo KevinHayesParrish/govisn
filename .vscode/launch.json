@@ -12,31 +12,6 @@
             "program": "${file}"
         },
         {
-            "name": "Debug govisn -f",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "remotePath": "",
-            "port": 2345,
-            "host": "127.0.0.1",
-//            "program": "${file}",
-            "program": "/Users/kevin/go/src/govisn",
-            "env": {},
-            "args": ["-f", "/Users/kevin/govisnDiscoveredNet.db"]
-        },
-        {
-            "name": "Debug govisn -d -f",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "remotePath": "",
-            "port": 2345,
-            "host": "127.0.0.1",
-            "program": "/Users/kevin/go/src/govisn",
-            "env": {},
-            "args": ["-d", "-f", "/Users/kevin/test.db"]
-        },
-        {
             "name": "Debug govisn -c",
             "type": "go",
             "request": "launch",
@@ -61,7 +36,7 @@
             "args": ["-l", "-f", "/temp/V15N-vsp-2011-11-21-GPS.xml"]
         },
         {
-            "name": "govisn -di -co",
+            "name": "govisn -di -co -f",
             "type": "go",
             "request": "launch",
             "mode": "debug",
@@ -73,7 +48,7 @@
             "args": ["-di", "10.0.0.5", "-co", "idontknow", "-f", "/Users/kevin/test.db"]
         },
         {
-            "name": "govisn -di -co -de",
+            "name": "govisn -di -co -de -f",
             "type": "go",
             "request": "launch",
             "mode": "debug",
@@ -82,7 +57,7 @@
             "host": "127.0.0.1",
             "program": "/Users/kevin/go/src/govisn",
             "env": {},
-            "args": ["-di", "10.0.0.5", "-co", "idontknow", "-de"]
+            "args": ["-di", "10.0.0.5", "-co", "idontknow", "-de", "-f", "/Users/kevin/test.db"]
         },
         {
             "name": "govisn -vi -f",
