@@ -68,25 +68,35 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 		}
 
 		// Find ToRouterName
-		var routerID string
-		var ipAddr string
-		var ifIndex string
-		queryRouterRows, queryRtrErr := database.Query("SELECT RouterID, IpAddr, IfIndex FROM RouterIp WHERE ipAddr = $1 AND IfIndex = $2", DestAddr, IPRouteIfIndex)
-		if queryRtrErr != nil {
-			fmt.Println("Query where RouterIp.IPRouteIfIndex = NextHop", queryRtrErr)
-			log.Fatal(queryRtrErr)
-		}
-		defer queryRouterRows.Close()
-
-		for queryRouterRows.Next() {
-			queryRouterRows.Scan(&routerID, &ipAddr, ifIndex)
-			rtrNames := getRtrName(ipAddr)
-			if len(rtrNames) < 1 {
-				fmt.Println("No Router Name for Route Destination", ipAddr)
-				link.ToRouterName = ""
-			} else {
-				link.ToRouterName = rtrNames[0]
+		//	var routerID string
+		//	var ipAddr string
+		//	var ifIndex string
+		//		queryRouterRows, queryRtrErr := database.Query("SELECT RouterID, IpAddr, IfIndex FROM RouterIp WHERE ipAddr = $1 AND IfIndex = $2", DestAddr, IPRouteIfIndex)
+		/*
+			queryRouterRows, queryRtrErr := database.Query("SELECT RouterID, IpAddr, IfIndex FROM RouterIp WHERE ipAddr = $1 AND IfIndex = $2", NextHop, IPRouteIfIndex)
+			if queryRtrErr != nil {
+				fmt.Println("Query where RouterIp.IPRouteIfIndex = NextHop", queryRtrErr)
+				log.Fatal(queryRtrErr)
 			}
+			defer queryRouterRows.Close()
+
+			for queryRouterRows.Next() {
+				queryRouterRows.Scan(&routerID, &ipAddr, ifIndex)
+				rtrNames := getRtrName(ipAddr)
+				if len(rtrNames) < 1 {
+					fmt.Println("No Router Name for Route Destination", ipAddr)
+					link.ToRouterName = ""
+				} else {
+					link.ToRouterName = rtrNames[0]
+				}
+			}
+		*/
+		rtrNames := getRtrName(NextHop)
+		if len(rtrNames) < 1 {
+			fmt.Println("No Router Name for Route Destination", NextHop)
+			link.ToRouterName = ""
+		} else {
+			link.ToRouterName = rtrNames[0]
 		}
 
 		link.ToRouterIP = NextHop
