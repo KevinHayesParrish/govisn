@@ -115,7 +115,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	// Create a sphere representing the globe
 	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
-	globeMat := material.NewPhong(&math32.Color{R: 0.5, G: 0.5, B: 0.5})
+	//	globeMat := material.NewPhong(&math32.Color{R: 0.5, G: 0.5, B: 0.5})
+	globeMat := material.NewPhong(&math32.Color{R: 0.0, G: 0.5, B: 1.0}) // Azure blue 0, 128, 255
 	globeMat.SetTransparent(true)
 	globeMat.SetOpacity(0.25)
 	globeMesh := graphic.NewMesh(globe3D, globeMat)
