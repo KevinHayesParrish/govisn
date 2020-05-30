@@ -166,43 +166,16 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		/*
 		 * Set coordinates and altitude
 		 */
-		var GpsLatFloat64 = 0.0
-		//		GpsLatFloat64, parseErr := strconv.ParseFloat(GpsLat, 64)
-		var parseErr error
-		if GpsLat != "" {
-			GpsLatFloat64, parseErr = strconv.ParseFloat(GpsLat, 64)
-		}
-		if parseErr != nil {
-			fmt.Println("Error parsing GpsLat =", GpsLat)
-			log.Fatal(parseErr)
-		}
-		xRadianLat := Rad(GpsLatFloat64)
+		x, y, z = calcCoordinates(GpsLat, GpsLong, GpsAlt)
 
-		var GpsLongFloat64 = 0.0
-		//		GpsLongFloat64, parseErr := strconv.ParseFloat(GpsLong, 64)
-		if GpsLong != "" {
-			GpsLongFloat64, parseErr = strconv.ParseFloat(GpsLong, 64)
-			if parseErr != nil {
-				fmt.Println("Error parsing GpsLong", GpsLong)
-				log.Fatal(parseErr)
-			}
-		}
-
-		xRadianLong := Rad(GpsLongFloat64)
-		x = (float32)(globeRadius * math.Sin(xRadianLat) * math.Cos(xRadianLong))
 		//		routerArray[routerArrayIndex].System.Coordinates.X = x // update router struc with x coordinate
 		//		routerArray[routerArrayIndex].System.GPS.Longitude = fmt.Sprintf("%f", x) // update router struc with x coordinate
 		routers[routerArrayIndex].System.GPS.Longitude = fmt.Sprintf("%f", x) // update router struc with x coordinate
-		yRadianLat := Rad(GpsLatFloat64)
-		yRadianLong := Rad(GpsLongFloat64)
-		y = (float32)(globeRadius * math.Sin(yRadianLat) * math.Sin(yRadianLong))
+
 		//		routerArray[routerArrayIndex].System.Coordinates.Y = y // update router struc with y coordinate
 		//		routerArray[routerArrayIndex].System.GPS.Latitude = fmt.Sprintf("%f", y) // update router struc with y coordinate
 		routers[routerArrayIndex].System.GPS.Latitude = fmt.Sprintf("%f", y) // update router struc with y coordinate
 
-		GpsAltFloat64, parseErr := strconv.ParseFloat(GpsAlt, 64)
-		GpsAltFloat64 = GpsAltFloat64 / 100000.0
-		z = (float32)(globeRadius*(math.Cos(yRadianLat)) + GpsAltFloat64)
 		//		routerArray[routerArrayIndex].System.Coordinates.Z = z // update router struc with z coordinate.
 		//		routerArray[routerArrayIndex].System.GPS.Altitude = fmt.Sprintf("%f", z) // update router struc with z coordinate.
 		routers[routerArrayIndex].System.GPS.Altitude = fmt.Sprintf("%f", z) // update router struc with z coordinate.
@@ -350,13 +323,21 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		//		linkMat := material.NewPhong(math32.NewColor("Blue"))
 		//		cylinderMesh := graphic.NewMesh(link3D, linkMat)
 		//		cylinderMesh.SetPosition(FromRouterX, FromRouterY, FromRouterZ)
+
+		// calculate sphere coordinates of link endpoints from GPS coordinates
+		fromX, fromY, fromZ := calcCoordinates(strconv.FormatFloat(float64(FromRouterX), 'g', 1, 64), strconv.FormatFloat(float64(FromRouterY), 'g', 1, 64), strconv.FormatFloat(float64(FromRouterZ), 'g', 1, 64))
+		toX, toY, toZ := calcCoordinates(strconv.FormatFloat(float64(ToRouterX), 'g', 1, 64), strconv.FormatFloat(float64(ToRouterY), 'g', 1, 64), strconv.FormatFloat(float64(ToRouterZ), 'g', 1, 64))
+
 		linkGeom := geometry.NewGeometry()
 		vertices := math32.NewArrayF32(0, 0)
+		//		vertices.Append(
+		//			FromRouterX, FromRouterY, FromRouterZ,
+		//			ToRouterX, ToRouterY, ToRouterZ,
+		//		)
 		vertices.Append(
-			FromRouterX, FromRouterY, FromRouterZ,
-			ToRouterX, ToRouterY, ToRouterZ,
+			fromX, fromY, fromZ,
+			toX, toY, toZ,
 		)
-		//		if *debugFlag {
 		if debugFlag {
 			fmt.Println("link vertices=", vertices)
 		}
@@ -393,4 +374,43 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	app.Run()
 
 	return databaseForRead
+}
+
+func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, float32, float32) {
+	var x, y, z float32
+
+	var GpsLatFloat64 = 0.0
+	//		GpsLatFloat64, parseErr := strconv.ParseFloat(GpsLat, 64)
+	var parseErr error
+	if GpsLat != "" {
+		GpsLatFloat64, parseErr = strconv.ParseFloat(GpsLat, 64)
+	}
+	if parseErr != nil {
+		fmt.Println("Error parsing GpsLat =", GpsLat)
+		log.Fatal(parseErr)
+	}
+	xRadianLat := Rad(GpsLatFloat64)
+
+	var GpsLongFloat64 = 0.0
+	//		GpsLongFloat64, parseErr := strconv.ParseFloat(GpsLong, 64)
+	if GpsLong != "" {
+		GpsLongFloat64, parseErr = strconv.ParseFloat(GpsLong, 64)
+		if parseErr != nil {
+			fmt.Println("Error parsing GpsLong", GpsLong)
+			log.Fatal(parseErr)
+		}
+	}
+
+	xRadianLong := Rad(GpsLongFloat64)
+	x = (float32)(globeRadius * math.Sin(xRadianLat) * math.Cos(xRadianLong))
+
+	yRadianLat := Rad(GpsLatFloat64)
+	yRadianLong := Rad(GpsLongFloat64)
+	y = (float32)(globeRadius * math.Sin(yRadianLat) * math.Sin(yRadianLong))
+
+	GpsAltFloat64, parseErr := strconv.ParseFloat(GpsAlt, 64)
+	GpsAltFloat64 = GpsAltFloat64 / 100000.0
+	z = (float32)(globeRadius*(math.Cos(yRadianLat)) + GpsAltFloat64)
+
+	return x, y, z
 }
