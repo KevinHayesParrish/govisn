@@ -131,7 +131,7 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterName, links[i].FromRouterIP, links[i].ToRouterName, links[i].ToRouterIP)
 		if err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-				fmt.Println("Link alrady exists. Continue building links.")
+				fmt.Println("Link already exists. Continue building links.")
 			} else {
 				log.Fatalln("Link INSERT error:", err.Error())
 			}

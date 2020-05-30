@@ -484,7 +484,8 @@ func getHostIP(routerName string) []string {
 func getGPS(sysName string) []string {
 	txts, err := net.LookupTXT(sysName)
 	if err != nil {
-		panic(err)
+		//		panic(err)
+		fmt.Println("No TXT records for", sysName)
 	}
 	if len(txts) == 0 {
 		fmt.Println("No DNS TXT records for", sysName)
