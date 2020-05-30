@@ -309,7 +309,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		}
 		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesName(*debugFlag, routers, link.ToRouterName)
 		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesIP(*debugFlag, databaseForRead, link.ToRouterIP)
-		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesIP(debugFlag, databaseForRead, link.ToRouterIP)
+		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesIP(debugFlag, databaseForRead, link.ToRouterIP)
+		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesName(debugFlag, routers, link.ToRouterName)
 		//		if *debugFlag {
 		if debugFlag {
 			fmt.Println("router coordinates =", routers[routerArrayIndex].System.GPS)
