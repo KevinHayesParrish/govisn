@@ -69,7 +69,19 @@
             "host": "127.0.0.1",
             "program": "/Users/kevin/go/src/govisn",
             "env": {},
-            "args": ["-vi", "-f", "/Users/kevin/test.db"]
+            "args": ["-vi", "-f", "/Users/kevin/govisnDiscoveredNet.db"]
+        },
+        {
+            "name": "govisn -vi -f -de",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "remotePath": "",
+            "port": 2345,
+            "host": "127.0.0.1",
+            "program": "/Users/kevin/go/src/govisn",
+            "env": {},
+            "args": ["-vi", "-f", "/Users/kevin/govisnDiscoveredNet.db", "-de"]
         }
        ]
 }
