@@ -253,38 +253,20 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		}
 
 		// Exclude false routes
-		//		if FromRouter == "127.0.0.0" || FromRouter == "127.0.0.1" || FromRouter == "224.0.0.0" || FromRouter == "0.0.0.0" || ToRouter == "127.0.0.0" || ToRouter == "127.0.0.1" || ToRouter == "224.0.0.0" || ToRouter == "0.0.0.0" {
-		//		if FromRouterIP == "127.0.0.0" || FromRouterIP == "127.0.0.1" || FromRouterIP == "224.0.0.0" || FromRouterIP == "0.0.0.0" || ToRouterIP == "127.0.0.0" || ToRouterIP == "127.0.0.1" || ToRouterIP == "224.0.0.0" || ToRouterIP == "0.0.0.0" {
-		//		if DestinationIP == "127.0.0.0" || DestinationIP == "127.0.0.1" || DestinationIP == "224.0.0.0" || DestinationIP == "0.0.0.0" || NextHopIP == "127.0.0.0" || NextHopIP == "127.0.0.1" || NextHopIP == "224.0.0.0" || NextHopIP == "0.0.0.0" {
 		if FromRouterIP == "127.0.0.0" || FromRouterIP == "127.0.0.1" || FromRouterIP == "224.0.0.0" || FromRouterIP == "0.0.0.0" || ToRouterIP == "127.0.0.0" || ToRouterIP == "127.0.0.1" || ToRouterIP == "224.0.0.0" || ToRouterIP == "0.0.0.0" {
 			continue
 		}
 
 		// Load link struct from DB fields
 		link.LinkID = LinkID
-		//		link.FromRouter = FromRouter
-		//		link.ToRouter = ToRouter
-		//		link.FromRouterName = FromRouterName
-		//		link.FromRouterIP = FromRouterIP
-		//		link.ToRouterName = ToRouterName
-		//		link.ToRouterIP = ToRouterIP
-		//		link.RouterName = RouterName
-		//		link.DestinationName = DestinationName
-		//		link.DestinationIP = DestinationIP
-		//		link.NextHopName = NextHopName
-		//		link.NextHopIP = NextHopIP
 		link.FromRouterName = FromRouterName
 		link.FromRouterIP = FromRouterIP
 		link.ToRouterName = ToRouterName
 		link.ToRouterIP = ToRouterIP
 
 		// retrieve FromRouter coordinates from router struc
-		//		if *debugFlag {
 		if debugFlag {
 			fmt.Println("link =", link)
-			//fmt.Println("From routername=", link.FromRouter)
-			//			fmt.Println("From DestinationName=", link.DestinationName)
-			//			fmt.Println("From routername=", link.RouterName)
 			fmt.Println("FromRouterName=", link.FromRouterName)
 			fmt.Println("FromRouterIP=", link.FromRouterIP)
 		}
@@ -292,26 +274,17 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinatesName(debugFlag, routers, link.FromRouterName)
 		//		if *debugFlag {
 		if debugFlag {
-			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.Coordinates)
-			//			fmt.Println("router coordinates =", routerArray[routerArrayIndex].System.GPS)
 			fmt.Println("router coordinates =", routers[routerArrayIndex].System.GPS)
-			//			fmt.Println("returned from getRouterCoordinates func: FromRouterX=", FromRouterX, "FromRouterY=", FromRouterY, "FromRouterZ=", FromRouterZ)
 			fmt.Println("returned from getRouterCoordinatesName func: FromRouterX=", FromRouterX, "FromRouterY=", FromRouterY, "FromRouterZ=", FromRouterZ)
 		}
 
 		// retrieve ToRouter coordinates from router struc
-		//		if *debugFlag {
 		if debugFlag {
-			//			fmt.Println("To routername=", link.ToRouter)
-			//			fmt.Println("To routername=", link.NextHopIP)
 			fmt.Println("ToRouterName=", link.ToRouterName)
 			fmt.Println("ToRouterIP=", link.ToRouterIP)
 		}
-		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesName(*debugFlag, routers, link.ToRouterName)
-		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesIP(*debugFlag, databaseForRead, link.ToRouterIP)
 		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesIP(debugFlag, databaseForRead, link.ToRouterIP)
 		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesName(debugFlag, routers, link.ToRouterName)
-		//		if *debugFlag {
 		if debugFlag {
 			fmt.Println("router coordinates =", routers[routerArrayIndex].System.GPS)
 			//			fmt.Println("returned from getRouterCoordinates func: ToRouterX=", ToRouterX, "ToRouterY=", ToRouterY, "ToRouterZ=", ToRouterZ)
