@@ -312,7 +312,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 			//			fmt.Println("From DestinationName=", link.DestinationName)
 			//			fmt.Println("From routername=", link.RouterName)
 			fmt.Println("FromRouterName=", link.FromRouterName)
-			fmt.Println("FromRuoterIP=", link.FromRouterIP)
+			fmt.Println("FromRouterIP=", link.FromRouterIP)
 		}
 		//		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinatesName(*debugFlag, routers, link.FromRouterName)
 		FromRouterX, FromRouterY, FromRouterZ = getRouterCoordinatesName(debugFlag, routers, link.FromRouterName)
