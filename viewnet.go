@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"strconv"
+	"time"
 
 	//	"github.com/g3n/g3nd/material"
 
 	_ "github.com/mattn/go-sqlite3"
+	g "github.com/soniah/gosnmp"
 )
 
 /*
@@ -60,6 +63,7 @@ func main() {
 	if *debugFlag {
 		fmt.Println("Debug option selected")
 	}
+
 	if *sampleNetworkDB {
 		createsampledb()
 	}
@@ -73,10 +77,36 @@ func main() {
 		loaddb(*debugFlag, dbName)
 		return
 	}
+
 	if *discoverFlag != "" {
 		seed = *discoverFlag
 		if *debugFlag {
 			fmt.Println("seed=", seed, "community=", *community)
+		}
+
+		snmpPort := "161"
+		snmpTarget := seed
+		if len(snmpTarget) <= 0 {
+			log.Fatalf("environment variable not set: GOSNMP_TARGET")
+		} else {
+			if *debugFlag {
+				fmt.Println("snmpTarget=", snmpTarget)
+			}
+		}
+		if len(snmpPort) <= 0 {
+			log.Fatalf("environment variable not set: GOSNMP_PORT")
+		}
+		port, _ := strconv.ParseUint(snmpPort, 10, 16)
+
+		// GoSNMP struct
+		params := &g.GoSNMP{
+			Target:    snmpTarget,
+			Port:      uint16(port),
+			Community: *community,
+			Version:   g.Version2c,
+			Timeout:   time.Duration(2) * time.Second,
+			Logger:    nil,
+			MaxOids:   6,
 		}
 
 		// Open the database connection
@@ -86,7 +116,7 @@ func main() {
 		}
 
 		// Discover the network
-		database = discover(*debugFlag, dbName, seed, *community, *maxHops, database)
+		database = discover(*debugFlag, dbName, seed, *community, params, *maxHops, database)
 
 		// Close database. Completed initialization and update of all tables, except Links.
 		database.Close()
@@ -130,7 +160,32 @@ func main() {
 		}
 		defer database.Close()
 
-		scannedRouters = scanNet(*debugFlag, seed, *community, database)
+		snmpPort := "161"
+		snmpTarget := seed
+		if len(snmpTarget) <= 0 {
+			log.Fatalf("environment variable not set: GOSNMP_TARGET")
+		} else {
+			if *debugFlag {
+				fmt.Println("snmpTarget=", snmpTarget)
+			}
+		}
+		if len(snmpPort) <= 0 {
+			log.Fatalf("environment variable not set: GOSNMP_PORT")
+		}
+		port, _ := strconv.ParseUint(snmpPort, 10, 16)
+
+		// GoSNMP struct
+		params := &g.GoSNMP{
+			Target:    snmpTarget,
+			Port:      uint16(port),
+			Community: *community,
+			Version:   g.Version2c,
+			Timeout:   time.Duration(2) * time.Second,
+			Logger:    nil,
+			MaxOids:   6,
+		}
+
+		scannedRouters = scanNet(*debugFlag, seed, *community, *params)
 		if *debugFlag {
 			fmt.Println("scnnedRouters=", scannedRouters)
 		}
