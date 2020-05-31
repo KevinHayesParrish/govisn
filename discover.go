@@ -57,8 +57,7 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 		Version:   g.Version2c,
 		Timeout:   time.Duration(2) * time.Second,
 		Logger:    nil,
-		//		MaxOids:   5,
-		MaxOids: 6,
+		MaxOids:   6,
 	}
 
 	if debugFlag {
