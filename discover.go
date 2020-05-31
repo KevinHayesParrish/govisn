@@ -16,15 +16,11 @@ import (
 /*
  * TODO:
  	* Add code to walk route table to discover all routers
-	 * Write Links row to database
-	 * Write ipRouteIfIndex to RouteTable. This will help later when building Links
 */
 
 // DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.3.4"
+const DISCOVERYVERSION = "0.3.5"
 
-//func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
-//func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) *sql.DB {
 func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string, database *sql.DB) *sql.DB {
 
 	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.")
@@ -76,19 +72,9 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	defer params.Conn.Close()
 
 	// Initialize the database
-	//	database, err := sql.Open("sqlite3", dbName)
-	//	if err != nil {
-	//		log.Fatalf("sql.Open() err: %v", err)
-	//	}
 	database = initDB(debugFlag, database)
 
 	getRouterInfo(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
-
-	// TODO: Write Links row to database
-
-	// Close database
-	//	database.Close()
-	//	defer database.Close()
 
 	if debugFlag {
 		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
@@ -387,10 +373,8 @@ func getInterfaces(debugFlag bool, snmpTarget string, community string, maxHopsS
 func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 
 	/*
-		*
-		* TODO:
-			* Change Links table elements to be: LinkID, FromRouterName, FromRouterIP, ToRouterName, FromRouterIP
-	*/
+	* TODO:
+	 */
 
 	initDbVersion := "0.0.3"
 	if debugFlag {
@@ -442,8 +426,6 @@ func initDB(debugFlag bool, database *sql.DB) *sql.DB {
 	/*
 	 *	Add Links table to DB
 	 */
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
 	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
 	if err != nil {
 		log.Fatalf("Links Create err: %v", err)
@@ -463,9 +445,6 @@ func getRtrName(ipAddr string) []string {
 		fmt.Println("No FQDN records for", ipAddr)
 		return names
 	}
-	//	for _, name := range names {
-	//		fmt.Printf("%s\n", name)
-	//	}
 	return names
 }
 
@@ -490,9 +469,6 @@ func getGPS(sysName string) []string {
 	if len(txts) == 0 {
 		fmt.Println("No DNS TXT records for", sysName)
 	}
-	//	for _, txt := range txts {
-	//		fmt.Printf("%s\n", txt)
-	//	}
 	return txts
 }
 
@@ -552,7 +528,6 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 			log.Fatal(err)
 		}
 		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
-		//		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr)
 		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr, ipTable.ipAddrEntry.ipAdEntIfIndex)
 		if err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
@@ -568,16 +543,6 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 
 	}
 
-	//	walkPDU, err = params.WalkAll(ipAdEntIfIndex)
-	//	if err != nil {
-	//		log.Fatalf("Get(walkPDU) err: %v", err)
-	//	}
-	//	for i := 0; i < (len(walkPDU)); i++ {
-	//		ipTable.ipAddrEntry.ipAdEntIfIndex = walkPDU[i].Value.(int)
-	//		if debugFlag {
-	//			fmt.Println("ipAdEntIfIndex=", ipTable.ipAddrEntry.ipAdEntIfIndex)
-	//		}
-	//	}
 	walkPDU, err = params.WalkAll(ipAdEntNetMask)
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntNetMask = walkPDU[i].Value.(string)
@@ -602,9 +567,6 @@ func getIPAddresses(debugFlag bool, params *g.GoSNMP, router Router, database *s
 }
 
 func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *sql.DB) {
-
-	// TODO: DB record must be written within the for loop that parses the PDU arrays.
-	//       Remove the second nexthop for loop. loop contains dest and nexthop parses, then DB row add.
 
 	// get ipRouteTable
 	ipRouteDestPDU, err := params.WalkAll(ipRouteDestOID)
@@ -636,9 +598,6 @@ func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *
 
 	for i := 0; i < (len(ipRouteDestPDU)); i++ {
 		ipRouteTab.ipRouteEntry.ipRouteDest = ipRouteDestPDU[i].Value.(string)
-		//		if debugFlag {
-		//			fmt.Println("ipRouteDest=", ipRouteTab.ipRouteEntry.ipRouteDest)
-		//		}
 		ipRouteTab.ipRouteEntry.ipRouteIfIndex = ipRouteIfIndexPDU[i].Value.(int)
 		ipRouteTab.ipRouteEntry.ipRouteNextHop = ipRouteNextHopPDU[i].Value.(string)
 		if debugFlag {
@@ -648,7 +607,6 @@ func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *
 		}
 
 		// Add row to RouteTable table
-		//		statement, _ := database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, NextHop) VALUES (?, ?, ?)")
 		statement, _ := database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, IPRouteIfIndex, NextHop) VALUES (?, ?, ?, ?)")
 		if err != nil {
 			fmt.Printf("RouterTable Prepare Insert Exec err: %v", err)
@@ -656,7 +614,6 @@ func getIPRouteTable(debugFlag bool, params *g.GoSNMP, router Router, database *
 		}
 
 		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
-		//		_, err = statement.Exec(RouterID, ipRouteTab.ipRouteEntry.ipRouteDest, ipRouteTab.ipRouteEntry.ipRouteNextHop)
 		_, err = statement.Exec(RouterID, ipRouteTab.ipRouteEntry.ipRouteDest, ipRouteTab.ipRouteEntry.ipRouteIfIndex, ipRouteTab.ipRouteEntry.ipRouteNextHop)
 		if err != nil {
 			log.Fatalf("RouteTable Insert err: %v", err)
@@ -684,7 +641,6 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 	// get FQDN with IP Address
 	fqdn := getRtrName(snmpTarget)
 
-	//	router.System.Name = string(result.Variables[0].Value.([]byte))
 	router.System.Name = fqdn[0]
 	router.System.Description = string(result.Variables[1].Value.([]byte))
 	router.System.UpTime = result.Variables[2].Value.(uint32)
@@ -695,9 +651,6 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 	/*
 		// Retrieve GPS data from DNS
 	*/
-
-	// get FQDN with IP Address
-	//	fqdn := getRtrName(snmpTarget)
 
 	// get GPS data from DNS
 	router.System.GPS.Latitude = "0.0"  // initialze with float data to allow for missing GPS on DB
@@ -768,15 +721,4 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 
 		getIPRouteTable(debugFlag, params, router, database)
 	}
-
-	/*
-		// TODO: Write Links row to database
-
-		// Close database
-		database.Close()
-
-		if debugFlag {
-			fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
-		}
-	*/
 }
