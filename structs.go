@@ -183,3 +183,9 @@ type Link struct {
 	ToRouterName   string
 	ToRouterIP     string
 }
+
+// ScannedRouter is the structure representing an SNMP capable router discovered on the network.
+type ScannedRouter struct {
+	Name      string
+	IPAddress string
+}
