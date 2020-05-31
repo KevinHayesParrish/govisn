@@ -168,19 +168,12 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		 */
 		x, y, z = calcCoordinates(GpsLat, GpsLong, GpsAlt)
 
-		//		routerArray[routerArrayIndex].System.Coordinates.X = x // update router struc with x coordinate
-		//		routerArray[routerArrayIndex].System.GPS.Longitude = fmt.Sprintf("%f", x) // update router struc with x coordinate
-		routers[routerArrayIndex].System.GPS.Longitude = fmt.Sprintf("%f", x) // update router struc with x coordinate
+		//		routers[routerArrayIndex].System.GPS.Longitude = fmt.Sprintf("%f", x) // update router struc with x coordinate
 
-		//		routerArray[routerArrayIndex].System.Coordinates.Y = y // update router struc with y coordinate
-		//		routerArray[routerArrayIndex].System.GPS.Latitude = fmt.Sprintf("%f", y) // update router struc with y coordinate
-		routers[routerArrayIndex].System.GPS.Latitude = fmt.Sprintf("%f", y) // update router struc with y coordinate
+		//		routers[routerArrayIndex].System.GPS.Latitude = fmt.Sprintf("%f", y) // update router struc with y coordinate
 
-		//		routerArray[routerArrayIndex].System.Coordinates.Z = z // update router struc with z coordinate.
-		//		routerArray[routerArrayIndex].System.GPS.Altitude = fmt.Sprintf("%f", z) // update router struc with z coordinate.
-		routers[routerArrayIndex].System.GPS.Altitude = fmt.Sprintf("%f", z) // update router struc with z coordinate.
+		//		routers[routerArrayIndex].System.GPS.Altitude = fmt.Sprintf("%f", z) // update router struc with z coordinate.
 
-		//		if *debugFlag {
 		if debugFlag {
 			fmt.Println("x =", x, "y =", y, "z", z)
 			//			fmt.Println("router =", routerArray[routerArrayIndex])
@@ -243,7 +236,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	/*
 	* Add the links to the 3D scene
 	 */
-	var FromRouterX, FromRouterY, FromRouterZ, ToRouterX, ToRouterY, ToRouterZ float32
+	//	var FromRouterX, FromRouterY, FromRouterZ, ToRouterX, ToRouterY, ToRouterZ float32
+	var FromRouterX, FromRouterY, FromRouterZ, ToRouterX, ToRouterY, ToRouterZ string
 	for linkRows.Next() {
 		//		err := linkRows.Scan(&LinkID, &FromRouter, &ToRouter)
 		//		err := linkRows.Scan(&LinkID, &FromRouterName, &FromRouterIP, &ToRouterName, &ToRouterIP)
@@ -283,7 +277,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		}
 		defer routerGpsRows.Close()
 		var linksFromRouterName string
-		var linksFromRouterGpsLat, linksFromRouterGpsLong, linksFromRouterGpsAlt float32
+		//		var linksFromRouterGpsLat, linksFromRouterGpsLong, linksFromRouterGpsAlt float32
+		var linksFromRouterGpsLat, linksFromRouterGpsLong, linksFromRouterGpsAlt string
 		for routerGpsRows.Next() {
 			routerGpsRows.Scan(&linksFromRouterName, &linksFromRouterGpsLat, &linksFromRouterGpsLong, &linksFromRouterGpsAlt)
 		}
@@ -298,13 +293,28 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 			fmt.Println("returned from getRouterCoordinatesName func: FromRouterX=", FromRouterX, "FromRouterY=", FromRouterY, "FromRouterZ=", FromRouterZ)
 		}
 
-		// retrieve ToRouter coordinates from router struc
+		//  Query database for FromRouter GPS coordinates
 		if debugFlag {
 			fmt.Println("ToRouterName=", link.ToRouterName)
 			fmt.Println("ToRouterIP=", link.ToRouterIP)
 		}
-		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesIP(debugFlag, databaseForRead, link.ToRouterIP)
-		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesName(debugFlag, routers, link.ToRouterName)
+		//		ToRouterX, ToRouterY, ToRouterZ = getRouterCoordinatesName(debugFlag, routers, link.ToRouterName)
+		routerGpsRows, err = databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = $1", ToRouterName)
+		if err != nil {
+			log.Fatalln("databaseForRead Query error", err.Error())
+		}
+		if debugFlag {
+			fmt.Println("Successful Query for ToRouter GPS Coordinates")
+		}
+		var linksToRouterName string
+		var linksToRouterGpsLat, linksToRouterGpsLong, linksToRouterGpsAlt string
+		for routerGpsRows.Next() {
+			routerGpsRows.Scan(&linksToRouterName, &linksToRouterGpsLat, &linksToRouterGpsLong, &linksToRouterGpsAlt)
+		}
+		ToRouterX = linksToRouterGpsLat
+		ToRouterY = linksToRouterGpsLong
+		ToRouterZ = linksToRouterGpsAlt
+
 		if debugFlag {
 			//			fmt.Println("router coordinates =", routers[routerArrayIndex].System.G)
 			fmt.Println("router", Name, "GPS coordinates =", GpsLat, GpsLong, GpsAlt)
@@ -320,8 +330,10 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		//		cylinderMesh.SetPosition(FromRouterX, FromRouterY, FromRouterZ)
 
 		// calculate sphere coordinates of link endpoints from GPS coordinates
-		fromX, fromY, fromZ := calcCoordinates(strconv.FormatFloat(float64(FromRouterX), 'g', 1, 64), strconv.FormatFloat(float64(FromRouterY), 'g', 1, 64), strconv.FormatFloat(float64(FromRouterZ), 'g', 1, 64))
-		toX, toY, toZ := calcCoordinates(strconv.FormatFloat(float64(ToRouterX), 'g', 1, 64), strconv.FormatFloat(float64(ToRouterY), 'g', 1, 64), strconv.FormatFloat(float64(ToRouterZ), 'g', 1, 64))
+		//		fromX, fromY, fromZ := calcCoordinates(strconv.FormatFloat(float64(FromRouterX), 'g', 1, 64), strconv.FormatFloat(float64(FromRouterY), 'g', 1, 64), strconv.FormatFloat(float64(FromRouterZ), 'g', 1, 64))
+		//		toX, toY, toZ := calcCoordinates(strconv.FormatFloat(float64(ToRouterX), 'g', 1, 64), strconv.FormatFloat(float64(ToRouterY), 'g', 1, 64), strconv.FormatFloat(float64(ToRouterZ), 'g', 1, 64))
+		fromX, fromY, fromZ := calcCoordinates(FromRouterX, FromRouterY, FromRouterZ)
+		toX, toY, toZ := calcCoordinates(ToRouterX, ToRouterY, ToRouterZ)
 
 		linkGeom := geometry.NewGeometry()
 		vertices := math32.NewArrayF32(0, 0)
