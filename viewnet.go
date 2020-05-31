@@ -118,6 +118,24 @@ func main() {
 		}
 		defer databaseForUpdate.Close()
 	*/
+
+	var scannedRouters []ScannedRouter
+	if *scanNetFlag != "" {
+		seed = *scanNetFlag
+		// Open the database connection
+		database, openErr := sql.Open("sqlite3", *DbName)
+		if openErr != nil {
+			fmt.Println("Error opening database", *DbName)
+			log.Fatal(openErr)
+		}
+		defer database.Close()
+
+		scannedRouters = scanNet(*debugFlag, seed, *community, database)
+		if *debugFlag {
+			fmt.Println("scnnedRouters=", scannedRouters)
+		}
+	}
+
 	if *visualizeFlag {
 		// Open the database containing the discovered network
 		databaseForRead, openErr := sql.Open("sqlite3", *DbName)
