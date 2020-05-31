@@ -34,16 +34,4 @@ func testarango() {
 		// Handle error
 	}
 	fmt.Println("col=", col)
-	/*
-		// Create document
-		book := Book{
-			Title:   "ArangoDB Cookbook",
-			NoPages: 257,
-		}
-		meta, err := col.CreateDocument(nil, book)
-		if err != nil {
-			// Handle error
-		}
-		fmt.Printf("Created document in collection '%s' in database '%s'\n", col.Name(), db.Name())
-	*/
 }
