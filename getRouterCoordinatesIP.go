@@ -59,37 +59,5 @@ func getRouterCoordinatesIP(debugFlag bool, database *sql.DB, ToRouterIPIn strin
 		z = (float32)(z1)
 	}
 
-	/*
-		for i := 0; i < len(routers); i++ {
-			//		if routerArray[i].System.Name == "" {
-			//			break // end of routerArray entries
-			//		}
-			//		if routerArray[i].System.Name == routerName {
-				if routers[i].System.Name == routerName {
-				//			x = routerArray[i].System.Coordinates.X
-				//			x1, err := strconv.ParseFloat(routerArray[i].System.GPS.Longitude, 32)
-				x1, err := strconv.ParseFloat(routers[i].System.GPS.Longitude, 32)
-				if err != nil {
-					panic(err)
-				}
-				x = (float32)(x1)
-				//			y = routerArray[i].System.Coordinates.Y
-				//			y1, err := strconv.ParseFloat(routerArray[i].System.GPS.Latitude, 32)
-				y1, err := strconv.ParseFloat(routers[i].System.GPS.Latitude, 32)
-				if err != nil {
-					panic(err)
-				}
-				y = (float32)(y1)
-				//			z = routerArray[i].System.Coordinates.Z
-				//			z1, err := strconv.ParseFloat(routerArray[i].System.GPS.Altitude, 32)
-				z1, err := strconv.ParseFloat(routers[i].System.GPS.Altitude, 32)
-				if err != nil {
-					panic(err)
-				}
-				z = (float32)(z1)
-				break
-			}
-		}
-	*/
 	return x, y, z
 }
