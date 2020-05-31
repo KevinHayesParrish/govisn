@@ -4,7 +4,7 @@ import (
 	"net"
 )
 
-func Hosts(cidr string) ([]string, error) {
+func getHosts(cidr string) ([]string, error) {
 	ip, ipnet, err := net.ParseCIDR(cidr)
 	if err != nil {
 		return nil, err
