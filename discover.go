@@ -21,7 +21,7 @@ import (
 */
 
 // DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.3.3"
+const DISCOVERYVERSION = "0.3.4"
 
 //func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) {
 //func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string) *sql.DB {
@@ -681,7 +681,11 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 		log.Fatalf("Get() err: %v", err)
 	}
 
-	router.System.Name = string(result.Variables[0].Value.([]byte))
+	// get FQDN with IP Address
+	fqdn := getRtrName(snmpTarget)
+
+	//	router.System.Name = string(result.Variables[0].Value.([]byte))
+	router.System.Name = fqdn[0]
 	router.System.Description = string(result.Variables[1].Value.([]byte))
 	router.System.UpTime = result.Variables[2].Value.(uint32)
 	router.System.Contact = string(result.Variables[3].Value.([]byte))
@@ -693,7 +697,7 @@ func getRouterInfo(debugFlag bool, snmpTarget string, community string, maxHopsS
 	*/
 
 	// get FQDN with IP Address
-	fqdn := getRtrName(snmpTarget)
+	//	fqdn := getRtrName(snmpTarget)
 
 	// get GPS data from DNS
 	router.System.GPS.Latitude = "0.0"  // initialze with float data to allow for missing GPS on DB
