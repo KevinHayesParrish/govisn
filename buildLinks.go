@@ -13,7 +13,7 @@ import (
 )
 
 //buildLinksVersion is the file version sequence number
-const buildLinksVersion = "0.0.1"
+const buildLinksVersion = "0.0.2"
 
 func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 	fmt.Println("func buildLinks version", buildLinksVersion, "started")
@@ -35,14 +35,11 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 	}
 	defer routeTableRows.Close()
 
-	//var routers []Router
 	var router Router
-	//routerArrayIndex := 0
 	var links []Link
 	var link Link
 	var RouterID int
 	var Name string
-	//var IpIfIndex string
 	var DestAddr string
 	var IPRouteIfIndex string
 	var NextHop string
