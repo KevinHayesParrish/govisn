@@ -48,7 +48,6 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 	var IPRouteIfIndex string
 	var NextHop string
 	for routeTableRows.Next() {
-		//		routeTableRows.Scan(&RouterID, &Name, &DestAddr, &NextHop)
 		routeTableRows.Scan(&RouterID, &Name, &DestAddr, &IPRouteIfIndex, &NextHop)
 		router.System.RouterID = RouterID
 		router.System.Name = Name
@@ -67,30 +66,6 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 			link.FromRouterIP = fromIPs[0]
 		}
 
-		// Find ToRouterName
-		//	var routerID string
-		//	var ipAddr string
-		//	var ifIndex string
-		//		queryRouterRows, queryRtrErr := database.Query("SELECT RouterID, IpAddr, IfIndex FROM RouterIp WHERE ipAddr = $1 AND IfIndex = $2", DestAddr, IPRouteIfIndex)
-		/*
-			queryRouterRows, queryRtrErr := database.Query("SELECT RouterID, IpAddr, IfIndex FROM RouterIp WHERE ipAddr = $1 AND IfIndex = $2", NextHop, IPRouteIfIndex)
-			if queryRtrErr != nil {
-				fmt.Println("Query where RouterIp.IPRouteIfIndex = NextHop", queryRtrErr)
-				log.Fatal(queryRtrErr)
-			}
-			defer queryRouterRows.Close()
-
-			for queryRouterRows.Next() {
-				queryRouterRows.Scan(&routerID, &ipAddr, ifIndex)
-				rtrNames := getRtrName(ipAddr)
-				if len(rtrNames) < 1 {
-					fmt.Println("No Router Name for Route Destination", ipAddr)
-					link.ToRouterName = ""
-				} else {
-					link.ToRouterName = rtrNames[0]
-				}
-			}
-		*/
 		rtrNames := getRtrName(NextHop)
 		if len(rtrNames) < 1 {
 			fmt.Println("No Router Name for Route Destination", NextHop)
@@ -102,32 +77,19 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 		link.ToRouterIP = NextHop
 
 		// calculate LinkID
-		//		link.LinkID = int(crc32.ChecksumIEEE([]byte(Name)))
 		link.LinkID = int(crc32.ChecksumIEEE([]byte(link.FromRouterIP + link.ToRouterIP)))
 
 		links = append(links, link)
-
-		//		statement, err := database.Prepare("INSERT INTO Links (LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP) VALUES (?, ?, ?, ?, ?, ?)")
-		//		if err != nil {
-		//			log.Fatalln("Links Insert Prepare err:", err.Error())
-		//		}
-		//		_, err = statement.Exec(link.LinkID, link.RouterName, link.DestinationName, link.DestinationIP, link.NextHopName, link.NextHopIP)
-		//		if err != nil {
-		//			log.Fatalln("Link INSERT error:", err.Error())
-		//		}
-		//		defer statement.Close()
 
 	}
 	routeTableRows.Close()
 
 	for i := 0; i < len(links); i++ {
 		//SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, FromRouterIP FROM Links
-		//	statement, err := database.Prepare("INSERT INTO Links (LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP) VALUES (?, ?, ?, ?, ?, ?)")
 		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?)")
 		if err != nil {
 			log.Fatalln("Links Insert Prepare err:", err.Error())
 		}
-		//		_, err = statement.Exec(links[i].LinkID, links[i].RouterName, links[i].DestinationName, links[i].DestinationIP, links[i].NextHopName, links[i].NextHopIP)
 		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterName, links[i].FromRouterIP, links[i].ToRouterName, links[i].ToRouterIP)
 		if err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
