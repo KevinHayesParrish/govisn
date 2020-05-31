@@ -1,7 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 /*
@@ -12,11 +15,18 @@ import (
 // SCANNETVERSION is the file version number
 const SCANNETVERSION = "0.0.1"
 
-func scanNet(debugFlag bool, snmpTarget string, community string) ([]string, []string) {
+func scanNet(debugFlag bool, seed string, community string, database *sql.DB) []ScannedRouter {
 
 	fmt.Println("\nfunc scanNet version", SCANNETVERSION, "started.")
+	if debugFlag {
+		fmt.Println("seed=", seed, "community=", community)
+	}
 
-	var RouterNames, RouterIPs []string
+	var scannedRouters []ScannedRouter
 
-	return RouterNames, RouterIPs
+	if debugFlag {
+		fmt.Println("Returning, scannedRouters=", scannedRouters)
+	}
+	fmt.Println("func scanNet", SCANNETVERSION, "ended.")
+	return scannedRouters
 }
