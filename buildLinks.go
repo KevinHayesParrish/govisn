@@ -78,13 +78,17 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 		// calculate LinkID
 		link.LinkID = int(crc32.ChecksumIEEE([]byte(link.FromRouterIP + link.ToRouterIP)))
 
-		links = append(links, link)
+		if link.FromRouterName == link.ToRouterName {
+			fmt.Println("From and To Routers are the same. Link not added to database.")
+		} else {
+			links = append(links, link)
+		}
 
 	}
 	routeTableRows.Close()
 
 	for i := 0; i < len(links); i++ {
-		//SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, FromRouterIP FROM Links
+		// SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, FromRouterIP FROM Links
 		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?)")
 		if err != nil {
 			log.Fatalln("Links Insert Prepare err:", err.Error())
