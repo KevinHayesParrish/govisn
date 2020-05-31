@@ -42,6 +42,9 @@ var community = flag.String("co", "public", "SNMP Community ReadOnly String")
 var maxHops = flag.String("m", "0", "Scope of discovery. Maximum number of Hops from seed. (Default:10)")
 var visualizeFlag = flag.Bool("vi", false, "Visualize the Network.")
 
+//scanNetFlag is the startup option to scan the network for SNMP capable routers.
+var scanNetFlag = flag.String("s", "", "Scan the network for SNMP capable routers.\nOnce the network is scanned, the list of found routers\nwill be queried and their information added to the database.")
+
 //routerRadius is the radius of the 3D object representing a network router
 const routerRadius float64 = 0.5
 
@@ -99,23 +102,37 @@ func main() {
 		database.Close()
 
 	}
+	/*
+		// Open the database containing the discovered network
+		databaseForRead, openErr := sql.Open("sqlite3", *DbName)
+		if openErr != nil {
+			fmt.Println("Error opening databaseForRead", *DbName)
+			log.Fatal(openErr)
+		}
+		defer databaseForRead.Close()
 
-	// Open the database containing the discovered network
-	databaseForRead, openErr := sql.Open("sqlite3", *DbName)
-	if openErr != nil {
-		fmt.Println("Error opening databaseForRead", *DbName)
-		log.Fatal(openErr)
-	}
-	defer databaseForRead.Close()
-
-	databaseForUpdate, openErr := sql.Open("sqlite3", *DbName)
-	if openErr != nil {
-		fmt.Println("Error opening databaseForUpdate", *DbName)
-		log.Fatal(openErr)
-	}
-	defer databaseForUpdate.Close()
-
+		databaseForUpdate, openErr := sql.Open("sqlite3", *DbName)
+		if openErr != nil {
+			fmt.Println("Error opening databaseForUpdate", *DbName)
+			log.Fatal(openErr)
+		}
+		defer databaseForUpdate.Close()
+	*/
 	if *visualizeFlag {
+		// Open the database containing the discovered network
+		databaseForRead, openErr := sql.Open("sqlite3", *DbName)
+		if openErr != nil {
+			fmt.Println("Error opening databaseForRead", *DbName)
+			log.Fatal(openErr)
+		}
+		defer databaseForRead.Close()
+
+		databaseForUpdate, openErr := sql.Open("sqlite3", *DbName)
+		if openErr != nil {
+			fmt.Println("Error opening databaseForUpdate", *DbName)
+			log.Fatal(openErr)
+		}
+		defer databaseForUpdate.Close()
 		databaseForRead = visualizeNetwork(*debugFlag, databaseForRead)
 	}
 }
