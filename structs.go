@@ -16,11 +16,6 @@ type Router struct {
 			Longitude string
 			Altitude  string
 		}
-		//		Coordinates struct {
-		//			X float32
-		//			Y float32
-		//			Z float32
-		//		}
 	}
 	Addresses struct {
 		NetworkAddresses struct {
@@ -182,16 +177,9 @@ type ipRouteTable struct {
 
 // Link is the structure representing a network link between two routers
 type Link struct {
-	LinkID int
-	//FromRouter     string
-	//ToRouter       string
+	LinkID         int
 	FromRouterName string
 	FromRouterIP   string
 	ToRouterName   string
 	ToRouterIP     string
-	//	RouterName      string
-	//	DestinationName string
-	//	DestinationIP   string
-	//	NextHopName     string
-	//	NextHopIP       string
 }
