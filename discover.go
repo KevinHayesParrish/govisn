@@ -8,7 +8,6 @@ import (
 	"net"
 	"strconv"
 	"strings"
-	"time"
 
 	g "github.com/soniah/gosnmp"
 )
@@ -21,7 +20,7 @@ import (
 // DISCOVERYVERSION is the file version number
 const DISCOVERYVERSION = "0.3.5"
 
-func discover(debugFlag bool, dbName string, snmpTarget string, community string, maxHopsStr string, database *sql.DB) *sql.DB {
+func discover(debugFlag bool, dbName string, snmpTarget string, community string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
 
 	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.")
 
@@ -36,30 +35,31 @@ func discover(debugFlag bool, dbName string, snmpTarget string, community string
 	// Get Router attributes
 	var router Router
 
-	snmpPort := "161"
-	if len(snmpTarget) <= 0 {
-		log.Fatalf("environment variable not set: GOSNMP_TARGET")
-	} else {
-		if debugFlag {
-			fmt.Println("snmpTarget=", snmpTarget)
+	/*
+		snmpPort := "161"
+		if len(snmpTarget) <= 0 {
+			log.Fatalf("environment variable not set: GOSNMP_TARGET")
+		} else {
+			if debugFlag {
+				fmt.Println("snmpTarget=", snmpTarget)
+			}
 		}
-	}
-	if len(snmpPort) <= 0 {
-		log.Fatalf("environment variable not set: GOSNMP_PORT")
-	}
-	port, _ := strconv.ParseUint(snmpPort, 10, 16)
+		if len(snmpPort) <= 0 {
+			log.Fatalf("environment variable not set: GOSNMP_PORT")
+		}
+		port, _ := strconv.ParseUint(snmpPort, 10, 16)
 
-	// GoSNMP struct
-	params := &g.GoSNMP{
-		Target:    snmpTarget,
-		Port:      uint16(port),
-		Community: community,
-		Version:   g.Version2c,
-		Timeout:   time.Duration(2) * time.Second,
-		Logger:    nil,
-		MaxOids:   6,
-	}
-
+		// GoSNMP struct
+		params := &g.GoSNMP{
+			Target:    snmpTarget,
+			Port:      uint16(port),
+			Community: community,
+			Version:   g.Version2c,
+			Timeout:   time.Duration(2) * time.Second,
+			Logger:    nil,
+			MaxOids:   6,
+		}
+	*/
 	if debugFlag {
 		fmt.Println("params=", params)
 	}
