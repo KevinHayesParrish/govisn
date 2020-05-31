@@ -26,7 +26,6 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 	 *
 	 */
 
-	//	routeTableRows, err := database.Query("SELECT RouterID, Name, DestAddr, NextHop FROM Routers INNER JOIN RouteTable USING (RouterID)")
 	routeTableRows, err := database.Query("SELECT RouterID, Name, DestAddr, IPRouteIfIndex, NextHop FROM Routers INNER JOIN RouteTable USING (RouterID)")
 	if err != nil {
 		log.Fatalln("databaseForRead JOIN error", err.Error())
