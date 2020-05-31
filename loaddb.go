@@ -71,13 +71,6 @@ func loaddb(debug bool, networkXML string) {
 		fmt.Println("Debug option selected")
 	}
 
-	// The struc which contains all the Routers in the XML input file.
-	//	type Routers struct {
-	//		XMLName     xml.Name `xml:"V15N_Discovered_Network"`
-	//		NetworkName string   `xml:"V15N_Discovered_Network"`
-	//		Routers     []Router `xml:"Router"`
-	//	}
-
 	// Open our xmlFile
 	xmlFile, err := os.Open(networkXML)
 	// if os.Open returns an error then handle it
@@ -111,7 +104,6 @@ func loaddb(debug bool, networkXML string) {
 	database, _ := sql.Open("sqlite3", databaseName)
 
 	// Create Routers DB table
-	//	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat REAL, GPSLong REAL, GpsAlt REAL)")
 	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY, SystemName TEXT, SystemDesc TEXT, UpTime TEXT, Contact TEXT, Location TEXT, GpsLat TEXT, GPSLong TEXT, GpsAlt TEXT)")
 	statement.Exec()
 
@@ -167,8 +159,6 @@ func loaddb(debug bool, networkXML string) {
 		}
 
 		//	Create Links DB table
-		//		statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, FromRouter TEXT, ToRouter TEXT)")
-		//		statement, _ = database.Prepare("INSERT INTO Links (LinkID, FromRouter, ToRouter) VALUES (?, ?, ?)")
 		statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, RouterName TEXT, DestinationName TEXT, DestinationIP TEXT, NextHopName TEXT, NextHopIP TEXT)")
 		if err != nil {
 			fmt.Println("Error creating Links table.")
@@ -190,7 +180,6 @@ func loaddb(debug bool, networkXML string) {
 
 		if debug {
 			fmt.Println("Adding link records to Links table.")
-			//fmt.Println("network.Router[", i, "]=", network.Router[i])
 		}
 		for l := 0; l < len(network.Router[i].Neighbors.Neighbor); l++ {
 			// Don't add link row for loopback interface
@@ -247,7 +236,6 @@ func loaddb(debug bool, networkXML string) {
 				}
 			}
 
-			//			statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), DestinationName, dest, NextHopName, nextHop)
 			if debug {
 				fmt.Println("Adding link row with fields =", SystemName, DestinationName, dest, NextHopName, nextHop)
 			}
@@ -275,7 +263,6 @@ func getRouterNameUsingIP(debug bool, ipAddress string, network V15NDiscoveredNe
 		if debug {
 			fmt.Println(" network.Router[i].System.Name=", network.Router[i].System.Name)
 			fmt.Println(" i=", i)
-			//fmt.Println(" network.Router[i]", network.Router[i])
 			fmt.Println(" len(network.Router[i].Addresses.NetworkAddresses.IPAddress=", len(network.Router[i].Addresses.NetworkAddresses.IPAddress))
 		}
 
@@ -284,7 +271,6 @@ func getRouterNameUsingIP(debug bool, ipAddress string, network V15NDiscoveredNe
 				fmt.Println(" j=", j)
 				fmt.Println(" ipAddress=", ipAddress)
 				fmt.Println(" network.Router[i].Addresses.NetworkAddresses.IPAddress[j]=", network.Router[i].Addresses.NetworkAddresses.IPAddress[j])
-				//fmt.Println(" network.Router[i]", network.Router[i])
 			}
 			if network.Router[i].Addresses.NetworkAddresses.IPAddress[j] == ipAddress {
 				routerName = network.Router[i].System.Name
