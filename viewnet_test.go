@@ -11,7 +11,6 @@ func Test_main(t *testing.T) {
 		name string
 		args string
 	}{
-		// TODO: Add test cases.
 		{"test1", "-f /temp/home3.xml.db"},
 		{"test2", "-d -f /temp/home3.xml.db"},
 	}
@@ -28,7 +27,6 @@ func TestRad(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		//args args
 		want float64
 	}{
 		// TODO: Add test cases.
@@ -38,9 +36,6 @@ func TestRad(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			//if got := Rad(tt.args.d); got != tt.want {
-			//	t.Errorf("Rad() = %v, want %v", got, tt.want)
-			//}
 		})
 	}
 }
@@ -51,27 +46,21 @@ func TestDeg(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		// args args
 		want float64
 	}{
-		// TODO: Add test cases.
 		{"test1", 0.30},
 		{"test2", 0.45},
 		{"test2", -0.15},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// if got := Deg(tt.args.r); got != tt.want {
-			// t.Errorf("Deg() = %v, want %v", got, tt.want)
-			// }
 		})
 	}
 }
 
 func Test_getRouterCoordinates(t *testing.T) {
 	type args struct {
-		debug bool
-		//		routerArray [1000]Router
+		debug      bool
 		routers    []Router
 		routerName string
 	}
@@ -86,7 +75,6 @@ func Test_getRouterCoordinates(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			//			got, got1, got2 := getRouterCoordinates(tt.args.debug, tt.args.routerArray, tt.args.routerName)
 			got, got1, got2 := getRouterCoordinatesName(tt.args.debug, tt.args.routers, tt.args.routerName)
 			if got != tt.want {
 				t.Errorf("getRouterCoordinates() got = %v, want %v", got, tt.want)
