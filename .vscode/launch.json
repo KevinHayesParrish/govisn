@@ -81,7 +81,7 @@
             "host": "127.0.0.1",
             "program": "/Users/kevin/go/src/govisn",
             "env": {},
-            "args": ["-vi", "-f", "/Users/kevin/govisnDiscoveredNet.db", "-de"]
+            "args": ["-vi", "-f", "/Users/kevin/test.db", "-de"]
         }
        ]
 }
