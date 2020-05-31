@@ -19,8 +19,6 @@ import (
 //ViewnetVersion is the file version number
 const ViewnetVersion = "0.8.10"
 
-//const maxRouters int = 1000
-
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
 var debugFlag = flag.Bool("de", false, "Print Debug statements.")
@@ -37,9 +35,11 @@ var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 
 //discoverFlag is the option to discover a network
 var discoverFlag = flag.String("di", "", "Discover a network using seed IP Address")
+
 var seed = "127.0.0.1"
+
 var community = flag.String("co", "public", "SNMP Community ReadOnly String")
-var maxHops = flag.String("m", "0", "Scope of discovery. Maximum number of Hops from seed")
+var maxHops = flag.String("m", "0", "Scope of discovery. Maximum number of Hops from seed. (Default:10)")
 var visualizeFlag = flag.Bool("vi", false, "Visualize the Network.")
 
 //routerRadius is the radius of the 3D object representing a network router
