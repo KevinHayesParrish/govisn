@@ -1,11 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 )
 
 // Get Router Coordinates from routerArray
 func getRouterCoordinatesName(debug bool, routers []Router, routerName string) (float32, float32, float32) {
+	if debug {
+		fmt.Println("getRouterCoordinatesName starting")
+	}
 	var x float32
 	var y float32
 	var z float32
@@ -32,6 +36,9 @@ func getRouterCoordinatesName(debug bool, routers []Router, routerName string) (
 			z = (float32)(z1)
 			break
 		}
+	}
+	if debug {
+		fmt.Println("getRouterCoordinatesName ending")
 	}
 	return x, y, z
 }

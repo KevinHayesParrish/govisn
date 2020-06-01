@@ -297,6 +297,9 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	}
 	app.Run()
 
+	if debugFlag {
+		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func ending")
+	}
 	return databaseForRead
 }
 

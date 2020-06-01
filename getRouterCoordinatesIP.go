@@ -9,6 +9,9 @@ import (
 
 // Get Router Coordinates from routerArray
 func getRouterCoordinatesIP(debugFlag bool, database *sql.DB, ToRouterIPIn string) (float32, float32, float32) {
+	if debugFlag {
+		fmt.Println("getRouterCoordiantesIP starting")
+	}
 	var x float32
 	var y float32
 	var z float32
@@ -57,6 +60,9 @@ func getRouterCoordinatesIP(debugFlag bool, database *sql.DB, ToRouterIPIn strin
 			log.Fatalln("z1 ParseFloat error", parseErr.Error())
 		}
 		z = (float32)(z1)
+	}
+	if debugFlag {
+		fmt.Println("getRouterCoordiantesIP ending")
 	}
 
 	return x, y, z

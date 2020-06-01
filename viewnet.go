@@ -208,6 +208,7 @@ func main() {
 		defer databaseForUpdate.Close()
 		databaseForRead = visualizeNetwork(*debugFlag, databaseForRead)
 	}
+	fmt.Println("viewnet version", ViewnetVersion, "ending.")
 }
 
 const constX = math.Pi / 180

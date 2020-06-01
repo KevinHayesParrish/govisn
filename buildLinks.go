@@ -101,6 +101,6 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 		defer statement.Close()
 	}
 
-	fmt.Println("func buildLinks version", buildLinksVersion, "stopped")
+	fmt.Println("func buildLinks version", buildLinksVersion, "ending")
 	return database
 }
