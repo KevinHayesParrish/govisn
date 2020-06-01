@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 	g "github.com/soniah/gosnmp"
@@ -69,7 +70,12 @@ func scanNet(debugFlag bool, cidr string, community string, params g.GoSNMP) []S
 
 		result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 		if err != nil {
-			log.Fatalf("Get() err: %v", err)
+			if strings.Contains(err.Error(), "Request timeout") {
+				fmt.Println(subnetIPAddrs[i], "not answering SNMP get. Continuing network scan.")
+				continue
+			} else {
+				log.Fatalf("Get() err: %v", err)
+			}
 		}
 		var scannedRouter ScannedRouter
 		if result.Variables[1].Value.(int) >= 4 {
