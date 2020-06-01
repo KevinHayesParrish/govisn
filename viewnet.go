@@ -207,6 +207,8 @@ func main() {
 
 	if *visualizeFlag {
 		// Open the database containing the discovered network
+		fmt.Println("\nBeginning Network Visualization.")
+
 		databaseForRead, openErr := sql.Open("sqlite3", *DbName)
 		if openErr != nil {
 			fmt.Println("Error opening databaseForRead", *DbName)
