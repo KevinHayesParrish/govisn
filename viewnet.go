@@ -132,24 +132,9 @@ func main() {
 		database.Close()
 
 	}
-	/*
-		// Open the database containing the discovered network
-		databaseForRead, openErr := sql.Open("sqlite3", *DbName)
-		if openErr != nil {
-			fmt.Println("Error opening databaseForRead", *DbName)
-			log.Fatal(openErr)
-		}
-		defer databaseForRead.Close()
-
-		databaseForUpdate, openErr := sql.Open("sqlite3", *DbName)
-		if openErr != nil {
-			fmt.Println("Error opening databaseForUpdate", *DbName)
-			log.Fatal(openErr)
-		}
-		defer databaseForUpdate.Close()
-	*/
 
 	var scannedRouters []ScannedRouter
+
 	if *scanNetFlag != "" {
 		seed = *scanNetFlag
 		// Open the database connection
@@ -185,10 +170,39 @@ func main() {
 			MaxOids:   6,
 		}
 
+		// Scan the requested network for Router hosts
 		scannedRouters = scanNet(*debugFlag, seed, *community, *params)
 		if *debugFlag {
 			fmt.Println("scnnedRouters=", scannedRouters)
 		}
+
+		// Discover router information from list of scanned routers.
+		// Open the database connection
+		database, err := sql.Open("sqlite3", dbName)
+		if err != nil {
+			log.Fatalf("sql.Open() err: %v", err)
+		}
+		for i := 0; i < len(scannedRouters); i++ {
+
+			// Discover the router's information and add to database
+			params.Target = scannedRouters[i].IPAddress
+			database = discover(*debugFlag, dbName, scannedRouters[i].IPAddress, *community, params, *maxHops, database)
+
+			// Close database. Completed initialization and update of all tables, except Links.
+			database.Close()
+
+			// Open database. buildLinks joins Router and RouteTable tables.
+			database, err = sql.Open("sqlite3", dbName)
+			if err != nil {
+				log.Fatalf("sql.Open() err: %v", err)
+			}
+
+			// Build Links
+			database = buildLinks(*debugFlag, database)
+
+		}
+		database.Close()
+
 	}
 
 	if *visualizeFlag {
