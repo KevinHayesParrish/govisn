@@ -15,7 +15,7 @@ import (
 */
 
 // SCANNETVERSION is the file version number
-const SCANNETVERSION = "0.0.1"
+const SCANNETVERSION = "0.0.2"
 
 func scanNet(debugFlag bool, cidr string, community string, params g.GoSNMP) []ScannedRouter {
 
@@ -70,7 +70,7 @@ func scanNet(debugFlag bool, cidr string, community string, params g.GoSNMP) []S
 
 		result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 		if err != nil {
-			if strings.Contains(err.Error(), "Request timeout") {
+			if strings.Contains(err.Error(), "Request timeout") || strings.Contains(err.Error(), "connection refused") {
 				fmt.Println(subnetIPAddrs[i], "not answering SNMP get. Continuing network scan.")
 				continue
 			} else {
