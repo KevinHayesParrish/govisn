@@ -63,7 +63,7 @@ func scanNet(debugFlag bool, cidr string, community string, params g.GoSNMP) []S
 		err = params.Connect()
 		if err != nil {
 			//			log.Fatalf("Connect() err: %v", err)
-			fmt.Println("Router not SNMP Enabled, or SNMP parameters incorrect. Continuing to scann CIDR.")
+			fmt.Println("Router not SNMP Enabled, or SNMP parameters incorrect. Continuing to scan CIDR.")
 			params.Conn.Close()
 			continue
 		}
