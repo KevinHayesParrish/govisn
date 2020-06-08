@@ -22,7 +22,7 @@ import (
 )
 
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
-	const VISUALIZENETWORKVERSION = "0.0.1"
+	const VISUALIZENETWORKVERSION = "0.0.2"
 	if debugFlag {
 		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
 	}
@@ -57,6 +57,9 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		fmt.Println("Error Creating 3D g3n app", *DbName)
 		log.Fatal(appErr)
 	}
+
+	// Set background color to black
+	app.Gl().ClearColor(0.0, 0.0, 0.0, 0.0)
 
 	var RouterID int
 	var Name string
