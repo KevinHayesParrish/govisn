@@ -22,7 +22,7 @@ import (
 )
 
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
-	const VISUALIZENETWORKVERSION = "0.0.2"
+	const VISUALIZENETWORKVERSION = "0.0.3"
 	if debugFlag {
 		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
 	}
@@ -99,7 +99,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	texfile := workingDir + "/data/images/earth_clouds_big.jpg"
 	globeTex, err := texture.NewTexture2DFromImage(texfile)
 	if err != nil {
-		app.Log().Fatal("Error loading texture: %s", err)
+		app.Log().Fatal("Error loading texture: %s", err, "\n Insure govisn /data/images is copied to GOBIN")
 	}
 	globeTex.SetFlipY(false)
 
@@ -167,7 +167,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
 		font, err := text.NewFont(fontfile)
 		if err != nil {
-			app.Log().Fatal(err.Error())
+			//			app.Log().Fatal(err.Error())
+			app.Log().Fatal("Error loading font: %s", err, "\n Insure govisn /data/fonts is copied to GOBIN")
 		}
 
 		font.SetLineSpacing(1.0)
