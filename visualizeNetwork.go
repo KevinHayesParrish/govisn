@@ -79,7 +79,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	var z float32 = 1.0
 
 	// Add lights to the scene
-	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 0.8)
+	//	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 0.8)
+	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1.0)
 	app.Scene().Add(ambientLight)
 	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
 	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
@@ -92,11 +93,26 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	// Set initial camera position, i.e. viewing point
 	app.CameraPersp().SetPosition(0.0, 0.0, (float32)(globeRadius*2.0))
 
+	// Create Globe texture
+	//	workingDir, _ := os.Getwd()
+	workingDir := os.Getenv("GOBIN")
+	texfile := workingDir + "/data/images/earth_clouds_big.jpg"
+	globeTex, err := texture.NewTexture2DFromImage(texfile)
+	if err != nil {
+		app.Log().Fatal("Error loading texture: %s", err)
+	}
+	globeTex.SetFlipY(false)
+
 	// Create a sphere representing the globe
 	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
-	globeMat := material.NewPhong(&math32.Color{R: 0.0, G: 0.5, B: 1.0}) // Azure blue 0, 128, 255
+	//	globeMat := material.NewPhong(&math32.Color{R: 0.0, G: 0.5, B: 1.0}) // Azure blue 0, 128, 255
+	globeMat := material.NewStandard(&math32.Color{R: 1.0, G: 1.0, B: 1.0}) // Azure blue 0, 128, 255
+	globeMat.AddTexture(globeTex)
 	globeMat.SetTransparent(true)
-	globeMat.SetOpacity(0.25)
+	//	globeMat.SetOpacity(0.25)
+	globeMat.SetOpacity(.50)
+
+	//	globeMesh := graphic.NewMesh(globe3D, globeMat)
 	globeMesh := graphic.NewMesh(globe3D, globeMat)
 	globeMesh.SetPosition(0, 0, 0)
 	app.Scene().Add(globeMesh)
@@ -147,7 +163,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 		// Add router name to scene
 		// Creates Font
-		fontfile := os.Getenv("GOPATH") + "/src/govisn/data/fonts/FreeSans.ttf"
+		//		fontfile := os.Getenv("GOPATH") + "/src/govisn/data/fonts/FreeSans.ttf"
+		fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
 		font, err := text.NewFont(fontfile)
 		if err != nil {
 			app.Log().Fatal(err.Error())
