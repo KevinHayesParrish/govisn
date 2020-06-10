@@ -11,7 +11,9 @@ import (
 	"github.com/g3n/engine/geometry"
 	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/graphic"
+	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/light"
+	"github.com/g3n/engine/window"
 
 	"github.com/g3n/engine/material"
 	"github.com/g3n/engine/math32"
@@ -20,6 +22,10 @@ import (
 	"github.com/g3n/engine/util/application"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+// GuiMenu is the structure containing the Menus for the Gui
+type GuiMenu struct {
+}
 
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	const VISUALIZENETWORKVERSION = "0.0.3"
@@ -49,14 +55,18 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	// Initialize the 3D space
 	app, appErr := application.Create(application.Options{
-		Title:  "GoVisn - 3D Network Visualization",
-		Width:  1200,
-		Height: 1000,
+		Title:     "GoVisn - 3D Network Visualization",
+		Width:     1200,
+		Height:    1000,
+		LogPrefix: "GoVisn",
 	})
 	if appErr != nil {
 		fmt.Println("Error Creating 3D g3n app", *DbName)
 		log.Fatal(appErr)
 	}
+
+	// Build Menus
+	buildMenus(debugFlag, app)
 
 	// Set background color to black
 	app.Gl().ClearColor(0.0, 0.0, 0.0, 0.0)
@@ -359,4 +369,44 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 	z = (float32)(globeRadius*(math.Cos(yRadianLat)) + GpsAltFloat64)
 
 	return x, y, z
+}
+
+func buildMenus(debugFlag bool, app *application.Application) *application.Application {
+	if debugFlag {
+		fmt.Println("Starting func buildMenus")
+	}
+
+	//	var menu *GuiMenu
+	// Event handler for menu clicks
+	onClick := func(evname string, ev interface{}) {
+		//		path := strings.Join(ev.(*gui.MenuItem).IdPath(), "/")
+		//		mbOption.SetText(mbText + path)
+		switch ev.(*gui.MenuItem).Id() {
+		case "Exit":
+			{
+				fmt.Println("GoVisn terminating. File/Exit selected.")
+				os.Exit(0)
+			}
+		}
+	}
+	// Create menu bar
+	mb := gui.NewMenuBar()
+	mb.Subscribe(gui.OnClick, onClick)
+	mb.SetPosition(10, 10)
+
+	// Create fileMenu and adds it to the menu bar
+	m1 := gui.NewMenu()
+	m1.AddOption("File/Exit").
+		SetId("Exit")
+	mb.AddMenu("File", m1).
+		SetId("File").
+		SetShortcut(window.ModAlt, window.Key1)
+
+	app.Gui().Add(mb)
+	app.Gui().Root().SetKeyFocus(mb)
+
+	if debugFlag {
+		fmt.Println("func buildMenus ended")
+	}
+	return (app)
 }
