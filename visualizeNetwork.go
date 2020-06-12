@@ -104,9 +104,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	app.CameraPersp().SetPosition(0.0, 0.0, (float32)(globeRadius*2.0))
 
 	// Create Globe texture
-	//	workingDir, _ := os.Getwd()
-	workingDir := os.Getenv("GOBIN")
-	texfile := workingDir + "/data/images/earth_clouds_big.jpg"
+	gobinDir := os.Getenv("GOBIN")
+	texfile := gobinDir + "/data/images/earth_clouds_big.jpg"
 	globeTex, err := texture.NewTexture2DFromImage(texfile)
 	if err != nil {
 		app.Log().Fatal("Error loading texture: %s", err, "\n Insure govisn /data/images is copied to GOBIN")
@@ -116,13 +115,11 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	// Create a sphere representing the globe
 	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
 	//	globeMat := material.NewPhong(&math32.Color{R: 0.0, G: 0.5, B: 1.0}) // Azure blue 0, 128, 255
-	globeMat := material.NewStandard(&math32.Color{R: 1.0, G: 1.0, B: 1.0}) // Azure blue 0, 128, 255
+	globeMat := material.NewStandard(&math32.Color{R: 1.0, G: 1.0, B: 1.0}) // White 255, 255, 255
 	globeMat.AddTexture(globeTex)
 	globeMat.SetTransparent(true)
-	//	globeMat.SetOpacity(0.25)
 	globeMat.SetOpacity(.50)
 
-	//	globeMesh := graphic.NewMesh(globe3D, globeMat)
 	globeMesh := graphic.NewMesh(globe3D, globeMat)
 	globeMesh.SetPosition(0, 0, 0)
 	app.Scene().Add(globeMesh)
@@ -169,6 +166,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 		// Add Router object to 3D scene.
 		cylinderMesh.SetPosition(x, y, z)
+		cylinderMesh.SetName(string(router.System.RouterID))
 		app.Scene().Add(cylinderMesh)
 
 		// Add router name to scene
@@ -318,6 +316,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 		// Creates lines with the specified geometry and material
 		link3D := graphic.NewLines(linkGeom, mat)
+		link3D.SetName(string(link.LinkID))
 
 		app.Scene().Add(link3D)
 
