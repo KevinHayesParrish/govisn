@@ -375,11 +375,8 @@ func buildMenus(debugFlag bool, app *application.Application) *application.Appli
 		fmt.Println("Starting func buildMenus")
 	}
 
-	//	var menu *GuiMenu
 	// Event handler for menu clicks
 	onClick := func(evname string, ev interface{}) {
-		//		path := strings.Join(ev.(*gui.MenuItem).IdPath(), "/")
-		//		mbOption.SetText(mbText + path)
 		switch ev.(*gui.MenuItem).Id() {
 		case "Exit":
 			{
