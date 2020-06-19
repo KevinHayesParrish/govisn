@@ -1,11 +1,16 @@
 # govisn
 
-A network visualization tool written in golang.
-This project is a continuation of the work that started with vrmlNet. A second generation version was titled V15N. This was a complete re-write of vrmlNet . Unlike vrmlNet, which used the Virtual Reality Modeling Language (VRML), V15N uses the Java 3D API for rendering a 3D visualization of a network. 
+A 3D network visualization tool written in golang.
 
-govisn is the third generation of this 3D network visualization tool. It is written in the go language and uses go-sqlite3, gosnmp and g3n libraries to for their database, SNMP and 3D rendering capabilities. Many thanks to the authors of these libraries for the use of their work.
+This project is a continuation of the work that started with vrmlNet, which was developed in 1998. vrmlNet created VRML code that could be rendered by VRML Browser Plug-ins.
 
-govisn is a single executable application. This supports the orginal principles of this generational series of applications, in that it is usable at no cost and easy to install and use.
+In the early 2000's VRML technology had sunset. A second generation of the project, titled V15N, was developed beginning in the Fall of 2003. This was a complete re-write of vrmlNet . Unlike vrmlNet, which used the Virtual Reality Modeling Language (VRML), V15N uses the Java 3D API for rendering a 3D visualization of a network.   The application took as input a seed IP Address and used SNMP to walk the routing tables of routers within a network. It then used Java3D to visualize that network in a virtual 3D space.
+
+govisn is the third generation of this 3D network visualization tool. By the Fall of 2018, 3D visualization technology had left Java3D behind. I was looking to continue the 3D network visualization concept, plus learn a new coding language. Rather than develop a multi-tiered web-based application, I chose to keep with the original pinciples of the project: Free Open Source and a simple implmentation. The original goal was to build something a network engineer could deploy, without requiring complicated systems engineering or administation tasks. 
+
+govisn is written in the go language and uses go-sqlite3, gosnmp and g3n libraries to for their database, SNMP and 3D rendering capabilities. Many thanks to the authors of these libraries for the use of their work. I stand on the shoulders of giants.
+
+govisn is a single executable application. This supports the orginal principles of this generational series of applications, in that it is usable at no cost and easy to install and operate. The command line executable takes startup options to scan a subnet for routers. It then queries those routers using SNMP to create a sqlite database. The database is used to render the 3D scene containing the router objects and the network links between them.
 
 Usage of govisn:
   -a    Test opening an ArangoDB database
