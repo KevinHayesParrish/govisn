@@ -18,6 +18,7 @@ govisn is a single executable application. This supports the orginal principles 
 # Usage of govisn:
 
   -a    Test opening an ArangoDB database
+  
   -co string
         SNMP Community ReadOnly String (default "public")
   -cr
