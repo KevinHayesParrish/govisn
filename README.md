@@ -18,26 +18,35 @@ govisn is a single executable application. This supports the orginal principles 
 # Usage of govisn:
 
   -a    Test opening an ArangoDB database
-  
+
   -co string
         SNMP Community ReadOnly String (default "public")
+
   -cr
         Create a sample database.
+
   -de
         Print Debug statements.
+
   -di string
         Discover a network using seed IP Address
+
   -f string
         Name of the discovered network database -or-
         Name of the XML input file, if combined with -l option. (default "govisnDiscoveredNet.db")
+
   -l    Load a database from an XML document.
+
   -m string
         Scope of discovery. Maximum number of Hops from seed. (Default:10) (default "0")
+
   -s string
         Scan the CIDR network for SNMP capable routers.
         CIDR format = x.x.x.x/n. ex: 192.168.1.0/24
         Once the network is scanned, the list of found routers
         will be queried and their information added to the database.
+
   -v    Print the version number.
+  
   -vi
         Visualize the Network.
