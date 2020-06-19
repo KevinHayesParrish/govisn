@@ -15,7 +15,8 @@ govisn is written in the go language and uses go-sqlite3, gosnmp and G3N librari
 
 govisn is a single executable application. This supports the orginal principles of this generational series of applications, in that it is usable at no cost and easy to install and operate. The command line executable takes startup options to scan a subnet for routers. It then queries those routers using SNMP to create a sqlite database. The database is used to render the 3D scene containing the router objects and the network links between them.
 
-Usage of govisn:
+# Usage of govisn:
+
   -a    Test opening an ArangoDB database
   -co string
         SNMP Community ReadOnly String (default "public")
