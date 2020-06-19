@@ -20,7 +20,7 @@ import (
  */
 
 //ViewnetVersion is the file version number
-const ViewnetVersion = "0.8.10"
+const ViewnetVersion = "0.8.11"
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -42,7 +42,7 @@ var discoverFlag = flag.String("di", "", "Discover a network using seed IP Addre
 var seed = "127.0.0.1"
 
 var community = flag.String("co", "public", "SNMP Community ReadOnly String")
-var maxHops = flag.String("m", "0", "Scope of discovery. Maximum number of Hops from seed. (Default:10)")
+var maxHops = flag.String("m", "0", "Scope of discovery. Maximum number of Hops from seed.")
 var visualizeFlag = flag.Bool("vi", false, "Visualize the Network.")
 
 //scanNetFlag is the startup option to scan the network for SNMP capable routers.
