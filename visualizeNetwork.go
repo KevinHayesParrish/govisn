@@ -73,7 +73,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	// Setup Mouse clicking of objects within the 3D scene
 	var t Raycast
-	t.Initialize(app)
+	t.Initialize(debugFlag, app)
 	// Build Menus
 	buildMenus(debugFlag, app)
 
@@ -417,7 +417,7 @@ func buildMenus(debugFlag bool, app *application.Application) *application.Appli
 }
 
 // Initialize the raycaster
-func (t *Raycast) Initialize(app *application.Application) {
+func (t *Raycast) Initialize(debugFlag bool, app *application.Application) {
 	fmt.Println("Initializing the raycaster") // TESTING ONLY
 	// Creates the raycaster
 	//	var t *Raycast
@@ -427,27 +427,33 @@ func (t *Raycast) Initialize(app *application.Application) {
 
 	// Subscribe to mouse button down events
 	app.Window().Subscribe(window.OnMouseDown, func(evname string, ev interface{}) {
-		t.onMouse(app, ev)
+		t.onMouse(debugFlag, app, ev)
 	})
 }
 
 // onMouse is executed when an object in the 3D scene is selected with a mouse click
-func (t *Raycast) onMouse(app *application.Application, ev interface{}) {
+func (t *Raycast) onMouse(debugFlag bool, app *application.Application, ev interface{}) {
 	// Convert mouse coordinates to normalized device coordinates
 	mev := ev.(*window.MouseEvent)
 	width, height := app.Window().Size()
 	x := 2*(mev.Xpos/float32(width)) - 1
 	y := -2*(mev.Ypos/float32(height)) + 1
-	fmt.Println("onMouse x=", x) // TESTING ONLY
-	fmt.Println("onMouse y=", y) // TESTING ONLY
+	if debugFlag {
+		fmt.Println("onMouse x=", x)
+		fmt.Println("onMouse y=", y)
+	}
 
 	// Set the raycaster from the current camera and mouse coordinates
 	app.Camera().SetRaycaster(t.rayCast, x, y)
-	fmt.Printf("rc:%+v\n", t.rayCast.Ray) // TESTING ONLY
+	if debugFlag {
+		fmt.Printf("rayCast:%+v\n", t.rayCast.Ray)
+	}
 
 	// Checks intersection with all objects in the scene
 	intersects := t.rayCast.IntersectObjects(app.Scene().Children(), true)
-	fmt.Printf("intersects:%+v\n", intersects) // TESTNG ONLY
+	if debugFlag {
+		fmt.Printf("intersects:%+v\n", intersects)
+	}
 	if len(intersects) == 0 {
 		return
 	}
