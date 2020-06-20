@@ -460,6 +460,12 @@ func (t *Raycast) onMouse(debugFlag bool, app *application.Application, ev inter
 
 	// Get first intersection
 	obj := intersects[0].Object
+	router3D := obj.GetNode()
+	router3DName := router3D.Name
+	if debugFlag {
+		fmt.Println("Picked oject name=", router3DName)
+	}
+
 	// Convert INode to IGraphic
 	ig, ok := obj.(graphic.IGraphic)
 	if !ok {
@@ -483,8 +489,12 @@ func (t *Raycast) onMouse(debugFlag bool, app *application.Application, ev inter
 		}
 	}
 
+	// Gets the router system information for a pop-up window
+	//router := getRouterFromDB(debugFlag, obj)
 }
 
 // Render renders the mouse pick action
 func (t *Raycast) Render(app *application.Application) {
 }
+
+//func getRouterFromDB(debugFlag bool, obj core.INode) {}
