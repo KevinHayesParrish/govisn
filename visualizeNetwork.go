@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/geometry"
 	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/graphic"
@@ -27,8 +28,13 @@ import (
 type GuiMenu struct {
 }
 
+// Raycast is the structure containing the Raycaster
+type Raycast struct {
+	rayCast *core.Raycaster
+}
+
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
-	const VISUALIZENETWORKVERSION = "0.0.3"
+	const VISUALIZENETWORKVERSION = "0.1.0"
 	if debugFlag {
 		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
 	}
@@ -65,6 +71,9 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		log.Fatal(appErr)
 	}
 
+	// Setup Mouse clicking of objects within the 3D scene
+	var t Raycast
+	t.Initialize(app)
 	// Build Menus
 	buildMenus(debugFlag, app)
 
@@ -405,4 +414,71 @@ func buildMenus(debugFlag bool, app *application.Application) *application.Appli
 		fmt.Println("func buildMenus ended")
 	}
 	return (app)
+}
+
+// Initialize the raycaster
+func (t *Raycast) Initialize(app *application.Application) {
+	fmt.Println("Initializing the raycaster") // TESTING ONLY
+	// Creates the raycaster
+	//	var t *Raycast
+	t.rayCast = core.NewRaycaster(&math32.Vector3{}, &math32.Vector3{})
+	t.rayCast.LinePrecision = 0.05
+	t.rayCast.PointPrecision = 0.05
+
+	// Subscribe to mouse button down events
+	app.Window().Subscribe(window.OnMouseDown, func(evname string, ev interface{}) {
+		t.onMouse(app, ev)
+	})
+}
+
+// onMouse is executed when an object in the 3D scene is selected with a mouse click
+func (t *Raycast) onMouse(app *application.Application, ev interface{}) {
+	// Convert mouse coordinates to normalized device coordinates
+	mev := ev.(*window.MouseEvent)
+	width, height := app.Window().Size()
+	x := 2*(mev.Xpos/float32(width)) - 1
+	y := -2*(mev.Ypos/float32(height)) + 1
+	fmt.Println("onMouse x=", x) // TESTING ONLY
+	fmt.Println("onMouse y=", y) // TESTING ONLY
+
+	// Set the raycaster from the current camera and mouse coordinates
+	app.Camera().SetRaycaster(t.rayCast, x, y)
+	fmt.Printf("rc:%+v\n", t.rayCast.Ray) // TESTING ONLY
+
+	// Checks intersection with all objects in the scene
+	intersects := t.rayCast.IntersectObjects(app.Scene().Children(), true)
+	fmt.Printf("intersects:%+v\n", intersects) // TESTNG ONLY
+	if len(intersects) == 0 {
+		return
+	}
+
+	// Get first intersection
+	obj := intersects[0].Object
+	// Convert INode to IGraphic
+	ig, ok := obj.(graphic.IGraphic)
+	if !ok {
+		app.Log().Debug("Not graphic:%T", obj)
+		return
+	}
+	// Get graphic object
+	gr := ig.GetGraphic()
+	imat := gr.GetMaterial(0)
+
+	type matI interface {
+		EmissiveColor() math32.Color
+		SetEmissiveColor(*math32.Color)
+	}
+
+	if v, ok := imat.(matI); ok {
+		if em := v.EmissiveColor(); em.R == 1 && em.G == 1 && em.B == 1 {
+			v.SetEmissiveColor(&math32.Color{R: 0, B: 0, G: 0})
+		} else {
+			v.SetEmissiveColor(&math32.Color{R: 1, B: 1, G: 1})
+		}
+	}
+
+}
+
+// Render renders the mouse pick action
+func (t *Raycast) Render(app *application.Application) {
 }
