@@ -461,7 +461,7 @@ func (t *Raycast) onMouse(debugFlag bool, app *application.Application, ev inter
 	// Get first intersection
 	obj := intersects[0].Object
 	router3D := obj.GetNode()
-	router3DName := router3D.Name
+	router3DName := router3D.Name()
 	if debugFlag {
 		fmt.Println("Picked oject name=", router3DName)
 	}
