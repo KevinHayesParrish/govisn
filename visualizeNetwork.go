@@ -176,6 +176,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		// Add Router object to 3D scene.
 		cylinderMesh.SetPosition(x, y, z)
 		cylinderMesh.SetName(string(router.System.RouterID))
+		cylinderMesh.SetUserData(string(router.System.RouterID))
 		app.Scene().Add(cylinderMesh)
 
 		// Add router name to scene
@@ -464,7 +465,8 @@ func (t *Raycast) onMouse(debugFlag bool, app *application.Application, ev inter
 	router3D := obj.GetNode()
 	router3DName := router3D.Name()
 	if debugFlag {
-		fmt.Println("Picked oject name=", router3DName)
+		fmt.Println("Picked object Name=", router3DName)
+		fmt.Println("Picked object UserData=", router3D.UserData())
 	}
 
 	// Convert INode to IGraphic
