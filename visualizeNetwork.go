@@ -7,6 +7,12 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"time"
+
+	"github.com/g3n/engine/app"
+	"github.com/g3n/engine/camera"
+	"github.com/g3n/engine/renderer"
+	"github.com/g3n/engine/util/helper"
 
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/geometry"
@@ -20,7 +26,11 @@ import (
 	"github.com/g3n/engine/math32"
 	"github.com/g3n/engine/text"
 	"github.com/g3n/engine/texture"
-	"github.com/g3n/engine/util/application"
+
+	//	"github.com/g3n/engine/util/application"
+
+	"github.com/g3n/engine/experimental/collision"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -30,7 +40,8 @@ type GuiMenu struct {
 
 // Raycast is the structure containing the Raycaster
 type Raycast struct {
-	rayCast *core.Raycaster
+	//	rayCast *Raycaster
+	rayCast *collision.Raycaster
 }
 
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
@@ -60,25 +71,33 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	}
 
 	// Initialize the 3D space
-	app, appErr := application.Create(application.Options{
-		Title:     "GoVisn - 3D Network Visualization",
-		Width:     1200,
-		Height:    1000,
-		LogPrefix: "GoVisn",
-	})
-	if appErr != nil {
-		fmt.Println("Error Creating 3D g3n app", *DbName)
-		log.Fatal(appErr)
-	}
-
+	//	app, appErr := application.Create(application.Options{
+	//	Title:     "GoVisn - 3D Network Visualization",
+	//		Width:     1200,
+	//		Height:    1000,
+	//		LogPrefix: "GoVisn",
+	//	})
+	//	if appErr != nil {
+	//		fmt.Println("Error Creating 3D g3n app", *DbName)
+	//		log.Fatal(appErr)
+	//	}
 	// Setup Mouse clicking of objects within the 3D scene
 	var t Raycast
+
+	// Create application and scene
+	app := app.App()
+	scene := core.NewNode()
+
+	// Set the scene to be managed by the gui manager
+	gui.Manager().Set(scene)
+
+	// Set background color to black
+	//	app.Gl().ClearColor(0.0, 0.0, 0.0, 0.0)
+	app.Gls().ClearColor(0.0, 0.0, 0.0, 0.0)
+
 	t.Initialize(debugFlag, app)
 	// Build Menus
 	buildMenus(debugFlag, app)
-
-	// Set background color to black
-	app.Gl().ClearColor(0.0, 0.0, 0.0, 0.0)
 
 	var RouterID int
 	var Name string
@@ -100,29 +119,38 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	// Add lights to the scene
 	//	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 0.8)
 	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1.0)
-	app.Scene().Add(ambientLight)
+	//	app.Scene().Add(ambientLight)
+	scene.Add(ambientLight)
+
 	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
 	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
-	app.Scene().Add(pointLight)
+	//	app.Scene().Add(pointLight)
+	scene.Add(pointLight)
 
 	// Add an axis helper to the scene
-	axis := graphic.NewAxisHelper(0.5)
-	app.Scene().Add(axis)
+	//	axis := graphic.NewAxisHelper(0.5)
+	//	app.Scene().Add(axis)
+	axes := helper.NewAxes(1)
+	scene.Add(axes)
 
 	// Set initial camera position, i.e. viewing point
-	app.CameraPersp().SetPosition(0.0, 0.0, (float32)(globeRadius*2.0))
+	//	app.CameraPersp().SetPosition(0.0, 0.0, (float32)(globeRadius*2.0))
+	cam := camera.New(1)
+	cam.SetPosition(0, 0, (float32)(globeRadius*2.0))
 
 	// Create Globe texture
 	gobinDir := os.Getenv("GOBIN")
 	texfile := gobinDir + "/data/images/earth_clouds_big.jpg"
 	globeTex, err := texture.NewTexture2DFromImage(texfile)
 	if err != nil {
-		app.Log().Fatal("Error loading texture: %s", err, "\n Insure govisn /data/images is copied to GOBIN")
+		//		app.Log().Fatal("Error loading texture: %s", err, "\n Insure govisn /data/images is copied to GOBIN")
+		log.Fatalf("Error loading texture: %s", err, "\n Insure govisn /data/images is copied to GOBIN")
 	}
 	globeTex.SetFlipY(false)
 
 	// Create a sphere representing the globe
-	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
+	//	globe3D := geometry.NewSphere(globeRadius, 16, 16, 0, math.Pi*2, 0, math.Pi)
+	globe3D := geometry.NewSphere(globeRadius, 16, 16)
 	//	globeMat := material.NewPhong(&math32.Color{R: 0.0, G: 0.5, B: 1.0}) // Azure blue 0, 128, 255
 	globeMat := material.NewStandard(&math32.Color{R: 1.0, G: 1.0, B: 1.0}) // White 255, 255, 255
 	globeMat.AddTexture(globeTex)
@@ -131,7 +159,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	globeMesh := graphic.NewMesh(globe3D, globeMat)
 	globeMesh.SetPosition(0, 0, 0)
-	app.Scene().Add(globeMesh)
+	//	app.Scene().Add(globeMesh)
+	scene.Add(globeMesh)
 
 	if debugFlag {
 		fmt.Println("Beginning routerRows.Next loop; adding routers to 3D scene.")
@@ -158,8 +187,10 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 		routers = append(routers, router)
 
-		rtr3D := geometry.NewCylinder(routerRadius, routerRadius, 0.5, 16, 2, 0, 2*math.Pi, true, true)
-		mat := material.NewPhong(math32.NewColor("DarkBlue"))
+		//		rtr3D := geometry.NewCylinder(routerRadius, routerRadius, 0.5, 16, 2, 0, 2*math.Pi, true, true)
+		rtr3D := geometry.NewCylinder(routerRadius, routerRadius, 16, 2, true, true)
+		//		mat := material.NewPhong(math32.NewColor("DarkBlue"))
+		mat := material.NewStandard(math32.NewColor("DarkBlue"))
 		cylinderMesh := graphic.NewMesh(rtr3D, mat)
 		/*
 		 * Set coordinates and altitude
@@ -177,7 +208,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		cylinderMesh.SetPosition(x, y, z)
 		cylinderMesh.SetName(string(router.System.RouterID))
 		cylinderMesh.SetUserData(string(router.System.RouterID))
-		app.Scene().Add(cylinderMesh)
+		//		app.Scene().Add(cylinderMesh)
+		scene.Add(cylinderMesh)
 
 		// Add router name to scene
 		// Creates Font
@@ -186,7 +218,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		font, err := text.NewFont(fontfile)
 		if err != nil {
 			//			app.Log().Fatal(err.Error())
-			app.Log().Fatal("Error loading font: %s", err, "\n Insure govisn /data/fonts is copied to GOBIN")
+			//			app.Log().Fatal("Error loading font: %s", err, "\n Insure govisn /data/fonts is copied to GOBIN")
+			log.Fatalf("Error loading font: %s", err, "\n Insure govisn /data/fonts is copied to GOBIN")
 		}
 
 		font.SetLineSpacing(1.0)
@@ -205,7 +238,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		aspect := float32(swidth) / float32(sheight)
 		mesh3 := graphic.NewSprite(aspect, 1, mat3)
 		mesh3.SetPosition(x, y, z+1.0)
-		app.Scene().Add(mesh3)
+		//		app.Scene().Add(mesh3)
+		scene.Add(mesh3)
 
 		queryErr = routerRows.Err()
 		if queryErr != nil {
@@ -329,14 +363,21 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		link3D := graphic.NewLines(linkGeom, mat)
 		link3D.SetName(string(link.LinkID))
 
-		app.Scene().Add(link3D)
+		//		app.Scene().Add(link3D)
+		scene.Add(link3D)
 
 		err = linkRows.Err()
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
-	app.Run()
+
+	// Run the application
+	//	app.Run()
+	app.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
+		app.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
+		renderer.Render(scene, cam)
+	})
 
 	if debugFlag {
 		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func ending")
@@ -381,7 +422,8 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 	return x, y, z
 }
 
-func buildMenus(debugFlag bool, app *application.Application) *application.Application {
+//func buildMenus(debugFlag bool, app *application.Application) *application.Application {
+func buildMenus(debugFlag bool, app *app.Application) *app.Application {
 	if debugFlag {
 		fmt.Println("Starting func buildMenus")
 	}
@@ -409,8 +451,9 @@ func buildMenus(debugFlag bool, app *application.Application) *application.Appli
 		SetId("File").
 		SetShortcut(window.ModAlt, window.Key1)
 
-	app.Gui().Add(mb)
-	app.Gui().Root().SetKeyFocus(mb)
+	//	app.Gui().Add(mb)
+	//	app.Gui().Root().SetKeyFocus(mb)
+	gui.Manager().SetKeyFocus(mb)
 
 	if debugFlag {
 		fmt.Println("func buildMenus ended")
@@ -419,25 +462,30 @@ func buildMenus(debugFlag bool, app *application.Application) *application.Appli
 }
 
 // Initialize the raycaster
-func (t *Raycast) Initialize(debugFlag bool, app *application.Application) {
+//func (t *Raycast) Initialize(debugFlag bool, app *application.Application) {
+func (t *Raycast) Initialize(debugFlag bool, app *app.Application) {
 	fmt.Println("Initializing the raycaster") // TESTING ONLY
 	// Creates the raycaster
 	//	var t *Raycast
-	t.rayCast = core.NewRaycaster(&math32.Vector3{}, &math32.Vector3{})
+	//	t.rayCast = core.NewRaycaster(&math32.Vector3{}, &math32.Vector3{})
+	t.rayCast = collision.NewRaycaster(&math32.Vector3{}, &math32.Vector3{})
 	t.rayCast.LinePrecision = 0.05
 	t.rayCast.PointPrecision = 0.05
 
 	// Subscribe to mouse button down events
-	app.Window().Subscribe(window.OnMouseDown, func(evname string, ev interface{}) {
+	//	app.Window().Subscribe(window.OnMouseDown, func(evname string, ev interface{}) {
+	app.SubscribeID(window.OnMouseDown, app, func(evname string, ev interface{}) {
 		t.onMouse(debugFlag, app, ev)
 	})
 }
 
 // onMouse is executed when an object in the 3D scene is selected with a mouse click
-func (t *Raycast) onMouse(debugFlag bool, app *application.Application, ev interface{}) {
+//func (t *Raycast) onMouse(debugFlag bool, app *application.Application, ev interface{}) {
+func (t *Raycast) onMouse(debugFlag bool, app *app.Application, ev interface{}) {
 	// Convert mouse coordinates to normalized device coordinates
 	mev := ev.(*window.MouseEvent)
-	width, height := app.Window().Size()
+	//	width, height := app.Window().Size()
+	width, height := app.GetSize()
 	x := 2*(mev.Xpos/float32(width)) - 1
 	y := -2*(mev.Ypos/float32(height)) + 1
 	if debugFlag {
@@ -446,13 +494,15 @@ func (t *Raycast) onMouse(debugFlag bool, app *application.Application, ev inter
 	}
 
 	// Set the raycaster from the current camera and mouse coordinates
-	app.Camera().SetRaycaster(t.rayCast, x, y)
+	//	app.Camera().SetRaycaster(t.rayCast, x, y)
+	t.rayCast.SetFromCamera(app.Camera(), x, y)
 	if debugFlag {
 		fmt.Printf("rayCast:%+v\n", t.rayCast.Ray)
 	}
 
 	// Checks intersection with all objects in the scene
-	intersects := t.rayCast.IntersectObjects(app.Scene().Children(), true)
+	//	intersects := t.rayCast.IntersectObjects(app.Scene().Children(), true)
+	intersects := t.rayCast.IntersectObjects(scene.Children(), true)
 	if debugFlag {
 		fmt.Printf("intersects:%+v\n", intersects)
 	}
@@ -472,7 +522,8 @@ func (t *Raycast) onMouse(debugFlag bool, app *application.Application, ev inter
 	// Convert INode to IGraphic
 	ig, ok := obj.(graphic.IGraphic)
 	if !ok {
-		app.Log().Debug("Not graphic:%T", obj)
+		//		app.Log().Debug("Not graphic:%T", obj)
+		log.Fatalf("Not graphic:%T", obj)
 		return
 	}
 	// Get graphic object
@@ -497,7 +548,8 @@ func (t *Raycast) onMouse(debugFlag bool, app *application.Application, ev inter
 }
 
 // Render renders the mouse pick action
-func (t *Raycast) Render(app *application.Application) {
+//func (t *Raycast) Render(app *application.Application) {
+func (t *Raycast) Render(app *app.Application) {
 }
 
 //func getRouterFromDB(debugFlag bool, obj core.INode) {}
