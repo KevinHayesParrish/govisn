@@ -9,10 +9,13 @@ import (
 	"strconv"
 	"time"
 
+	logger "github.com/alouca/gologger"
 	"github.com/g3n/engine/app"
 	"github.com/g3n/engine/camera"
 	"github.com/g3n/engine/renderer"
+	"github.com/g3n/engine/util"
 	"github.com/g3n/engine/util/helper"
+	"github.com/g3n/engine/util/stats"
 
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/geometry"
@@ -34,6 +37,31 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// App contains the application state
+type App struct {
+	*app.Application                // Embedded standard application object
+	log              *logger.Logger // Application logger
+	//currentDemo      IDemo            // Current demo
+	dirData    string           // Full path of the data directory
+	scene      *core.Node       // Scene rendered
+	demoScene  *core.Node       // Scene populated by individual demos
+	ambLight   *light.Ambient   // Scene ambient light
+	frameRater *util.FrameRater // Render loop frame rater
+
+	// GUI
+	mainPanel  *gui.Panel
+	demoPanel  *gui.Panel
+	labelFPS   *gui.Label         // header FPS label
+	treeTests  *gui.Tree          // tree with test names
+	stats      *stats.Stats       // statistics object
+	statsTable *stats.StatsTable  // statistics table panel
+	control    *gui.ControlFolder // Pointer to gui control panel
+
+	// Camera and orbit control
+	camera *camera.Camera       // Camera
+	orbit  *camera.OrbitControl // Orbit control
+}
+
 // GuiMenu is the structure containing the Menus for the Gui
 type GuiMenu struct {
 }
@@ -45,7 +73,7 @@ type Raycast struct {
 }
 
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
-	const VISUALIZENETWORKVERSION = "0.1.0"
+	const VISUALIZENETWORKVERSION = "0.2.0"
 	if debugFlag {
 		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
 	}
@@ -81,23 +109,52 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	//		fmt.Println("Error Creating 3D g3n app", *DbName)
 	//		log.Fatal(appErr)
 	//	}
-	// Setup Mouse clicking of objects within the 3D scene
-	var t Raycast
 
 	// Create application and scene
-	app := app.App()
+	a := app.App()
 	scene := core.NewNode()
 
-	// Set the scene to be managed by the gui manager
-	gui.Manager().Set(scene)
+	// Create perspective camera
+	cam := camera.New(1)
+	cam.SetPosition(0, 0, (float32)(globeRadius*2.0))
+	scene.Add(cam)
+
+	// Setup orbit control for the camera
+	camera.NewOrbitControl(cam)
+
+	// Set up callback to update viewport and camera aspect ratio when the window is resized
+	onResize := func(evname string, ev interface{}) {
+		// Get framebuffer size and update viewport accordingly
+		width, height := a.GetSize()
+		a.Gls().Viewport(0, 0, int32(width), int32(height))
+		// Update the camera's aspect ratio
+		cam.SetAspect(float32(width) / float32(height))
+	}
+	a.Subscribe(window.OnWindowSize, onResize)
+	onResize("", nil)
+
+	// Create and Add lights to the scene
+	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1.0)
+	scene.Add(ambientLight)
+	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
+	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
+	scene.Add(pointLight)
+
+	// Add an axis helper to the scene
+	//	axis := graphic.NewAxisHelper(0.5)
+	//	app.Scene().Add(axis)
+	axes := helper.NewAxes(1)
+	scene.Add(axes)
 
 	// Set background color to black
-	//	app.Gl().ClearColor(0.0, 0.0, 0.0, 0.0)
-	app.Gls().ClearColor(0.0, 0.0, 0.0, 0.0)
+	a.Gls().ClearColor(0.0, 0.0, 0.0, 0.0)
 
-	t.Initialize(debugFlag, app)
+	// Set the scene to be managed by the gui manager
+	//gui.Manager().Set(scene)
+
 	// Build Menus
-	buildMenus(debugFlag, app)
+	//	buildMenus(debugFlag, app)
+	buildMenus(debugFlag, a)
 
 	var RouterID int
 	var Name string
@@ -116,27 +173,10 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	var y float32 = 1.0
 	var z float32 = 1.0
 
-	// Add lights to the scene
-	//	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 0.8)
-	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1.0)
-	//	app.Scene().Add(ambientLight)
-	scene.Add(ambientLight)
-
-	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
-	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
-	//	app.Scene().Add(pointLight)
-	scene.Add(pointLight)
-
-	// Add an axis helper to the scene
-	//	axis := graphic.NewAxisHelper(0.5)
-	//	app.Scene().Add(axis)
-	axes := helper.NewAxes(1)
-	scene.Add(axes)
-
-	// Set initial camera position, i.e. viewing point
-	//	app.CameraPersp().SetPosition(0.0, 0.0, (float32)(globeRadius*2.0))
-	cam := camera.New(1)
-	cam.SetPosition(0, 0, (float32)(globeRadius*2.0))
+	// Setup Mouse clicking of objects within the 3D scene
+	var t Raycast
+	t.Initialize(debugFlag, scene, cam, a)
+	//	t.Initialize(debugFlag, scene, a.camera, a.Application)
 
 	// Create Globe texture
 	gobinDir := os.Getenv("GOBIN")
@@ -144,7 +184,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	globeTex, err := texture.NewTexture2DFromImage(texfile)
 	if err != nil {
 		//		app.Log().Fatal("Error loading texture: %s", err, "\n Insure govisn /data/images is copied to GOBIN")
-		log.Fatalf("Error loading texture: %s", err, "\n Insure govisn /data/images is copied to GOBIN")
+		log.Fatalln("Error loading texture:", err, "\n Insure govisn /data/images is copied to GOBIN")
 	}
 	globeTex.SetFlipY(false)
 
@@ -219,7 +259,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		if err != nil {
 			//			app.Log().Fatal(err.Error())
 			//			app.Log().Fatal("Error loading font: %s", err, "\n Insure govisn /data/fonts is copied to GOBIN")
-			log.Fatalf("Error loading font: %s", err, "\n Insure govisn /data/fonts is copied to GOBIN")
+			log.Fatalln("Error loading font:", err, "\n Insure govisn /data/fonts is copied to GOBIN")
 		}
 
 		font.SetLineSpacing(1.0)
@@ -374,8 +414,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	// Run the application
 	//	app.Run()
-	app.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
-		app.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
+	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
+		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(scene, cam)
 	})
 
@@ -423,7 +463,8 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 }
 
 //func buildMenus(debugFlag bool, app *application.Application) *application.Application {
-func buildMenus(debugFlag bool, app *app.Application) *app.Application {
+func buildMenus(debugFlag bool, a *app.Application) *app.Application {
+	//func buildMenus(debugFlag bool, a *App) *App {
 	if debugFlag {
 		fmt.Println("Starting func buildMenus")
 	}
@@ -438,6 +479,18 @@ func buildMenus(debugFlag bool, app *app.Application) *app.Application {
 			}
 		}
 	}
+
+	// Show and enable demo panel
+
+	//dl := gui.NewDockLayout()
+	//width, height := a.GetSize()
+	//a.mainPanel = gui.NewPanel(float32(width), float32(height))
+	//a.mainPanel.SetRenderable(true)
+	//a.mainPanel.SetEnabled(true)
+	//a.mainPanel.SetLayout(dl)
+	//a.scene.Add(a.mainPanel)
+	//gui.Manager().Set(a.mainPanel)
+
 	// Create menu bar
 	mb := gui.NewMenuBar()
 	mb.Subscribe(gui.OnClick, onClick)
@@ -451,19 +504,24 @@ func buildMenus(debugFlag bool, app *app.Application) *app.Application {
 		SetId("File").
 		SetShortcut(window.ModAlt, window.Key1)
 
-	//	app.Gui().Add(mb)
-	//	app.Gui().Root().SetKeyFocus(mb)
+	//a.mainPanel.Add(mb)
+	mb.Subscribe(gui.OnClick, func(name string, ev interface{}) {
+		material.NewStandard(math32.NewColor("DarkRed"))
+	})
+	//app.Gui().Add(mb)
+	//app.Gui().Root().SetKeyFocus(mb)
+
 	gui.Manager().SetKeyFocus(mb)
 
 	if debugFlag {
 		fmt.Println("func buildMenus ended")
 	}
-	return (app)
+	return (a)
 }
 
 // Initialize the raycaster
 //func (t *Raycast) Initialize(debugFlag bool, app *application.Application) {
-func (t *Raycast) Initialize(debugFlag bool, app *app.Application) {
+func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camera, app *app.Application) {
 	fmt.Println("Initializing the raycaster") // TESTING ONLY
 	// Creates the raycaster
 	//	var t *Raycast
@@ -475,13 +533,14 @@ func (t *Raycast) Initialize(debugFlag bool, app *app.Application) {
 	// Subscribe to mouse button down events
 	//	app.Window().Subscribe(window.OnMouseDown, func(evname string, ev interface{}) {
 	app.SubscribeID(window.OnMouseDown, app, func(evname string, ev interface{}) {
-		t.onMouse(debugFlag, app, ev)
+		//		t.onMouse(debugFlag, app, ev)
+		t.onMouse(debugFlag, scene, cam, app, ev)
 	})
 }
 
 // onMouse is executed when an object in the 3D scene is selected with a mouse click
 //func (t *Raycast) onMouse(debugFlag bool, app *application.Application, ev interface{}) {
-func (t *Raycast) onMouse(debugFlag bool, app *app.Application, ev interface{}) {
+func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, app *app.Application, ev interface{}) {
 	// Convert mouse coordinates to normalized device coordinates
 	mev := ev.(*window.MouseEvent)
 	//	width, height := app.Window().Size()
@@ -495,7 +554,7 @@ func (t *Raycast) onMouse(debugFlag bool, app *app.Application, ev interface{}) 
 
 	// Set the raycaster from the current camera and mouse coordinates
 	//	app.Camera().SetRaycaster(t.rayCast, x, y)
-	t.rayCast.SetFromCamera(app.Camera(), x, y)
+	t.rayCast.SetFromCamera(cam, x, y)
 	if debugFlag {
 		fmt.Printf("rayCast:%+v\n", t.rayCast.Ray)
 	}
@@ -549,7 +608,11 @@ func (t *Raycast) onMouse(debugFlag bool, app *app.Application, ev interface{}) 
 
 // Render renders the mouse pick action
 //func (t *Raycast) Render(app *application.Application) {
-func (t *Raycast) Render(app *app.Application) {
+func (t *Raycast) Render(a *app.Application) {
 }
 
-//func getRouterFromDB(debugFlag bool, obj core.INode) {}
+// Update is called every frame.
+func (t *Raycast) Update(a *app.Application, deltaTime time.Duration) {}
+
+// Cleanup is called once at the end of the demo.
+func (t *Raycast) Cleanup(a *app.Application) {}
