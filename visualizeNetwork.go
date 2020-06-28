@@ -73,7 +73,7 @@ type Raycast struct {
 }
 
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
-	const VISUALIZENETWORKVERSION = "0.2.1"
+	const VISUALIZENETWORKVERSION = "0.2.2"
 	if debugFlag {
 		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
 	}
@@ -110,12 +110,13 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	// Create perspective camera
 	//	cam := camera.New(1)
 	//	cam.SetPosition(0, 0, (float32)(globeRadius*2.0))
+	gv.camPos = math32.Vector3{X: 0, Y: 0, Z: (float32)(globeRadius * 2.0)}
 	gv.cam = camera.New(1)
 	gv.cam.SetPosition(0, 0, (float32)(globeRadius*2.0))
 
 	// Setup orbit control for the camera
 	//	camera.NewOrbitControl(cam)
-	camera.NewOrbitControl(gv.cam)
+	gv.orbit = camera.NewOrbitControl(gv.cam)
 
 	//	scene.Add(cam)
 	//	gv.scene.Add(cam)
@@ -489,6 +490,13 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application) *app.Application 
 				//				os.Exit(0)
 				gv.Exit()
 			}
+		case "Reset":
+			{
+				fmt.Println("Resetting Camera to initial view.")
+				gv.cam.SetPositionVec(&gv.camPos)
+				gv.cam.LookAt(&math32.Vector3{X: 0, Y: 0, Z: 0}, &math32.Vector3{X: 0, Y: 1, Z: 0})
+				gv.orbit.Reset()
+			}
 		}
 	}
 
@@ -501,7 +509,9 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application) *app.Application 
 
 	// Create fileMenu and adds it to the menu bar
 	m1 := gui.NewMenu()
-	m1.AddOption("File/Exit").
+	m1.AddOption("Reset Camera to Initial View").
+		SetId("Reset")
+	m1.AddOption("Exit").
 		SetId("Exit")
 	mb.AddMenu("File", m1).
 		SetId("File").
