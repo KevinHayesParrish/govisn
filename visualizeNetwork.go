@@ -73,7 +73,7 @@ type Raycast struct {
 }
 
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
-	const VISUALIZENETWORKVERSION = "0.2.0"
+	const VISUALIZENETWORKVERSION = "0.2.1"
 	if debugFlag {
 		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
 	}
@@ -99,28 +99,27 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	}
 
 	// Initialize the 3D space
-	//	app, appErr := application.Create(application.Options{
-	//	Title:     "GoVisn - 3D Network Visualization",
-	//		Width:     1200,
-	//		Height:    1000,
-	//		LogPrefix: "GoVisn",
-	//	})
-	//	if appErr != nil {
-	//		fmt.Println("Error Creating 3D g3n app", *DbName)
-	//		log.Fatal(appErr)
-	//	}
 
 	// Create application and scene
+	gv := new(gvapp)
 	a := app.App()
-	scene := core.NewNode()
+	gv.Application = a
+	//	scene := core.NewNode()
+	gv.scene = core.NewNode()
 
 	// Create perspective camera
-	cam := camera.New(1)
-	cam.SetPosition(0, 0, (float32)(globeRadius*2.0))
-	scene.Add(cam)
+	//	cam := camera.New(1)
+	//	cam.SetPosition(0, 0, (float32)(globeRadius*2.0))
+	gv.cam = camera.New(1)
+	gv.cam.SetPosition(0, 0, (float32)(globeRadius*2.0))
 
 	// Setup orbit control for the camera
-	camera.NewOrbitControl(cam)
+	//	camera.NewOrbitControl(cam)
+	camera.NewOrbitControl(gv.cam)
+
+	//	scene.Add(cam)
+	//	gv.scene.Add(cam)
+	gv.scene.Add(gv.cam)
 
 	// Set up callback to update viewport and camera aspect ratio when the window is resized
 	onResize := func(evname string, ev interface{}) {
@@ -128,23 +127,27 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		width, height := a.GetSize()
 		a.Gls().Viewport(0, 0, int32(width), int32(height))
 		// Update the camera's aspect ratio
-		cam.SetAspect(float32(width) / float32(height))
+		//		cam.SetAspect(float32(width) / float32(height))
+		gv.cam.SetAspect(float32(width) / float32(height))
 	}
 	a.Subscribe(window.OnWindowSize, onResize)
 	onResize("", nil)
 
 	// Create and Add lights to the scene
 	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1.0)
-	scene.Add(ambientLight)
+	//	scene.Add(ambientLight)
+	gv.scene.Add(ambientLight)
 	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
 	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
-	scene.Add(pointLight)
+	//	scene.Add(pointLight)
+	gv.scene.Add(pointLight)
 
 	// Add an axis helper to the scene
 	//	axis := graphic.NewAxisHelper(0.5)
 	//	app.Scene().Add(axis)
 	axes := helper.NewAxes(1)
-	scene.Add(axes)
+	//	scene.Add(axes)
+	gv.scene.Add(axes)
 
 	// Set background color to black
 	a.Gls().ClearColor(0.0, 0.0, 0.0, 0.0)
@@ -154,7 +157,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	// Build Menus
 	//	buildMenus(debugFlag, app)
-	buildMenus(debugFlag, a)
+	buildMenus(debugFlag, gv, a)
 
 	var RouterID int
 	var Name string
@@ -175,8 +178,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	// Setup Mouse clicking of objects within the 3D scene
 	var t Raycast
-	t.Initialize(debugFlag, scene, cam, a)
-	//	t.Initialize(debugFlag, scene, a.camera, a.Application)
+	//	t.Initialize(debugFlag, scene, cam, a)
+	t.Initialize(debugFlag, gv.scene, gv.cam, a)
 
 	// Create Globe texture
 	gobinDir := os.Getenv("GOBIN")
@@ -200,7 +203,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	globeMesh := graphic.NewMesh(globe3D, globeMat)
 	globeMesh.SetPosition(0, 0, 0)
 	//	app.Scene().Add(globeMesh)
-	scene.Add(globeMesh)
+	//	scene.Add(globeMesh)
+	gv.scene.Add(globeMesh)
 
 	if debugFlag {
 		fmt.Println("Beginning routerRows.Next loop; adding routers to 3D scene.")
@@ -249,7 +253,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		cylinderMesh.SetName(string(router.System.RouterID))
 		cylinderMesh.SetUserData(string(router.System.RouterID))
 		//		app.Scene().Add(cylinderMesh)
-		scene.Add(cylinderMesh)
+		//		scene.Add(cylinderMesh)
+		gv.scene.Add(cylinderMesh)
 
 		// Add router name to scene
 		// Creates Font
@@ -279,7 +284,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		mesh3 := graphic.NewSprite(aspect, 1, mat3)
 		mesh3.SetPosition(x, y, z+1.0)
 		//		app.Scene().Add(mesh3)
-		scene.Add(mesh3)
+		//		scene.Add(mesh3)
+		gv.scene.Add(mesh3)
 
 		queryErr = routerRows.Err()
 		if queryErr != nil {
@@ -404,7 +410,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		link3D.SetName(string(link.LinkID))
 
 		//		app.Scene().Add(link3D)
-		scene.Add(link3D)
+		//		scene.Add(link3D)
+		gv.scene.Add(link3D)
 
 		err = linkRows.Err()
 		if err != nil {
@@ -416,7 +423,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	//	app.Run()
 	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
-		renderer.Render(scene, cam)
+		//		renderer.Render(scene, cam)
+		renderer.Render(gv.scene, gv.cam)
 	})
 
 	if debugFlag {
@@ -463,7 +471,7 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 }
 
 //func buildMenus(debugFlag bool, app *application.Application) *application.Application {
-func buildMenus(debugFlag bool, a *app.Application) *app.Application {
+func buildMenus(debugFlag bool, gv *gvapp, a *app.Application) *app.Application {
 	//func buildMenus(debugFlag bool, a *App) *App {
 	if debugFlag {
 		fmt.Println("Starting func buildMenus")
@@ -491,6 +499,8 @@ func buildMenus(debugFlag bool, a *app.Application) *app.Application {
 	//a.scene.Add(a.mainPanel)
 	//gui.Manager().Set(a.mainPanel)
 
+	gui.Manager().Set(gv.scene)
+
 	// Create menu bar
 	mb := gui.NewMenuBar()
 	mb.Subscribe(gui.OnClick, onClick)
@@ -508,6 +518,7 @@ func buildMenus(debugFlag bool, a *app.Application) *app.Application {
 	mb.Subscribe(gui.OnClick, func(name string, ev interface{}) {
 		material.NewStandard(math32.NewColor("DarkRed"))
 	})
+	gv.scene.Add(mb)
 	//app.Gui().Add(mb)
 	//app.Gui().Root().SetKeyFocus(mb)
 
