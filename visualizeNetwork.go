@@ -483,7 +483,8 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application) *app.Application 
 		case "Exit":
 			{
 				fmt.Println("GoVisn terminating. File/Exit selected.")
-				os.Exit(0)
+				//				os.Exit(0)
+				gv.Exit()
 			}
 		}
 	}
