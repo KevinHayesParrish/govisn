@@ -552,34 +552,40 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 	obj := intersects[0].Object
 	router3D := obj.GetNode()
 	router3DName := router3D.Name()
-	if debugFlag {
+	if router3DName == "" {
+		fmt.Println("No Router selected. Try again.")
+	} else {
 		fmt.Println("Picked object Name=", router3DName)
 		fmt.Println("Picked object UserData=", router3D.UserData())
 	}
 
+	// Retrieve Router info from database
+
+	// Display Router info in 3D scene
+
 	// Convert INode to IGraphic
-	ig, ok := obj.(graphic.IGraphic)
-	if !ok {
-		//		app.Log().Debug("Not graphic:%T", obj)
-		log.Fatalf("Not graphic:%T", obj)
-		return
-	}
-	// Get graphic object
-	gr := ig.GetGraphic()
-	imat := gr.GetMaterial(0)
-
-	type matI interface {
-		EmissiveColor() math32.Color
-		SetEmissiveColor(*math32.Color)
-	}
-
-	if v, ok := imat.(matI); ok {
-		if em := v.EmissiveColor(); em.R == 1 && em.G == 1 && em.B == 1 {
-			v.SetEmissiveColor(&math32.Color{R: 0, B: 0, G: 0})
-		} else {
-			v.SetEmissiveColor(&math32.Color{R: 1, B: 1, G: 1})
-		}
-	}
+	//	ig, ok := obj.(graphic.IGraphic)
+	//	if !ok {
+	//		//		app.Log().Debug("Not graphic:%T", obj)
+	//		log.Fatalf("Not graphic:%T", obj)
+	//		return
+	//	}
+	//	// Get graphic object
+	//	gr := ig.GetGraphic()
+	//	imat := gr.GetMaterial(0)
+	//
+	//	type matI interface {
+	//		EmissiveColor() math32.Color
+	//		SetEmissiveColor(*math32.Color)
+	//	}
+	//
+	//	if v, ok := imat.(matI); ok {
+	//		if em := v.EmissiveColor(); em.R == 1 && em.G == 1 && em.B == 1 {
+	//			v.SetEmissiveColor(&math32.Color{R: 0, B: 0, G: 0})
+	//		} else {
+	//			v.SetEmissiveColor(&math32.Color{R: 1, B: 1, G: 1})
+	//		}
+	//	}
 }
 
 // Dump3dScene writes the Collada file representing the 3D Scene
