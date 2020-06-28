@@ -1,5 +1,14 @@
 package main
 
+import (
+	"github.com/g3n/engine/app"
+	"github.com/g3n/engine/camera"
+	"github.com/g3n/engine/core"
+	"github.com/g3n/engine/gui"
+	"github.com/g3n/engine/math32"
+	"github.com/g3n/engine/util/helper"
+)
+
 // Router is the structure representing a network router
 type Router struct {
 	System struct {
@@ -188,4 +197,34 @@ type Link struct {
 type ScannedRouter struct {
 	Name      string
 	IPAddress string
+}
+
+// FileSelect struct
+type FileSelect struct {
+	gui.Panel
+	path *gui.Label
+	list *gui.List
+	bok  *gui.Button
+	bcan *gui.Button
+}
+
+// ErrorDialog struct
+type ErrorDialog struct {
+	gui.Panel
+	msg *gui.ImageLabel
+	bok *gui.Button
+}
+type gvapp struct {
+	*app.Application                // Embedded application object
+	fs               *FileSelect    // File selection dialog
+	ed               *ErrorDialog   // Error dialog
+	axes             *helper.Axes   // Axis helper
+	grid             *helper.Grid   // Grid helper
+	viewAxes         bool           // Axis helper visible flag
+	viewGrid         bool           // Grid helper visible flag
+	camPos           math32.Vector3 // Initial camera position
+	models           []*core.Node   // Models being shown
+	scene            *core.Node
+	cam              *camera.Camera
+	orbit            *camera.OrbitControl
 }
