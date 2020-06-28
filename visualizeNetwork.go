@@ -72,7 +72,7 @@ type Raycast struct {
 }
 
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
-	const VISUALIZENETWORKVERSION = "0.2.2"
+	const VISUALIZENETWORKVERSION = "0.2.3"
 	if debugFlag {
 		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
 	}
@@ -232,8 +232,14 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 		// Add Router object to 3D scene.
 		cylinderMesh.SetPosition(x, y, z)
-		cylinderMesh.SetName(string(router.System.RouterID))
-		cylinderMesh.SetUserData(string(router.System.RouterID))
+		//		cylinderMesh.SetName(string(router.System.RouterID))
+		//		cylinderMesh.SetUserData(string(router.System.RouterID))
+		cylinderMesh.SetName(strconv.Itoa(router.System.RouterID))
+		cylinderMesh.SetUserData(strconv.Itoa(router.System.RouterID))
+		if debugFlag {
+			fmt.Println("cylinderMesh Name=", cylinderMesh.Name())
+			fmt.Println("cylinderMesh UserData=", cylinderMesh.UserData())
+		}
 		gv.scene.Add(cylinderMesh)
 
 		// Add router name to scene
@@ -450,17 +456,21 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application) *app.Application 
 	// Event handler for menu clicks
 	onClick := func(evname string, ev interface{}) {
 		switch ev.(*gui.MenuItem).Id() {
-		case "Exit":
-			{
-				fmt.Println("GoVisn terminating. File/Exit selected.")
-				gv.Exit()
-			}
 		case "Reset":
 			{
 				fmt.Println("Resetting Camera to initial view.")
 				gv.cam.SetPositionVec(&gv.camPos)
 				gv.cam.LookAt(&math32.Vector3{X: 0, Y: 0, Z: 0}, &math32.Vector3{X: 0, Y: 1, Z: 0})
 				gv.orbit.Reset()
+			}
+		case "Print":
+			{
+				Dump3dScene(gv)
+			}
+		case "Exit":
+			{
+				fmt.Println("GoVisn terminating. File/Exit selected.")
+				gv.Exit()
 			}
 		}
 	}
@@ -476,6 +486,8 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application) *app.Application 
 	m1 := gui.NewMenu()
 	m1.AddOption("Reset Camera to Initial View").
 		SetId("Reset")
+	m1.AddOption("Print 3D Scene graph").
+		SetId("Print")
 	m1.AddOption("Exit").
 		SetId("Exit")
 	mb.AddMenu("File", m1).
@@ -568,6 +580,14 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 			v.SetEmissiveColor(&math32.Color{R: 1, B: 1, G: 1})
 		}
 	}
+}
+
+// Dump3dScene writes the Collada file representing the 3D Scene
+func Dump3dScene(gv *gvapp) {
+	fmt.Println("Dumping 3D Scene")
+	//	var decoder collada.Decoder
+	//	var out io.Writer
+	//decoder.Dump(out, 4)
 }
 
 // Render renders the mouse pick action
