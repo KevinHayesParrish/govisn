@@ -137,10 +137,13 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1.0)
 	//	scene.Add(ambientLight)
 	gv.scene.Add(ambientLight)
-	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
-	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
-	//	scene.Add(pointLight)
-	gv.scene.Add(pointLight)
+	//	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
+	//	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
+	//	gv.scene.Add(pointLight)
+
+	dirLight := light.NewDirectional(math32.NewColor("white"), 0.8)
+	dirLight.SetPosition((float32)(globeRadius+100), 0, 0)
+	gv.scene.Add(dirLight)
 
 	// Add an axis helper to the scene
 	//	axis := graphic.NewAxisHelper(0.5)
@@ -489,17 +492,6 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application) *app.Application 
 		}
 	}
 
-	// Show and enable demo panel
-
-	//dl := gui.NewDockLayout()
-	//width, height := a.GetSize()
-	//a.mainPanel = gui.NewPanel(float32(width), float32(height))
-	//a.mainPanel.SetRenderable(true)
-	//a.mainPanel.SetEnabled(true)
-	//a.mainPanel.SetLayout(dl)
-	//a.scene.Add(a.mainPanel)
-	//gui.Manager().Set(a.mainPanel)
-
 	gui.Manager().Set(gv.scene)
 
 	// Create menu bar
@@ -515,13 +507,10 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application) *app.Application 
 		SetId("File").
 		SetShortcut(window.ModAlt, window.Key1)
 
-	//a.mainPanel.Add(mb)
 	mb.Subscribe(gui.OnClick, func(name string, ev interface{}) {
 		material.NewStandard(math32.NewColor("DarkRed"))
 	})
 	gv.scene.Add(mb)
-	//app.Gui().Add(mb)
-	//app.Gui().Root().SetKeyFocus(mb)
 
 	gui.Manager().SetKeyFocus(mb)
 
