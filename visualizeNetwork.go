@@ -627,7 +627,7 @@ func DisplayRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB,
 		router.System.GPS.Altitude = GpsAlt
 	}
 
-	// Retrive MAC Addresses from the database
+	// Retrieve MAC Addresses from the database
 	macRows, queryErr := databaseForRead.Query("SELECT RouterID, MacAddr FROM RouterMac WHERE RouterID = ?", router.System.RouterID)
 	if queryErr != nil {
 		fmt.Println("databaseForRead Query MAC error", queryErr)
@@ -642,7 +642,7 @@ func DisplayRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB,
 		i++
 	}
 
-	// Retrive IP Addresses from the database
+	// Retrieve IP Addresses from the database
 	ipRows, queryErr := databaseForRead.Query("SELECT RouterID, IpAddr FROM RouterIp WHERE RouterID = ?", router.System.RouterID)
 	if queryErr != nil {
 		fmt.Println("databaseForRead Query IP error", queryErr)
