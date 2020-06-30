@@ -147,7 +147,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	// Build Menus
 	//	buildMenus(debugFlag, app)
-	buildMenus(debugFlag, gv, a)
+	buildMenus(debugFlag, gv, a, databaseForRead)
 
 	var RouterID int
 	var Name string
@@ -168,7 +168,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	// Setup Mouse clicking of objects within the 3D scene
 	var t Raycast
-	t.Initialize(debugFlag, gv.scene, gv.cam, a)
+	t.Initialize(debugFlag, gv.scene, gv.cam, a, databaseForRead)
 
 	// Create Globe texture
 	gobinDir := os.Getenv("GOBIN")
@@ -448,7 +448,7 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 	return x, y, z
 }
 
-func buildMenus(debugFlag bool, gv *gvapp, a *app.Application) *app.Application {
+func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
 	if debugFlag {
 		fmt.Println("Starting func buildMenus")
 	}
@@ -508,7 +508,7 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application) *app.Application 
 }
 
 // Initialize the raycaster
-func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camera, app *app.Application) {
+func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camera, app *app.Application, databaseForRead *sql.DB) {
 	fmt.Println("Initializing the raycaster") // TESTING ONLY
 	// Creates the raycaster
 	t.rayCast = collision.NewRaycaster(&math32.Vector3{}, &math32.Vector3{})
@@ -517,12 +517,12 @@ func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camer
 
 	// Subscribe to mouse button down events
 	app.SubscribeID(window.OnMouseDown, app, func(evname string, ev interface{}) {
-		t.onMouse(debugFlag, scene, cam, app, ev)
+		t.onMouse(debugFlag, scene, cam, app, databaseForRead, ev)
 	})
 }
 
 // onMouse is executed when an object in the 3D scene is selected with a mouse click
-func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, app *app.Application, ev interface{}) {
+func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, app *app.Application, databaseForRead *sql.DB, ev interface{}) {
 	// Convert mouse coordinates to normalized device coordinates
 	mev := ev.(*window.MouseEvent)
 	width, height := app.GetSize()
@@ -560,8 +560,7 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 	}
 
 	// Retrieve Router info from database
-
-	// Display Router info in 3D scene
+	DisplayRouter(debugFlag, router3DName, databaseForRead, app)
 
 	// Convert INode to IGraphic
 	//	ig, ok := obj.(graphic.IGraphic)
@@ -594,6 +593,75 @@ func Dump3dScene(gv *gvapp) {
 	//	var decoder collada.Decoder
 	//	var out io.Writer
 	//decoder.Dump(out, 4)
+}
+
+// DisplayRouter is called when an object in the 3D scene is mouse clicked. It retrieve's the
+//   routers information from the database and opens a new window to display it.
+func DisplayRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB, app *app.Application) {
+	var router Router
+	var RouterID, Services int
+	var Name, Contact, Location, GpsLat, GpsLong, GpsAlt string
+	var MacAddr, IPAddr string
+
+	var UpTime uint32
+	// Retrive Router from the database
+	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers WHERE RouterID = ?", router3DName)
+	if queryErr != nil {
+		fmt.Println("databaseForRead Query Router error", queryErr)
+		log.Fatal(queryErr)
+	}
+	if debugFlag {
+		fmt.Println("Successful Routers table Select")
+	}
+	for routerRows.Next() {
+		routerRows.Scan(&RouterID, &Name, &UpTime, &Contact, &Location, &Services, &GpsLat, &GpsLong, &GpsAlt)
+		// Load router struct from DB fields
+		router.System.RouterID = RouterID
+		router.System.UpTime = UpTime
+		router.System.Name = Name
+		router.System.Contact = Contact
+		router.System.Location = Location
+		router.System.Services = Services
+		router.System.GPS.Latitude = GpsLat
+		router.System.GPS.Longitude = GpsLong
+		router.System.GPS.Altitude = GpsAlt
+	}
+
+	// Retrive MAC Addresses from the database
+	macRows, queryErr := databaseForRead.Query("SELECT RouterID, MacAddr FROM RouterMac WHERE RouterID = ?", router.System.RouterID)
+	if queryErr != nil {
+		fmt.Println("databaseForRead Query MAC error", queryErr)
+		log.Fatal(queryErr)
+	}
+	i := 0
+	for macRows.Next() {
+		macRows.Scan(&RouterID, &MacAddr)
+		// Load router struct from DB fields
+		router.Addresses.MediaAddresses.MediaAddress = append(router.Addresses.MediaAddresses.MediaAddress, MacAddr)
+
+		i++
+	}
+
+	// Retrive IP Addresses from the database
+	ipRows, queryErr := databaseForRead.Query("SELECT RouterID, IpAddr FROM RouterIp WHERE RouterID = ?", router.System.RouterID)
+	if queryErr != nil {
+		fmt.Println("databaseForRead Query IP error", queryErr)
+		log.Fatal(queryErr)
+	}
+	j := 0
+	for ipRows.Next() {
+		ipRows.Scan(&RouterID, &IPAddr)
+		// Load router struct from DB fields
+		router.Addresses.NetworkAddresses.IPAddress = append(router.Addresses.NetworkAddresses.IPAddress, IPAddr)
+
+		if debugFlag {
+			fmt.Println("OnMouse Router=", router)
+		}
+		j++
+	}
+
+	// Display Router info in 3D scene
+
 }
 
 // Render renders the mouse pick action
