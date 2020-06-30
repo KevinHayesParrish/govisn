@@ -31,7 +31,7 @@ type Router struct {
 			IPAddress []string
 		}
 		MediaAddresses struct {
-			MediaAddress string
+			MediaAddress []string
 		}
 	}
 	Neighbors struct {
