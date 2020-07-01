@@ -266,7 +266,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		mat3.AddTexture(tex3)
 		aspect := float32(swidth) / float32(sheight)
 		mesh3 := graphic.NewSprite(aspect, 1, mat3)
-		mesh3.SetPosition(x, y, z+1.0)
+		//		mesh3.SetPosition(x, y, z+1.0)
+		mesh3.SetPosition(x, y+1.0, z)
 		gv.scene.Add(mesh3)
 
 		queryErr = routerRows.Err()
