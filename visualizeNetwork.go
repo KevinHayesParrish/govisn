@@ -72,7 +72,7 @@ type Raycast struct {
 }
 
 func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
-	const VISUALIZENETWORKVERSION = "0.2.3"
+	const VISUALIZENETWORKVERSION = "0.2.4"
 	if debugFlag {
 		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
 	}
@@ -168,7 +168,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	// Setup Mouse clicking of objects within the 3D scene
 	var t Raycast
-	t.Initialize(debugFlag, gv.scene, gv.cam, a, databaseForRead)
+	//	t.Initialize(debugFlag, gv.scene, gv.cam, a, databaseForRead)
+	t.Initialize(debugFlag, gv.scene, gv.cam, gv, a, databaseForRead)
 
 	// Create Globe texture
 	gobinDir := os.Getenv("GOBIN")
@@ -509,7 +510,7 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 }
 
 // Initialize the raycaster
-func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camera, app *app.Application, databaseForRead *sql.DB) {
+func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB) {
 	fmt.Println("Initializing the raycaster") // TESTING ONLY
 	// Creates the raycaster
 	t.rayCast = collision.NewRaycaster(&math32.Vector3{}, &math32.Vector3{})
@@ -518,12 +519,14 @@ func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camer
 
 	// Subscribe to mouse button down events
 	app.SubscribeID(window.OnMouseDown, app, func(evname string, ev interface{}) {
-		t.onMouse(debugFlag, scene, cam, app, databaseForRead, ev)
+		//		t.onMouse(debugFlag, scene, cam, app, databaseForRead, ev)
+		t.onMouse(debugFlag, scene, cam, gv, app, databaseForRead, ev)
 	})
 }
 
 // onMouse is executed when an object in the 3D scene is selected with a mouse click
-func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, app *app.Application, databaseForRead *sql.DB, ev interface{}) {
+//func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, app *app.Application, databaseForRead *sql.DB, ev interface{}) {
+func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB, ev interface{}) {
 	// Convert mouse coordinates to normalized device coordinates
 	mev := ev.(*window.MouseEvent)
 	width, height := app.GetSize()
@@ -561,31 +564,67 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 	}
 
 	// Retrieve Router info from database
-	DisplayRouter(debugFlag, router3DName, databaseForRead, app)
+	router := RetrieveRouter(debugFlag, router3DName, databaseForRead, app)
 
-	// Convert INode to IGraphic
-	//	ig, ok := obj.(graphic.IGraphic)
-	//	if !ok {
-	//		//		app.Log().Debug("Not graphic:%T", obj)
-	//		log.Fatalf("Not graphic:%T", obj)
-	//		return
-	//	}
-	//	// Get graphic object
-	//	gr := ig.GetGraphic()
-	//	imat := gr.GetMaterial(0)
-	//
-	//	type matI interface {
-	//		EmissiveColor() math32.Color
-	//		SetEmissiveColor(*math32.Color)
-	//	}
-	//
-	//	if v, ok := imat.(matI); ok {
-	//		if em := v.EmissiveColor(); em.R == 1 && em.G == 1 && em.B == 1 {
-	//			v.SetEmissiveColor(&math32.Color{R: 0, B: 0, G: 0})
-	//		} else {
-	//			v.SetEmissiveColor(&math32.Color{R: 1, B: 1, G: 1})
-	//		}
-	//	}
+	// Add Router info to 3D scene
+	fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
+	font, err := text.NewFont(fontfile)
+	if err != nil {
+		//			app.Log().Fatal(err.Error())
+		//			app.Log().Fatal("Error loading font: %s", err, "\n Insure govisn /data/fonts is copied to GOBIN")
+		log.Fatalln("Error loading font:", err, "\n Insure govisn /data/fonts is copied to GOBIN")
+	}
+
+	font.SetLineSpacing(1.0)
+	font.SetPointSize(28)
+	font.SetDPI(72)
+	font.SetFgColor(&math32.Color4{R: 0, G: 0, B: 1, A: 1})
+	font.SetBgColor(&math32.Color4{R: 1, G: 1, B: 0, A: 0.8})
+	canvas := text.NewCanvas(300, 200, &math32.Color4{R: 0, G: 1, B: 0, A: 0.8})
+	//	rtext := "Descr: " + router.System.Description
+	//	swidth, sheight := font.MeasureText(rtext)
+	//	canvas := text.NewCanvas(swidth, sheight, &math32.Color4{R: 0, G: 1, B: 1, A: 1})
+	//	canvas.DrawText(0, 0, rtext, font)
+	//	tex3 := texture.NewTexture2DFromRGBA(canvas.RGBA)
+	//	mat3 := material.NewStandard(&math32.Color{R: 1, G: 1, B: 1})
+	//	mat3.AddTexture(tex3)
+	//	aspect := float32(swidth) / float32(sheight)
+	//	mesh3 := graphic.NewSprite(aspect, 1, mat3)
+
+	x, y, z := calcCoordinates(router.System.GPS.Latitude, router.System.GPS.Longitude, router.System.GPS.Altitude)
+	//	mesh3.SetPosition(x, y-1.0, z)
+	//	gv.scene.Add(mesh3)
+
+	//	var i int
+	for i := 0; i < len(router.Addresses.NetworkAddresses.IPAddress); i++ {
+
+		rtext := "\nIP Address: " + router.Addresses.NetworkAddresses.IPAddress[i]
+		swidth, sheight := font.MeasureText(rtext)
+		canvas = text.NewCanvas(swidth, sheight, &math32.Color4{R: 0, G: 1, B: 1, A: 1})
+		canvas.DrawText(0, 0, rtext, font)
+		tex3 := texture.NewTexture2DFromRGBA(canvas.RGBA)
+		mat3 := material.NewStandard(&math32.Color{R: 1, G: 1, B: 1})
+		mat3.AddTexture(tex3)
+		aspect := float32(swidth) / float32(sheight)
+		mesh3 := graphic.NewSprite(aspect, 1, mat3)
+
+		mesh3.SetPosition(x-3.0, y-1.0-float32(i), z)
+		gv.scene.Add(mesh3)
+	}
+	for j := 0; j < len(router.Addresses.NetworkAddresses.IPAddress); j++ {
+		rtext := "\nMAC Address: " + router.Addresses.NetworkAddresses.IPAddress[j]
+		swidth, sheight := font.MeasureText(rtext)
+		canvas = text.NewCanvas(swidth, sheight, &math32.Color4{R: 0, G: 1, B: 1, A: 1})
+		canvas.DrawText(0, 0, rtext, font)
+		tex3 := texture.NewTexture2DFromRGBA(canvas.RGBA)
+		mat3 := material.NewStandard(&math32.Color{R: 1, G: 1, B: 1})
+		mat3.AddTexture(tex3)
+		aspect := float32(swidth) / float32(sheight)
+		mesh3 := graphic.NewSprite(aspect, 1, mat3)
+
+		mesh3.SetPosition(x+3.0, y-1.0-float32(j), z)
+		gv.scene.Add(mesh3)
+	}
 }
 
 // Dump3dScene writes the Collada file representing the 3D Scene
@@ -596,9 +635,9 @@ func Dump3dScene(gv *gvapp) {
 	//decoder.Dump(out, 4)
 }
 
-// DisplayRouter is called when an object in the 3D scene is mouse clicked. It retrieve's the
+// RetrieveRouter is called when an object in the 3D scene is mouse clicked. It retrieve's the
 //   routers information from the database and opens a new window to display it.
-func DisplayRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB, app *app.Application) {
+func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB, app *app.Application) Router {
 	var router Router
 	var RouterID, Services int
 	var Name, Contact, Location, GpsLat, GpsLong, GpsAlt string
@@ -660,9 +699,7 @@ func DisplayRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB,
 		}
 		j++
 	}
-
-	// Display Router info in 3D scene
-
+	return router
 }
 
 // Render renders the mouse pick action
