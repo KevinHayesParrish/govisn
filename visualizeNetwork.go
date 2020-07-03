@@ -387,7 +387,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		linkGeom.AddVBO(gls.NewVBO(colors).AddAttrib(gls.VertexColor))
 
 		// Creates basic material
-		mat := material.NewBasic()
+		//		mat := material.NewBasic()
+		mat := material.NewStandard(math32.NewColor("White"))
 		mat.SetLineWidth(1.0) // Set line width. Default is 1.0
 
 		// Creates lines with the specified geometry and material
