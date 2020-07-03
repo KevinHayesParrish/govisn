@@ -194,9 +194,9 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	if debugFlag {
 		fmt.Println("Beginning routerRows.Next loop; adding routers to 3D scene.")
 	}
-	/*
-	* Add the routers to the 3D scene
-	 */
+	//
+	// Add the routers to the 3D scene
+	//
 	var routers []Router
 	var router Router
 	routerArrayIndex := 0
@@ -219,9 +219,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		rtr3D := geometry.NewCylinder(routerRadius, routerRadius, 16, 2, true, true)
 		mat := material.NewStandard(math32.NewColor("DarkBlue"))
 		cylinderMesh := graphic.NewMesh(rtr3D, mat)
-		/*
-		 * Set coordinates and altitude
-		 */
+
+		// Set coordinates and altitude
 		x, y, z = calcCoordinates(GpsLat, GpsLong, GpsAlt)
 
 		if debugFlag {
@@ -243,7 +242,9 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		}
 		gv.scene.Add(cylinderMesh)
 
+		//
 		// Add router name to scene
+		//
 		fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
 		font, err := text.NewFont(fontfile)
 		if err != nil {
@@ -284,9 +285,9 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		fmt.Println("\nBeginning linkRows.Next loop; adding links to the 3D scene")
 		fmt.Println()
 	}
-	/*
-	* Add the links to the 3D scene
-	 */
+	//
+	// Add the links to the 3D scene
+	//
 	var FromRouterX, FromRouterY, FromRouterZ, ToRouterX, ToRouterY, ToRouterZ string
 	for linkRows.Next() {
 		err := linkRows.Scan(&LinkID, &FromRouterName, &FromRouterIP, &ToRouterName, &ToRouterIP)
@@ -387,7 +388,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 		// Creates basic material
 		mat := material.NewBasic()
-		mat.SetLineWidth(3.0) // Set line width. Default is 1.0
+		mat.SetLineWidth(1.0) // Set line width. Default is 1.0
 
 		// Creates lines with the specified geometry and material
 		link3D := graphic.NewLines(linkGeom, mat)
