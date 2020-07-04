@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -134,9 +135,9 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	//	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
 	//	gv.scene.Add(pointLight)
 
-	dirLight := light.NewDirectional(math32.NewColor("white"), 0.8)
-	dirLight.SetPosition((float32)(globeRadius+100), 0, 0)
-	gv.scene.Add(dirLight)
+	//	dirLight := light.NewDirectional(math32.NewColor("white"), 0.8)
+	//	dirLight.SetPosition((float32)(globeRadius+100), 0, 0)
+	//	gv.scene.Add(dirLight)
 
 	// Add an axis helper to the scene
 	axes := helper.NewAxes(1)
@@ -377,19 +378,28 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 			fmt.Println("link vertices=", vertices)
 			fmt.Println()
 		}
-		colors := math32.NewArrayF32(0, 0)
-		colors.Append(
-			0.0, 0.0, 1.0,
-			0.0, 0.0, 1.0,
-		)
+		//		colors := math32.NewArrayF32(0, 0)
+		//		colors.Append(
+		//			0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+		//		)
 		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
 
-		linkGeom.AddVBO(gls.NewVBO(colors).AddAttrib(gls.VertexColor))
+		//		linkGeom.AddVBO(gls.NewVBO(colors).AddAttrib(gls.VertexColor))
 
 		// Creates basic material
 		//		mat := material.NewBasic()
 		mat := material.NewStandard(math32.NewColor("White"))
-		mat.SetLineWidth(1.0) // Set line width. Default is 1.0 MacOS G3N implementation only allows width of 1.0
+		//		mat.SetLineWidth(1.0) // Set line width. Default is 1.0 MacOS G3N implementation only allows width of 1.0
+
+		// Check Runtime environment.
+		// OpenGL Implementation on MacOS will only accept Line width of 1.0
+		if runtime.GOOS == "darwin" {
+			mat.SetLineWidth(1.0)
+			fmt.Println("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept 1.0 ***")
+		} else {
+			mat.SetLineWidth(3.0)
+			//	fmt.Println("Link SetLineWidth() request accepted.")
+		}
 
 		// Creates lines with the specified geometry and material
 		link3D := graphic.NewLines(linkGeom, mat)
