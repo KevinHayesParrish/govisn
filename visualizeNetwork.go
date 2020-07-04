@@ -389,7 +389,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		// Creates basic material
 		//		mat := material.NewBasic()
 		mat := material.NewStandard(math32.NewColor("White"))
-		mat.SetLineWidth(1.0) // Set line width. Default is 1.0
+		mat.SetLineWidth(1.0) // Set line width. Default is 1.0 MacOS G3N implementation only allows width of 1.0
 
 		// Creates lines with the specified geometry and material
 		link3D := graphic.NewLines(linkGeom, mat)
@@ -627,6 +627,31 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 		mesh3.SetPosition(x+3.0, y-1.0-float32(j), z)
 		gv.scene.Add(mesh3)
 	}
+
+	// TESTING ONLY - BEGIN
+	// Convert INode to IGraphic
+	ig, ok := obj.(graphic.IGraphic)
+	if !ok {
+		return
+	}
+	// Get graphic object
+	gr := ig.GetGraphic()
+	imat := gr.GetMaterial(0)
+
+	type matI interface {
+		EmissiveColor() math32.Color
+		SetEmissiveColor(*math32.Color)
+	}
+
+	if v, ok := imat.(matI); ok {
+		if em := v.EmissiveColor(); em.R == 1 && em.G == 1 && em.B == 1 {
+			v.SetEmissiveColor(&math32.Color{R: 0, G: 0, B: 0})
+		} else {
+			v.SetEmissiveColor(&math32.Color{R: 1, G: 1, B: 1})
+		}
+	}
+	// TESTING ONLY - END
+
 }
 
 // Dump3dScene writes the Collada file representing the 3D Scene
