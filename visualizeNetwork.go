@@ -744,7 +744,8 @@ func calLinkVertices(debugFlag bool, camPos math32.Vector3, posA math32.Vector3,
 	linkVertex1 math32.Vector3,
 	linkVertex2 math32.Vector3,
 	linkVertex3 math32.Vector3,
-	linkVertex4 math32.Vector3) {
+	linkVertex4 math32.Vector3,
+	indices math32.ArrayU32) {
 
 	vertices := math32.NewArrayF32(0, 0)
 	vertices.Append()
@@ -752,10 +753,13 @@ func calLinkVertices(debugFlag bool, camPos math32.Vector3, posA math32.Vector3,
 	normals := math32.NewArrayF32(0, 0)
 	normals.Append()
 
-	indices := math32.NewArrayF32(0, 0)
-	indices.Append()
+	indices = math32.NewArrayU32(0, 0)
+	indices.Append(
+		0, 1, 2,
+		0, 2, 3,
+	)
 
-	return linkVertex1, linkVertex2, linkVertex3, linkVertex4
+	return linkVertex1, linkVertex2, linkVertex3, linkVertex4, indices
 }
 
 // Render renders the mouse pick action
