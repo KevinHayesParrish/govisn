@@ -739,6 +739,25 @@ func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB
 	return router
 }
 
+// calcLinkVertices calculates the vertices of the polygon representing the network link.
+func calLinkVertices(debugFlag bool, camPos math32.Vector3, posA math32.Vector3, posB math32.Vector3) (
+	linkVertex1 math32.Vector3,
+	linkVertex2 math32.Vector3,
+	linkVertex3 math32.Vector3,
+	linkVertex4 math32.Vector3) {
+
+	vertices := math32.NewArrayF32(0, 0)
+	vertices.Append()
+
+	normals := math32.NewArrayF32(0, 0)
+	normals.Append()
+
+	indices := math32.NewArrayF32(0, 0)
+	indices.Append()
+
+	return linkVertex1, linkVertex2, linkVertex3, linkVertex4
+}
+
 // Render renders the mouse pick action
 func (t *Raycast) Render(a *app.Application) {
 }
