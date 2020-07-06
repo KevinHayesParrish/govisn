@@ -378,18 +378,11 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 			fmt.Println("link vertices=", vertices)
 			fmt.Println()
 		}
-		//		colors := math32.NewArrayF32(0, 0)
-		//		colors.Append(
-		//			0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-		//		)
+
 		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
 
-		//		linkGeom.AddVBO(gls.NewVBO(colors).AddAttrib(gls.VertexColor))
-
 		// Creates basic material
-		//		mat := material.NewBasic()
 		mat := material.NewStandard(math32.NewColor("White"))
-		//		mat.SetLineWidth(1.0) // Set line width. Default is 1.0 MacOS G3N implementation only allows width of 1.0
 
 		// Check Runtime environment.
 		// OpenGL Implementation on MacOS will only accept Line width of 1.0
@@ -398,8 +391,14 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 			fmt.Println("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept 1.0 ***")
 		} else {
 			mat.SetLineWidth(3.0)
-			//	fmt.Println("Link SetLineWidth() request accepted.")
 		}
+
+		// TESTING ONLY - BEGIN
+		posA := math32.NewVector3(fromX, fromY, fromZ)
+		posB := math32.NewVector3(toX, toY, toZ)
+		cvertices, cnormals, cindices := calcLinkVBOs(debugFlag, gv.camPos, *posA, *posB, float32(0.01))
+		fmt.Println("calcLinkVBOs returned: ", cvertices, cnormals, cindices)
+		// TESTING ONLY - END
 
 		// Creates lines with the specified geometry and material
 		link3D := graphic.NewLines(linkGeom, mat)
@@ -739,19 +738,51 @@ func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB
 	return router
 }
 
-// calcLinkVertices calculates the vertices of the polygon representing the network link.
-func calLinkVertices(debugFlag bool, camPos math32.Vector3, posA math32.Vector3, posB math32.Vector3) (
-	linkVertex1 math32.Vector3,
-	linkVertex2 math32.Vector3,
-	linkVertex3 math32.Vector3,
-	linkVertex4 math32.Vector3,
+// calcLinkVBOs calculates the vertices of the polygon representing the network link.
+func calcLinkVBOs(debugFlag bool, camPos math32.Vector3, posA math32.Vector3, posB math32.Vector3, scalar float32) (
+	vertices math32.ArrayF32,
+	normals math32.ArrayF32,
 	indices math32.ArrayU32) {
 
-	vertices := math32.NewArrayF32(0, 0)
-	vertices.Append()
+	var linkVertex1,
+		linkVertex2,
+		linkVertex3,
+		linkVertex4 math32.Vector3
 
-	normals := math32.NewArrayF32(0, 0)
-	normals.Append()
+	// PosA vertices
+	linkVertex1.SetX(posA.Component(0))
+	linkVertex1.SetY(posA.Component(1))
+	linkVertex1.SetZ(posA.Component(2))
+
+	linkVertex2.SetX(posA.Component(0))
+	//	linkVertex2.SetY(posA.Component(1) + 0.01)
+	linkVertex2.SetY(posA.Component(1) + scalar)
+	linkVertex2.SetZ(posA.Component(2))
+
+	//PosB vertices
+	linkVertex3.SetX(posA.Component(0))
+	//	linkVertex3.SetY(posA.Component(1) + 0.01)
+	linkVertex3.SetY(posA.Component(1) + scalar)
+	linkVertex3.SetZ(posA.Component(2))
+
+	linkVertex4.SetX(posB.Component(0))
+	linkVertex4.SetY(posB.Component(1))
+	linkVertex4.SetZ(posB.Component(2))
+
+	vertices = math32.NewArrayF32(0, 0)
+	vertices.Append(
+		linkVertex1.Component(0), linkVertex1.Component(1), linkVertex1.Component(2),
+		linkVertex2.Component(0), linkVertex2.Component(1), linkVertex2.Component(2),
+		linkVertex3.Component(0), linkVertex3.Component(1), linkVertex3.Component(2),
+		linkVertex4.Component(0), linkVertex4.Component(1), linkVertex4.Component(2),
+	)
+	normals = math32.NewArrayF32(0, 0)
+	normals.Append(
+		camPos.Component(0), camPos.Component(1), camPos.Component(2),
+		camPos.Component(0), camPos.Component(1), camPos.Component(2),
+		camPos.Component(0), camPos.Component(1), camPos.Component(2),
+		camPos.Component(0), camPos.Component(1), camPos.Component(2),
+	)
 
 	indices = math32.NewArrayU32(0, 0)
 	indices.Append(
@@ -759,7 +790,8 @@ func calLinkVertices(debugFlag bool, camPos math32.Vector3, posA math32.Vector3,
 		0, 2, 3,
 	)
 
-	return linkVertex1, linkVertex2, linkVertex3, linkVertex4, indices
+	//	return linkVertex1, linkVertex2, linkVertex3, linkVertex4, indices
+	return vertices, normals, indices
 }
 
 // Render renders the mouse pick action
