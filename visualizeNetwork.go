@@ -6,7 +6,6 @@ import (
 	"log"
 	"math"
 	"os"
-	"runtime"
 	"strconv"
 	"time"
 
@@ -108,7 +107,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 	// Create perspective camera
 	gv.camPos = math32.Vector3{X: 0, Y: 0, Z: (float32)(globeRadius * 2.0)}
-	gv.cam = camera.New(1)
+	gv.cam = camera.New(1) // perspective camera with defaults
 	gv.cam.SetPosition(0, 0, (float32)(globeRadius*2.0))
 
 	// Setup orbit control for the camera
@@ -367,47 +366,58 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		// Add link object to the 3D scene
 		fromX, fromY, fromZ := calcCoordinates(FromRouterX, FromRouterY, FromRouterZ)
 		toX, toY, toZ := calcCoordinates(ToRouterX, ToRouterY, ToRouterZ)
+		if debugFlag {
+			fmt.Println("fromX=", fromX, "fromY=", fromY, "fromZ=", fromZ)
+			fmt.Println("toX=", toX, "toY=", toY, "toZ=", toZ)
+		}
+
+		linkGeom := geometry.NewGeometry()
 
 		// Build Link using glLine - BEGIN
-		linkGeom := geometry.NewGeometry()
-		vertices := math32.NewArrayF32(0, 0)
-		vertices.Append(
-			fromX, fromY, fromZ,
-			toX, toY, toZ,
-		)
-		if debugFlag {
-			fmt.Println("link vertices=", vertices)
-			fmt.Println()
-		}
+		//vertices := math32.NewArrayF32(0, 0)
+		//vertices.Append(
+		//			fromX, fromY, fromZ,
+		//			toX, toY, toZ,
+		//		)
+		//		if debugFlag {
+		//			fmt.Println("link vertices=", vertices)
+		//			fmt.Println()
+		//		}
 
-		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
+		//		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
 
-		mat := material.NewStandard(math32.NewColor("White"))
+		//		mat := material.NewStandard(math32.NewColor("White"))
 		// Check Runtime environment.
 		// OpenGL Implementation on MacOS will only accept Line width of 1.0
-		if runtime.GOOS == "darwin" {
-			mat.SetLineWidth(1.0)
-			fmt.Println("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept 1.0 ***")
-		} else {
-			mat.SetLineWidth(3.0)
-		}
+		//		if runtime.GOOS == "darwin" {
+		//			mat.SetLineWidth(1.0)
+		//			fmt.Println("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept 1.0 ***")
+		//		} else {
+		//			mat.SetLineWidth(3.0)
+		//		}
+		//		link3D := graphic.NewLines(linkGeom, mat)
+		//		link3D.SetName(string(link.LinkID))
 		// Build Link using glLine - END
 
 		// Build Link using Polygon
 		posA := math32.NewVector3(fromX, fromY, fromZ)
 		posB := math32.NewVector3(toX, toY, toZ)
-		cvertices, cnormals, cindices := calcLinkVBOs(debugFlag, gv.camPos, *posA, *posB, float32(0.01))
+		vertices, normals, indices := calcLinkVBOs(debugFlag, gv.camPos, *posA, *posB, float32(1.00))
 		if debugFlag {
-			fmt.Println("calcLinkVBOs returned: ", cvertices, cnormals, cindices)
+			fmt.Println("calcLinkVBOs returned: ", vertices, normals, indices)
 		}
-		//	mat := material.NewStandard(math32.NewColor("White"))
-		// Build Link using Polygon
+		linkGeom.SetIndices(indices)
+		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
+		linkGeom.AddVBO(gls.NewVBO(normals).AddAttrib(gls.VertexNormal))
+
+		// Creates basic material
+		mat := material.NewStandard(math32.NewColor("White"))
+		mat.SetSide(material.SideDouble)
+		link3D := graphic.NewMesh(linkGeom, mat)
+		link3D.SetVisible(true)
+		// Build Link using Polygon - END
 
 		// Creates lines with the specified geometry and material
-		// Creates basic material
-
-		link3D := graphic.NewLines(linkGeom, mat)
-		link3D.SetName(string(link.LinkID))
 
 		gv.scene.Add(link3D)
 
