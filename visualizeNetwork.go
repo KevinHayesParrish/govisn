@@ -368,6 +368,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		fromX, fromY, fromZ := calcCoordinates(FromRouterX, FromRouterY, FromRouterZ)
 		toX, toY, toZ := calcCoordinates(ToRouterX, ToRouterY, ToRouterZ)
 
+		// Build Link using glLine - BEGIN
 		linkGeom := geometry.NewGeometry()
 		vertices := math32.NewArrayF32(0, 0)
 		vertices.Append(
@@ -381,9 +382,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
 
-		// Creates basic material
 		mat := material.NewStandard(math32.NewColor("White"))
-
 		// Check Runtime environment.
 		// OpenGL Implementation on MacOS will only accept Line width of 1.0
 		if runtime.GOOS == "darwin" {
@@ -392,15 +391,21 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		} else {
 			mat.SetLineWidth(3.0)
 		}
+		// Build Link using glLine - END
 
-		// TESTING ONLY - BEGIN
+		// Build Link using Polygon
 		posA := math32.NewVector3(fromX, fromY, fromZ)
 		posB := math32.NewVector3(toX, toY, toZ)
 		cvertices, cnormals, cindices := calcLinkVBOs(debugFlag, gv.camPos, *posA, *posB, float32(0.01))
-		fmt.Println("calcLinkVBOs returned: ", cvertices, cnormals, cindices)
-		// TESTING ONLY - END
+		if debugFlag {
+			fmt.Println("calcLinkVBOs returned: ", cvertices, cnormals, cindices)
+		}
+		//	mat := material.NewStandard(math32.NewColor("White"))
+		// Build Link using Polygon
 
 		// Creates lines with the specified geometry and material
+		// Creates basic material
+
 		link3D := graphic.NewLines(linkGeom, mat)
 		link3D.SetName(string(link.LinkID))
 
