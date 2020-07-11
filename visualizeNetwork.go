@@ -506,6 +506,10 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 	return x, y, z
 }
 
+// NetPolling indicates the Network Traffic Polling state
+var NetPolling bool = false
+
+// buildmenus creates the Gui menus and menuitems for the application
 func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
 	if debugFlag {
 		fmt.Println("Starting func buildMenus")
@@ -532,11 +536,13 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 			}
 		case "Enable Polling":
 			{
-				fmt.Println("Network Traffic Polling ENABLED.")
+				NetPolling = true
+				fmt.Println("Network Traffic Polling", NetPolling)
 			}
 		case "Disable Polling":
 			{
-				fmt.Println("Network Traffic Polling DISABLED.")
+				NetPolling = false
+				fmt.Println("Network Traffic Polling", NetPolling)
 			}
 		}
 	}
