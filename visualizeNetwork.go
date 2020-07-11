@@ -530,6 +530,14 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 				fmt.Println("GoVisn terminating. File/Exit selected.")
 				gv.Exit()
 			}
+		case "Enable Polling":
+			{
+				fmt.Println("Network Traffic Polling ENABLED.")
+			}
+		case "Disable Polling":
+			{
+				fmt.Println("Network Traffic Polling DISABLED.")
+			}
 		}
 	}
 
@@ -540,7 +548,7 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 	mb.Subscribe(gui.OnClick, onClick)
 	mb.SetPosition(10, 10)
 
-	// Create fileMenu and adds it to the menu bar
+	// Create fileMenu and add it to the menu bar
 	m1 := gui.NewMenu()
 	m1.AddOption("Reset Camera to Initial View").
 		SetId("Reset")
@@ -550,6 +558,16 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 		SetId("Exit")
 	mb.AddMenu("File", m1).
 		SetId("File").
+		SetShortcut(window.ModAlt, window.Key1)
+
+	// Create linksMenu and add it to the menu bar
+	m2 := gui.NewMenu()
+	m2.AddOption("Enable Network Traffic Polling").
+		SetId("Enable Polling")
+	m2.AddOption("Disable Network Traffic Polling").
+		SetId("Disable Polling")
+	mb.AddMenu("Links", m2).
+		SetId("Enable").
 		SetShortcut(window.ModAlt, window.Key1)
 
 	mb.Subscribe(gui.OnClick, func(name string, ev interface{}) {
