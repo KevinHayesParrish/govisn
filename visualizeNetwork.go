@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -371,9 +372,52 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 			fmt.Println("toX=", toX, "toY=", toY, "toZ=", toZ)
 		}
 
-		linkGeom := geometry.NewGeometry()
-
 		// Build Link using glLine - BEGIN
+		linkGeom := geometry.NewGeometry()
+		vertices := math32.NewArrayF32(0, 0)
+		vertices.Append(
+			fromX, fromY, fromZ,
+			toX, toY, toZ,
+		)
+		if debugFlag {
+			fmt.Println("link vertices=", vertices)
+			fmt.Println()
+		}
+
+		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
+
+		mat := material.NewStandard(math32.NewColor("White"))
+		// Check Runtime environment.
+		// OpenGL Implementation on MacOS will only accept Line width of 1.0
+		if runtime.GOOS == "darwin" {
+			mat.SetLineWidth(1.0)
+			fmt.Println("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept 1.0 ***")
+			//		} else {
+			//			mat.SetLineWidth(1.0)
+		}
+		link3D := graphic.NewLines(linkGeom, mat)
+		link3D.SetName(string(link.LinkID))
+		// Build Link using glLine - END
+
+		// Build Link using Polygon
+		//posA := math32.NewVector3(fromX, fromY, fromZ)
+		//		posB := math32.NewVector3(toX, toY, toZ)
+		//		vertices, normals, indices := calcLinkVBOs(debugFlag, gv.camPos, *posA, *posB, float32(1.00))
+		//		if debugFlag {
+		//			fmt.Println("calcLinkVBOs returned: ", vertices, normals, indices)
+		//		}
+		//		linkGeom.SetIndices(indices)
+		//		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
+		//		linkGeom.AddVBO(gls.NewVBO(normals).AddAttrib(gls.VertexNormal))
+
+		// Creates basic material
+		//		mat := material.NewStandard(math32.NewColor("White"))
+		//		mat.SetSide(material.SideDouble)
+		//		link3D := graphic.NewMesh(linkGeom, mat)
+		//		link3D.SetVisible(true)
+		// Build Link using Polygon - END
+
+		// Build Link using Cylinder - BEGIN
 		//vertices := math32.NewArrayF32(0, 0)
 		//vertices.Append(
 		//			fromX, fromY, fromZ,
@@ -386,7 +430,11 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 		//		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
 
-		//		mat := material.NewStandard(math32.NewColor("White"))
+		//posA := math32.NewVector3(fromX, fromY, fromZ)
+		//posB := math32.NewVector3(toX, toY, toZ)
+		//cylHeight := calcDistance(debugFlag, posA, posB)
+		//linkGeom := geometry.NewCylinder(1.0, cylHeight, 16, 2, true, true)
+		//mat := material.NewStandard(math32.NewColor("White"))
 		// Check Runtime environment.
 		// OpenGL Implementation on MacOS will only accept Line width of 1.0
 		//		if runtime.GOOS == "darwin" {
@@ -395,27 +443,9 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		//		} else {
 		//			mat.SetLineWidth(3.0)
 		//		}
-		//		link3D := graphic.NewLines(linkGeom, mat)
-		//		link3D.SetName(string(link.LinkID))
-		// Build Link using glLine - END
-
-		// Build Link using Polygon
-		posA := math32.NewVector3(fromX, fromY, fromZ)
-		posB := math32.NewVector3(toX, toY, toZ)
-		vertices, normals, indices := calcLinkVBOs(debugFlag, gv.camPos, *posA, *posB, float32(1.00))
-		if debugFlag {
-			fmt.Println("calcLinkVBOs returned: ", vertices, normals, indices)
-		}
-		linkGeom.SetIndices(indices)
-		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
-		linkGeom.AddVBO(gls.NewVBO(normals).AddAttrib(gls.VertexNormal))
-
-		// Creates basic material
-		mat := material.NewStandard(math32.NewColor("White"))
-		mat.SetSide(material.SideDouble)
-		link3D := graphic.NewMesh(linkGeom, mat)
-		link3D.SetVisible(true)
-		// Build Link using Polygon - END
+		//link3D := graphic.NewMesh(linkGeom, mat)
+		//link3D.SetName(string(link.LinkID))
+		// Build Link using Cylinder - END
 
 		// Creates lines with the specified geometry and material
 
@@ -807,6 +837,21 @@ func calcLinkVBOs(debugFlag bool, camPos math32.Vector3, posA math32.Vector3, po
 
 	//	return linkVertex1, linkVertex2, linkVertex3, linkVertex4, indices
 	return vertices, normals, indices
+}
+
+func calcDistance(debugFlag bool, posA *math32.Vector3, posB *math32.Vector3) (distance float64) {
+	x2 := posB.Component(0)
+	x1 := posA.Component(0)
+	y2 := posB.Component(1)
+	y1 := posA.Component(1)
+	z2 := posB.Component(2)
+	z1 := posA.Component(2)
+
+	distance = math.Sqrt(math.Pow(float64(x2-x1), 2.0) + math.Pow(float64(y2-y1), 2.0) + math.Pow(float64(z2-z1), 2.0))
+	if debugFlag {
+		fmt.Println("distance=", distance)
+	}
+	return distance
 }
 
 // Render renders the mouse pick action
