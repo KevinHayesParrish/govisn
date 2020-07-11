@@ -467,6 +467,7 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func ending")
 	}
 	return databaseForRead
+
 }
 
 func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, float32, float32) {
@@ -506,6 +507,9 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 	return x, y, z
 }
 
+// FileExitSelected indicates the File Exit menuitem was selected
+var FileExitSelected bool = false
+
 // NetPolling indicates the Network Traffic Polling state
 var NetPolling bool = false
 
@@ -531,6 +535,7 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 			}
 		case "Exit":
 			{
+				FileExitSelected = true
 				fmt.Println("GoVisn terminating. File/Exit selected.")
 				gv.Exit()
 			}
