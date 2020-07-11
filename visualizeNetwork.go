@@ -668,7 +668,7 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 		gv.scene.Add(mesh3)
 	}
 	for j := 0; j < len(router.Addresses.NetworkAddresses.IPAddress); j++ {
-		rtext := "\nMAC Address: " + router.Addresses.NetworkAddresses.IPAddress[j]
+		rtext := "\nMAC Address: " + router.Addresses.MediaAddresses.MediaAddress[j]
 		swidth, sheight := font.MeasureText(rtext)
 		canvas = text.NewCanvas(swidth, sheight, &math32.Color4{R: 0, G: 1, B: 1, A: 1})
 		canvas.DrawText(0, 0, rtext, font)
