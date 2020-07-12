@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
+	//"log"
 	"strings"
 
+	"github.com/g3n/engine/util/logger"
 	_ "github.com/mattn/go-sqlite3"
 	g "github.com/soniah/gosnmp"
 )
@@ -17,7 +18,7 @@ import (
 // SCANNETVERSION is the file version number
 const SCANNETVERSION = "0.0.2"
 
-func scanNet(debugFlag bool, cidr string, community string, params g.GoSNMP) []ScannedRouter {
+func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, params g.GoSNMP) []ScannedRouter {
 
 	fmt.Println("\nfunc scanNet version", SCANNETVERSION, "started.")
 	if debugFlag {
@@ -37,7 +38,8 @@ func scanNet(debugFlag bool, cidr string, community string, params g.GoSNMP) []S
 	// get all the addresses within the cidr subnet, given the input parameter.
 	subnetIPAddrs, err := getHosts(cidr)
 	if err != nil {
-		log.Fatal(err)
+		//		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 	if debugFlag {
 		fmt.Println(len(subnetIPAddrs), "Host IP Addresses to be scanned=", subnetIPAddrs)
@@ -74,7 +76,8 @@ func scanNet(debugFlag bool, cidr string, community string, params g.GoSNMP) []S
 				fmt.Println(subnetIPAddrs[i], "not answering SNMP get. Continuing network scan.")
 				continue
 			} else {
-				log.Fatalf("Get() err: %v", err)
+				//				log.Fatalf("Get() err: %v", err)
+				log.Fatal("Get() err: %v", err)
 			}
 		}
 		var scannedRouter ScannedRouter

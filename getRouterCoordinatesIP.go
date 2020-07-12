@@ -3,12 +3,17 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
+
+	//"log"
+
 	"strconv"
+
+	"github.com/g3n/engine/util/logger"
 )
 
 // Get Router Coordinates from routerArray
 func getRouterCoordinatesIP(debugFlag bool, database *sql.DB, ToRouterIPIn string) (float32, float32, float32) {
+	var log *logger.Logger
 	if debugFlag {
 		fmt.Println("getRouterCoordiantesIP starting")
 	}
@@ -18,7 +23,8 @@ func getRouterCoordinatesIP(debugFlag bool, database *sql.DB, ToRouterIPIn strin
 
 	LinksTableRows, err := database.Query("SELECT RouterID  FROM RouterIP WHERE IpAddr = $1", ToRouterIPIn)
 	if err != nil {
-		log.Fatalln("LinksTableRows error", err.Error())
+		//		log.Fatalln("LinksTableRows error", err.Error())
+		log.Fatal("LinksTableRows error")
 	}
 	if debugFlag {
 		fmt.Println("Successful LinksTableRows Query")
@@ -32,7 +38,8 @@ func getRouterCoordinatesIP(debugFlag bool, database *sql.DB, ToRouterIPIn strin
 
 		RouterTableRows, err := database.Query("SELECT RouterID, GpsLat, GpsLong, GpsAlt FROM Routers WHERE RouterID = $1", RouterIDLinks)
 		if err != nil {
-			log.Fatalln("RouterTableRows error", err.Error())
+			//			log.Fatalln("RouterTableRows error", err.Error())
+			log.Fatal("RouterTableRows error")
 		}
 		defer LinksTableRows.Close()
 
@@ -45,19 +52,22 @@ func getRouterCoordinatesIP(debugFlag bool, database *sql.DB, ToRouterIPIn strin
 
 		x1, parseErr := strconv.ParseFloat(GpsLong, 32)
 		if parseErr != nil {
-			log.Fatalln("x1 ParseFloat error", parseErr.Error())
+			//			log.Fatalln("x1 ParseFloat error", parseErr.Error())
+			log.Fatal("x1 ParseFloat error")
 		}
 		x = (float32)(x1)
 
 		y1, parseErr := strconv.ParseFloat(GpsLat, 32)
 		if parseErr != nil {
-			log.Fatalln("y1 ParseFloat error", parseErr.Error())
+			//			log.Fatalln("y1 ParseFloat error", parseErr.Error())
+			log.Fatal("y1 ParseFloat error")
 		}
 		y = (float32)(y1)
 
 		z1, parseErr := strconv.ParseFloat(GpsAlt, 32)
 		if parseErr != nil {
-			log.Fatalln("z1 ParseFloat error", parseErr.Error())
+			//			log.Fatalln("z1 ParseFloat error", parseErr.Error())
+			log.Fatal("z1 ParseFloat error")
 		}
 		z = (float32)(z1)
 	}

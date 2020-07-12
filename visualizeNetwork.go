@@ -3,19 +3,21 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
+
+	//"log"
 	"math"
 	"os"
 	"runtime"
 	"strconv"
 	"time"
 
-	logger "github.com/alouca/gologger"
+	//logger "github.com/alouca/gologger"
 	"github.com/g3n/engine/app"
 	"github.com/g3n/engine/camera"
 	"github.com/g3n/engine/renderer"
 	"github.com/g3n/engine/util"
 	"github.com/g3n/engine/util/helper"
+	"github.com/g3n/engine/util/logger"
 	"github.com/g3n/engine/util/stats"
 
 	"github.com/g3n/engine/core"
@@ -72,7 +74,7 @@ type Raycast struct {
 	rayCast *collision.Raycaster
 }
 
-func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
+func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.DB) *sql.DB {
 	const VISUALIZENETWORKVERSION = "0.2.4"
 	if debugFlag {
 		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
@@ -81,8 +83,9 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	// Retrieve the Routers table
 	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers")
 	if queryErr != nil {
-		fmt.Println("databaseForRead Query error", queryErr)
-		log.Fatal(queryErr)
+		//		fmt.Println("databaseForRead Query error", queryErr)
+		//		log.Fatal(queryErr)
+		log.Fatal("databaseForRead Query error %v", queryErr)
 	}
 	if debugFlag {
 		fmt.Println("Successful Routers table Select")
@@ -91,8 +94,9 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	// Retrieve the Links table
 	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP FROM Links")
 	if queryErr != nil {
-		fmt.Println("databaseForRead Query error", queryErr)
-		log.Fatal(queryErr)
+		//		fmt.Println("databaseForRead Query error", queryErr)
+		//		log.Fatal(queryErr)
+		log.Fatal("databaseForRead Query error %v", queryErr)
 	}
 	if debugFlag {
 		fmt.Println("Successful Links table Select")
@@ -177,7 +181,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	texfile := gobinDir + "/data/images/earth_clouds_big.jpg"
 	globeTex, err := texture.NewTexture2DFromImage(texfile)
 	if err != nil {
-		log.Fatalln("Error loading texture:", err, "\n Insure govisn /data/images is copied to GOBIN")
+		//		log.Fatalln("Error loading texture:", err, "\n Insure govisn /data/images is copied to GOBIN")
+		log.Fatal("Error loading texture.\n Insure govisn /data/images is copied to GOBIN")
 	}
 	globeTex.SetFlipY(false)
 
@@ -251,7 +256,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		if err != nil {
 			//			app.Log().Fatal(err.Error())
 			//			app.Log().Fatal("Error loading font: %s", err, "\n Insure govisn /data/fonts is copied to GOBIN")
-			log.Fatalln("Error loading font:", err, "\n Insure govisn /data/fonts is copied to GOBIN")
+			//			log.Fatalln("Error loading font:", err, "\n Insure govisn /data/fonts is copied to GOBIN")
+			log.Fatal("Error loading font.\n Insure govisn /data/fonts is copied to GOBIN")
 		}
 
 		font.SetLineSpacing(1.0)
@@ -275,7 +281,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 		queryErr = routerRows.Err()
 		if queryErr != nil {
-			log.Fatal(queryErr)
+			//			log.Fatal(queryErr)
+			log.Fatal(queryErr.Error())
 		}
 
 		routerArrayIndex++
@@ -293,7 +300,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 	for linkRows.Next() {
 		err := linkRows.Scan(&LinkID, &FromRouterName, &FromRouterIP, &ToRouterName, &ToRouterIP)
 		if err != nil {
-			log.Fatal(err)
+			//			log.Fatal(err)
+			log.Fatal(err.Error())
 		}
 
 		// Exclude false routes
@@ -319,7 +327,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 		routerGpsRows, err := databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = $1", FromRouterName)
 		if err != nil {
-			log.Fatalln("databaseForRead Query error", err.Error())
+			//			log.Fatalln("databaseForRead Query error", err.Error())
+			log.Fatal("databaseForRead Query error %s", err.Error())
 		}
 		if debugFlag {
 			fmt.Println("Successful Query for FromRouter GPS Coordinates")
@@ -345,7 +354,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 		}
 		routerGpsRows, err = databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = $1", ToRouterName)
 		if err != nil {
-			log.Fatalln("databaseForRead Query error", err.Error())
+			//			log.Fatalln("databaseForRead Query error", err.Error())
+			log.Fatal("databaseForRead Query error %s", err.Error())
 		}
 		if debugFlag {
 			fmt.Println("Successful Query for ToRouter GPS Coordinates")
@@ -453,7 +463,8 @@ func visualizeNetwork(debugFlag bool, databaseForRead *sql.DB) *sql.DB {
 
 		err = linkRows.Err()
 		if err != nil {
-			log.Fatal(err)
+			//			log.Fatal(err)
+			log.Fatal(err.Error())
 		}
 	}
 
@@ -480,7 +491,8 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 	}
 	if parseErr != nil {
 		fmt.Println("Error parsing GpsLat =", GpsLat)
-		log.Fatal(parseErr)
+		//		log.Fatal(parseErr)
+		log.Fatal(parseErr.Error())
 	}
 	xRadianLat := Rad(GpsLatFloat64)
 
@@ -488,8 +500,9 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 	if GpsLong != "" {
 		GpsLongFloat64, parseErr = strconv.ParseFloat(GpsLong, 64)
 		if parseErr != nil {
-			fmt.Println("Error parsing GpsLong", GpsLong)
-			log.Fatal(parseErr)
+			//			fmt.Println("Error parsing GpsLong", GpsLong)
+			//			log.Fatal(parseErr)
+			log.Fatal("Error parsing GpsLong %s", GpsLong)
 		}
 	}
 
@@ -657,7 +670,8 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 	if err != nil {
 		//			app.Log().Fatal(err.Error())
 		//			app.Log().Fatal("Error loading font: %s", err, "\n Insure govisn /data/fonts is copied to GOBIN")
-		log.Fatalln("Error loading font:", err, "\n Insure govisn /data/fonts is copied to GOBIN")
+		//		log.Fatalln("Error loading font:", err, "\n Insure govisn /data/fonts is copied to GOBIN")
+		log.Fatal("Error loading font.\n Insure govisn /data/fonts is copied to GOBIN")
 	}
 
 	font.SetLineSpacing(1.0)
@@ -757,8 +771,9 @@ func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB
 	// Retrive Router from the database
 	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers WHERE RouterID = ?", router3DName)
 	if queryErr != nil {
-		fmt.Println("databaseForRead Query Router error", queryErr)
-		log.Fatal(queryErr)
+		//		fmt.Println("databaseForRead Query Router error", queryErr)
+		//		log.Fatal(queryErr)
+		log.Fatal("databaseForRead Query Router error %s", queryErr.Error())
 	}
 	if debugFlag {
 		fmt.Println("Successful Routers table Select")
@@ -780,8 +795,9 @@ func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB
 	// Retrieve MAC Addresses from the database
 	macRows, queryErr := databaseForRead.Query("SELECT RouterID, MacAddr FROM RouterMac WHERE RouterID = ?", router.System.RouterID)
 	if queryErr != nil {
-		fmt.Println("databaseForRead Query MAC error", queryErr)
-		log.Fatal(queryErr)
+		//		fmt.Println("databaseForRead Query MAC error", queryErr)
+		//		log.Fatal(queryErr)
+		log.Fatal("databaseForRead Query MAC error %s", queryErr.Error())
 	}
 	i := 0
 	for macRows.Next() {
@@ -795,8 +811,9 @@ func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB
 	// Retrieve IP Addresses from the database
 	ipRows, queryErr := databaseForRead.Query("SELECT RouterID, IpAddr FROM RouterIp WHERE RouterID = ?", router.System.RouterID)
 	if queryErr != nil {
-		fmt.Println("databaseForRead Query IP error", queryErr)
-		log.Fatal(queryErr)
+		//		fmt.Println("databaseForRead Query IP error", queryErr)
+		//		log.Fatal(queryErr)
+		log.Fatal("databaseForRead Query IP error %s", queryErr.Error())
 	}
 	j := 0
 	for ipRows.Next() {

@@ -4,18 +4,21 @@ import (
 	"database/sql"
 	"fmt"
 	"hash/crc32"
-	"log"
+
+	//"log"
 	"strconv"
 
 	//	"strconv"
 
+	"github.com/g3n/engine/util/logger"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 //createdsampledbVersion is the file version number
-const createsampledbVersion = "0.1.8"
+const createsampledbVersion = "0.1.9"
 
 func createsampledb() {
+	var log *logger.Logger
 	fmt.Println("createdampledb version:", createsampledbVersion)
 	database, _ := sql.Open("sqlite3", "./samplenetwork.db")
 	/*
@@ -256,15 +259,17 @@ func createsampledb() {
 	 */
 	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Coordinates (RouterID INTEGER, SystemName TEXT, X3D REAL, Y3D REAL, Z3D REAL)")
 	if err != nil {
-		fmt.Println("Error preparing 3DCoordinates table Create statement. Result=", statement)
-		log.Fatal(err)
+		//		fmt.Println("Error preparing 3DCoordinates table Create statement. Result=", statement)
+		//		log.Fatal(err)
+		log.Fatal("Error preparing 3DCoordinates table Create statement.")
 	}
 	statement.Exec()
 
 	statement, err = database.Prepare("INSERT INTO Coordinates (RouterID, SystemName, X3D, Y3D, Z3D) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
-		fmt.Println("Error preparing Coordinates insert statement. Result=", statement)
-		log.Fatal(err)
+		//		fmt.Println("Error preparing Coordinates insert statement. Result=", statement)
+		//		log.Fatal(err)
+		log.Fatal("Error preparing Coordinates insert statement.")
 	}
 	RouterIDUint32 = 589093411
 	SystemName = "wan-router"

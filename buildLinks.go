@@ -4,18 +4,20 @@ import (
 	"database/sql"
 	"fmt"
 	"hash/crc32"
-	"log"
+
+	//"log"
 	"strings"
 
 	//"log"
 	//"math"
+	"github.com/g3n/engine/util/logger"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 //buildLinksVersion is the file version sequence number
 const buildLinksVersion = "0.0.2"
 
-func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
+func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 	fmt.Println("func buildLinks version", buildLinksVersion, "started")
 
 	/* TODO
@@ -28,7 +30,8 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 
 	routeTableRows, err := database.Query("SELECT RouterID, Name, DestAddr, IPRouteIfIndex, NextHop FROM Routers INNER JOIN RouteTable USING (RouterID)")
 	if err != nil {
-		log.Fatalln("databaseForRead JOIN error", err.Error())
+		//		log.Fatalln("databaseForRead JOIN error", err.Error())
+		log.Fatal("databaseForRead JOIN error")
 	}
 	if debugFlag {
 		fmt.Println("Successful Routers/RouteTable JOIN")
@@ -88,14 +91,16 @@ func buildLinks(debugFlag bool, database *sql.DB) *sql.DB {
 		// SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, FromRouterIP FROM Links
 		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?)")
 		if err != nil {
-			log.Fatalln("Links Insert Prepare err:", err.Error())
+			//			log.Fatalln("Links Insert Prepare err:", err.Error())
+			log.Fatal("Links Insert Prepare err")
 		}
 		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterName, links[i].FromRouterIP, links[i].ToRouterName, links[i].ToRouterIP)
 		if err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 				fmt.Println("Link already exists. Continue building links.")
 			} else {
-				log.Fatalln("Link INSERT error:", err.Error())
+				//				log.Fatalln("Link INSERT error:", err.Error())
+				log.Fatal("Link INSERT error")
 			}
 		}
 		defer statement.Close()

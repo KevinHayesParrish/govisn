@@ -4,13 +4,12 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"log"
 	"math"
 	"strconv"
 	"time"
 
 	//	"github.com/g3n/g3nd/material"
-
+	"github.com/g3n/engine/util/logger"
 	_ "github.com/mattn/go-sqlite3"
 	g "github.com/soniah/gosnmp"
 )
@@ -19,8 +18,10 @@ import (
 * TODO:
  */
 
-//ViewnetVersion is the file version number
-const ViewnetVersion = "0.8.11"
+//GoVisn is the file version number
+const GoVisn = "0.9.0"
+
+var log *logger.Logger
 
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
@@ -56,7 +57,7 @@ const globeRadius float64 = 63.7
 
 func main() {
 	flag.Parse() // Scan the arguments list
-	fmt.Println("viewnet version:", ViewnetVersion)
+	fmt.Println("GoVision version:", GoVisn)
 	if *versionFlag {
 		return
 	}
@@ -87,14 +88,16 @@ func main() {
 		snmpPort := "161"
 		snmpTarget := seed
 		if len(snmpTarget) <= 0 {
-			log.Fatalf("environment variable not set: GOSNMP_TARGET")
+			//			log.Fatalf("environment variable not set: GOSNMP_TARGET")
+			log.Fatal("environment variable not set: GOSNMP_TARGET")
 		} else {
 			if *debugFlag {
 				fmt.Println("snmpTarget=", snmpTarget)
 			}
 		}
 		if len(snmpPort) <= 0 {
-			log.Fatalf("environment variable not set: GOSNMP_PORT")
+			//			log.Fatalf("environment variable not set: GOSNMP_PORT")
+			log.Fatal("environment variable not set: GOSNMP_PORT")
 		}
 		port, _ := strconv.ParseUint(snmpPort, 10, 16)
 
@@ -112,11 +115,13 @@ func main() {
 		// Open the database connection
 		database, err := sql.Open("sqlite3", dbName)
 		if err != nil {
-			log.Fatalf("sql.Open() err: %v", err)
+			//			log.Fatalf("sql.Open() err: %v", err)
+			log.Fatal("sql.Open() err")
 		}
 
 		// Discover the network
-		database = discover(*debugFlag, dbName, seed, *community, params, *maxHops, database)
+		//		database = discover(*debugFlag, dbName, seed, *community, params, *maxHops, database)
+		database = discover(*debugFlag, log, dbName, seed, *community, params, *maxHops, database)
 
 		// Close database. Completed initialization and update of all tables, except Links.
 		database.Close()
@@ -124,11 +129,12 @@ func main() {
 		// Open database. buildLinks joins Router and RouteTable tables.
 		database, err = sql.Open("sqlite3", dbName)
 		if err != nil {
-			log.Fatalf("sql.Open() err: %v", err)
+			//			log.Fatalf("sql.Open() err: %v", err)
+			log.Fatal("sql.Open() err")
 		}
 
 		// Build Links
-		database = buildLinks(*debugFlag, database)
+		database = buildLinks(*debugFlag, log, database)
 		database.Close()
 
 	}
@@ -140,22 +146,25 @@ func main() {
 		// Open the database connection
 		database, openErr := sql.Open("sqlite3", *DbName)
 		if openErr != nil {
-			fmt.Println("Error opening database", *DbName)
-			log.Fatal(openErr)
+			//			fmt.Println("Error opening database", *DbName)
+			//			log.Fatal(openErr)
+			log.Fatal("Error opening database")
 		}
 		defer database.Close()
 
 		snmpPort := "161"
 		snmpTarget := seed
 		if len(snmpTarget) <= 0 {
-			log.Fatalf("environment variable not set: GOSNMP_TARGET")
+			//			log.Fatalf("environment variable not set: GOSNMP_TARGET")
+			log.Fatal("environment variable not set: GOSNMP_TARGET")
 		} else {
 			if *debugFlag {
 				fmt.Println("snmpTarget=", snmpTarget)
 			}
 		}
 		if len(snmpPort) <= 0 {
-			log.Fatalf("environment variable not set: GOSNMP_PORT")
+			//			log.Fatalf("environment variable not set: GOSNMP_PORT")
+			log.Fatal("environment variable not set: GOSNMP_PORT")
 		}
 		port, _ := strconv.ParseUint(snmpPort, 10, 16)
 
@@ -171,7 +180,8 @@ func main() {
 		}
 
 		// Scan the requested network for Router hosts
-		scannedRouters = scanNet(*debugFlag, seed, *community, *params)
+		//		scannedRouters = scanNet(*debugFlag, seed, *community, *params)
+		scannedRouters = scanNet(*debugFlag, log, seed, *community, *params)
 		if *debugFlag {
 			fmt.Println("scnnedRouters=", scannedRouters)
 		}
@@ -180,13 +190,14 @@ func main() {
 		// Open the database connection
 		database, err := sql.Open("sqlite3", dbName)
 		if err != nil {
-			log.Fatalf("sql.Open() err: %v", err)
+			//			log.Fatalf("sql.Open() err: %v", err)
+			log.Fatal("sql.Open() err")
 		}
 		for i := 0; i < len(scannedRouters); i++ {
 
 			// Discover the router's information and add to database
 			params.Target = scannedRouters[i].IPAddress
-			database = discover(*debugFlag, dbName, scannedRouters[i].IPAddress, *community, params, *maxHops, database)
+			database = discover(*debugFlag, log, dbName, scannedRouters[i].IPAddress, *community, params, *maxHops, database)
 
 			// Close database. Completed initialization and update of all tables, except Links.
 			database.Close()
@@ -194,11 +205,13 @@ func main() {
 			// Open database. buildLinks joins Router and RouteTable tables.
 			database, err = sql.Open("sqlite3", dbName)
 			if err != nil {
-				log.Fatalf("sql.Open() err: %v", err)
+				//				log.Fatalf("sql.Open() err: %v", err)
+				//				log.Fatalf("sql.Open() err")
+				log.Fatal("sql.Open() err %v", err)
 			}
 
 			// Build Links
-			database = buildLinks(*debugFlag, database)
+			database = buildLinks(*debugFlag, log, database)
 
 		}
 		database.Close()
@@ -211,20 +224,23 @@ func main() {
 
 		databaseForRead, openErr := sql.Open("sqlite3", *DbName)
 		if openErr != nil {
-			fmt.Println("Error opening databaseForRead", *DbName)
-			log.Fatal(openErr)
+			//			fmt.Println("Error opening databaseForRead", *DbName)
+			//			log.Fatal(openErr)
+			log.Fatal("Error opening databaseForRead %v", *DbName)
 		}
 		defer databaseForRead.Close()
 
 		databaseForUpdate, openErr := sql.Open("sqlite3", *DbName)
 		if openErr != nil {
-			fmt.Println("Error opening databaseForUpdate", *DbName)
-			log.Fatal(openErr)
+			//			fmt.Println("Error opening databaseForUpdate", *DbName)
+			//			log.Fatal(openErr)
+			log.Fatal("Error opening databaseForUpdate %v", *DbName)
 		}
 		defer databaseForUpdate.Close()
-		databaseForRead = visualizeNetwork(*debugFlag, databaseForRead)
+		//		databaseForRead = visualizeNetwork(*debugFlag, databaseForRead)
+		databaseForRead = visualizeNetwork(*debugFlag, log, databaseForRead)
 	}
-	fmt.Println("viewnet version", ViewnetVersion, "ending.")
+	fmt.Println("GoVisn version", GoVisn, "ending.")
 }
 
 const constX = math.Pi / 180
