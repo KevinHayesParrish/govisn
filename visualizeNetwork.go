@@ -701,12 +701,12 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 	router3DName := router3D.Name()
 	if router3DName == "" {
 		//		fmt.Println("No Router selected. Try again.")
-		log.Info("No Router selected. Try again.")
+		log.Debug("No Router selected. Try again.")
 	} else {
 		//		fmt.Println("Picked object Name=", router3DName)
 		//		fmt.Println("Picked object UserData=", router3D.UserData())
-		log.Info("Picked object Name= %s", router3DName)
-		log.Info("Picked object UserData= %s", router3D.UserData())
+		log.Debug("Picked object Name= %s", router3DName)
+		log.Debug("Picked object UserData= %s", router3D.UserData())
 	}
 
 	// Retrieve Router info from database
