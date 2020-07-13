@@ -76,9 +76,10 @@ type Raycast struct {
 
 func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.DB) *sql.DB {
 	const VISUALIZENETWORKVERSION = "0.2.4"
-	if debugFlag {
-		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
-	}
+	//	if debugFlag {
+	//		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
+	//	}
+	log.Debug("visualizeNetwork %s", VISUALIZENETWORKVERSION+" started")
 
 	// Retrieve the Routers table
 	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers")
@@ -87,9 +88,10 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		//		log.Fatal(queryErr)
 		log.Fatal("databaseForRead Query error %v", queryErr)
 	}
-	if debugFlag {
-		fmt.Println("Successful Routers table Select")
-	}
+	//	if debugFlag {
+	//		fmt.Println("Successful Routers table Select")
+	//	}
+	log.Debug("Successful Routers table Select")
 
 	// Retrieve the Links table
 	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP FROM Links")
@@ -98,9 +100,10 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		//		log.Fatal(queryErr)
 		log.Fatal("databaseForRead Query error %v", queryErr)
 	}
-	if debugFlag {
-		fmt.Println("Successful Links table Select")
-	}
+	//	if debugFlag {
+	//		fmt.Println("Successful Links table Select")
+	//	}
+	log.Debug("Successful Links table Select")
 
 	// Initialize the 3D space
 
@@ -197,9 +200,10 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 	globeMesh.SetPosition(0, 0, 0)
 	gv.scene.Add(globeMesh)
 
-	if debugFlag {
-		fmt.Println("Beginning routerRows.Next loop; adding routers to 3D scene.")
-	}
+	//	if debugFlag {
+	//		fmt.Println("Beginning routerRows.Next loop; adding routers to 3D scene.")
+	//	}
+	log.Debug("Beginning routerRows.Next loop; adding routers to 3D scene.")
 	//
 	// Add the routers to the 3D scene
 	//
@@ -229,12 +233,16 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		// Set coordinates and altitude
 		x, y, z = calcCoordinates(GpsLat, GpsLong, GpsAlt)
 
-		if debugFlag {
-			fmt.Println("x =", x, "y =", y, "z", z)
-			fmt.Println("router =", routers[routerArrayIndex])
-			fmt.Println("router.System.GPS =", routers[routerArrayIndex].System.GPS)
-			fmt.Println("RouterID=", RouterID, "Name=", Name)
-		}
+		//		if debugFlag {
+		//			fmt.Println("x =", x, "y =", y, "z", z)
+		//			fmt.Println("router =", routers[routerArrayIndex])
+		//			fmt.Println("router.System.GPS =", routers[routerArrayIndex].System.GPS)
+		//			fmt.Println("RouterID=", RouterID, "Name=", Name)
+		//		}
+		log.Debug("x = %s", strconv.FormatFloat(float64(x), 'f', 5, 32)+"y = %s"+strconv.FormatFloat(float64(y), 'f', 5, 32)+"z = %s"+strconv.FormatFloat(float64(z), 'f', 5, 32))
+		log.Debug("router = %v", routers[routerArrayIndex])
+		log.Debug("router.System.GPS = %s", routers[routerArrayIndex].System.GPS)
+		log.Debug("RouterID= %s", strconv.Itoa(RouterID)+"Name= %s"+Name)
 
 		// Add Router object to 3D scene.
 		cylinderMesh.SetPosition(x, y, z)
@@ -242,10 +250,13 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		//		cylinderMesh.SetUserData(string(router.System.RouterID))
 		cylinderMesh.SetName(strconv.Itoa(router.System.RouterID))
 		cylinderMesh.SetUserData(strconv.Itoa(router.System.RouterID))
-		if debugFlag {
-			fmt.Println("cylinderMesh Name=", cylinderMesh.Name())
-			fmt.Println("cylinderMesh UserData=", cylinderMesh.UserData())
-		}
+		//		if debugFlag {
+		//			fmt.Println("cylinderMesh Name=", cylinderMesh.Name())
+		//			fmt.Println("cylinderMesh UserData=", cylinderMesh.UserData())
+		//		}
+		log.Debug("cylinderMesh Name= %s", cylinderMesh.Name())
+		log.Debug("cylinderMesh UserData= %s", cylinderMesh.UserData())
+
 		gv.scene.Add(cylinderMesh)
 
 		//
@@ -289,10 +300,11 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 	}
 	defer routerRows.Close()
 
-	if debugFlag {
-		fmt.Println("\nBeginning linkRows.Next loop; adding links to the 3D scene")
-		fmt.Println()
-	}
+	//	if debugFlag {
+	//		fmt.Println("\nBeginning linkRows.Next loop; adding links to the 3D scene")
+	//		fmt.Println()
+	//	}
+	log.Debug("Beginning linkRows.Next loop; adding links to the 3D scene")
 	//
 	// Add the links to the 3D scene
 	//
@@ -317,11 +329,14 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		link.ToRouterIP = ToRouterIP
 
 		// retrieve FromRouter coordinates
-		if debugFlag {
-			fmt.Println("link =", link)
-			fmt.Println("FromRouterName=", link.FromRouterName)
-			fmt.Println("FromRouterIP=", link.FromRouterIP)
-		}
+		//		if debugFlag {
+		//			fmt.Println("link =", link)
+		//			fmt.Println("FromRouterName=", link.FromRouterName)
+		//			fmt.Println("FromRouterIP=", link.FromRouterIP)
+		//		}
+		log.Debug("link = %v", link)
+		log.Debug("FromRouterName= %s", link.FromRouterName)
+		log.Debug("FromRouterIP= %s", link.FromRouterIP)
 
 		//  Query database for FromRouter GPS coordinates
 
@@ -330,9 +345,11 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 			//			log.Fatalln("databaseForRead Query error", err.Error())
 			log.Fatal("databaseForRead Query error %s", err.Error())
 		}
-		if debugFlag {
-			fmt.Println("Successful Query for FromRouter GPS Coordinates")
-		}
+		//		if debugFlag {
+		//			fmt.Println("Successful Query for FromRouter GPS Coordinates")
+		//		}
+		log.Debug("Successful Query for FromRouter GPS Coordinates")
+
 		defer routerGpsRows.Close()
 		var linksFromRouterName string
 		var linksFromRouterGpsLat, linksFromRouterGpsLong, linksFromRouterGpsAlt string
@@ -343,23 +360,29 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		FromRouterX = linksFromRouterGpsLat
 		FromRouterY = linksFromRouterGpsLong
 		FromRouterZ = linksFromRouterGpsAlt
-		if debugFlag {
-			fmt.Println("returned from getRouterCoordinatesName func: FromRouterX=", FromRouterX, "FromRouterY=", FromRouterY, "FromRouterZ=", FromRouterZ)
-		}
+		//		if debugFlag {
+		//			fmt.Println("returned from getRouterCoordinatesName func: FromRouterX=", FromRouterX, "FromRouterY=", FromRouterY, "FromRouterZ=", FromRouterZ)
+		//		}
+		log.Debug("returned from getRouterCoordinatesName func: FromRouterX= %s", FromRouterX+" FromRouterY= %s"+FromRouterY+" FromRouterZ= %s"+FromRouterZ)
 
 		//  Query database for FromRouter GPS coordinates
-		if debugFlag {
-			fmt.Println("ToRouterName=", link.ToRouterName)
-			fmt.Println("ToRouterIP=", link.ToRouterIP)
-		}
+		//		if debugFlag {
+		//			fmt.Println("ToRouterName=", link.ToRouterName)
+		//			fmt.Println("ToRouterIP=", link.ToRouterIP)
+		//		}
+		log.Debug("ToRouterName= %s", link.ToRouterName)
+		log.Debug("ToRouterIP= %s", link.ToRouterIP)
+
 		routerGpsRows, err = databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = $1", ToRouterName)
 		if err != nil {
 			//			log.Fatalln("databaseForRead Query error", err.Error())
-			log.Fatal("databaseForRead Query error %s", err.Error())
+			log.Fatal("databaseForRead Query error %v", err)
 		}
-		if debugFlag {
-			fmt.Println("Successful Query for ToRouter GPS Coordinates")
-		}
+		//		if debugFlag {
+		//			fmt.Println("Successful Query for ToRouter GPS Coordinates")
+		//		}
+		log.Debug("Successful Query for ToRouter GPS Coordinates")
+
 		var linksToRouterName string
 		var linksToRouterGpsLat, linksToRouterGpsLong, linksToRouterGpsAlt string
 		for routerGpsRows.Next() {
@@ -369,18 +392,22 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		ToRouterY = linksToRouterGpsLong
 		ToRouterZ = linksToRouterGpsAlt
 
-		if debugFlag {
-			fmt.Println("router", Name, "GPS coordinates =", GpsLat, GpsLong, GpsAlt)
-			fmt.Println("returned from getRouterCoordinatesIP func: ToRouterX=", ToRouterX, "ToRouterY=", ToRouterY, "ToRouterZ=", ToRouterZ)
-		}
+		//		if debugFlag {
+		//			fmt.Println("router", Name, "GPS coordinates =", GpsLat, GpsLong, GpsAlt)
+		//			fmt.Println("returned from getRouterCoordinatesIP func: ToRouterX=", ToRouterX, "ToRouterY=", ToRouterY, "ToRouterZ=", ToRouterZ)
+		//		}
+		log.Debug("router %s", Name+" GPS coordinates = %s, %s, %s"+GpsLat+GpsLong+GpsAlt)
+		log.Debug("returned from getRouterCoordinatesIP func: ToRouterX= %s", ToRouterX+"ToRouterY= %s"+ToRouterY+"ToRouterZ= %s"+ToRouterZ)
 
 		// Add link object to the 3D scene
 		fromX, fromY, fromZ := calcCoordinates(FromRouterX, FromRouterY, FromRouterZ)
 		toX, toY, toZ := calcCoordinates(ToRouterX, ToRouterY, ToRouterZ)
-		if debugFlag {
-			fmt.Println("fromX=", fromX, "fromY=", fromY, "fromZ=", fromZ)
-			fmt.Println("toX=", toX, "toY=", toY, "toZ=", toZ)
-		}
+		//		if debugFlag {
+		//			fmt.Println("fromX=", fromX, "fromY=", fromY, "fromZ=", fromZ)
+		//			fmt.Println("toX=", toX, "toY=", toY, "toZ=", toZ)
+		//		}
+		log.Debug("fromX= %s", strconv.FormatFloat(float64(fromX), 'f', 5, 64)+" fromY= %s"+strconv.FormatFloat(float64(fromY), 'f', 5, 64)+" fromZ= %s"+strconv.FormatFloat(float64(fromZ), 'f', 5, 64))
+		log.Debug("toX= %s", strconv.FormatFloat(float64(toX), 'f', 5, 64)+" toY= %s"+strconv.FormatFloat(float64(toY), 'f', 5, 64)+" toZ="+strconv.FormatFloat(float64(toZ), 'f', 5, 64))
 
 		// Build Link using glLine - BEGIN
 		linkGeom := geometry.NewGeometry()
@@ -389,10 +416,12 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 			fromX, fromY, fromZ,
 			toX, toY, toZ,
 		)
-		if debugFlag {
-			fmt.Println("link vertices=", vertices)
-			fmt.Println()
-		}
+		//		if debugFlag {
+		//			fmt.Println("link vertices=", vertices)
+		//			fmt.Println()
+		//		}
+		log.Debug("link vertices= %v", vertices)
+		log.Debug("")
 
 		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
 
@@ -474,9 +503,11 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		renderer.Render(gv.scene, gv.cam)
 	})
 
-	if debugFlag {
-		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func ending")
-	}
+	//	if debugFlag {
+	//		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func ending")
+	//	}
+	log.Debug("visualizeNetwork %s", VISUALIZENETWORKVERSION+" func ending.")
+
 	return databaseForRead
 
 }
@@ -528,16 +559,18 @@ var NetPolling bool = false
 
 // buildmenus creates the Gui menus and menuitems for the application
 func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
-	if debugFlag {
-		fmt.Println("Starting func buildMenus")
-	}
+	//	if debugFlag {
+	//		fmt.Println("Starting func buildMenus")
+	//	}
+	log.Debug("Starting func buildMenus")
 
 	// Event handler for menu clicks
 	onClick := func(evname string, ev interface{}) {
 		switch ev.(*gui.MenuItem).Id() {
 		case "Reset":
 			{
-				fmt.Println("Resetting Camera to initial view.")
+				//				fmt.Println("Resetting Camera to initial view.")
+				log.Debug("Resetting Camera to initial view.")
 				gv.cam.SetPositionVec(&gv.camPos)
 				gv.cam.LookAt(&math32.Vector3{X: 0, Y: 0, Z: 0}, &math32.Vector3{X: 0, Y: 1, Z: 0})
 				gv.orbit.Reset()
@@ -549,18 +582,21 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 		case "Exit":
 			{
 				FileExitSelected = true
-				fmt.Println("GoVisn terminating. File/Exit selected.")
+				//				fmt.Println("GoVisn terminating. File/Exit selected.")
+				log.Info("GoVisn terminating. File/Exit selected.")
 				gv.Exit()
 			}
 		case "Enable Polling":
 			{
 				NetPolling = true
-				fmt.Println("Network Traffic Polling", NetPolling)
+				//				fmt.Println("Network Traffic Polling", NetPolling)
+				log.Debug("Network Traffic Polling %t", NetPolling)
 			}
 		case "Disable Polling":
 			{
 				NetPolling = false
-				fmt.Println("Network Traffic Polling", NetPolling)
+				//				fmt.Println("Network Traffic Polling", NetPolling)
+				log.Debug("Network Traffic Polling %t", NetPolling)
 			}
 		}
 	}
@@ -601,15 +637,19 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 
 	gui.Manager().SetKeyFocus(mb)
 
-	if debugFlag {
-		fmt.Println("func buildMenus ended")
-	}
+	//	if debugFlag {
+	//		fmt.Println("func buildMenus ended")
+	//	}
+	log.Debug("func buildMenus ended")
+
 	return (a)
 }
 
 // Initialize the raycaster
 func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB) {
-	fmt.Println("Initializing the raycaster") // TESTING ONLY
+	//	fmt.Println("Initializing the raycaster") // TESTING ONLY
+	log.Debug("Initializing the raycaster")
+
 	// Creates the raycaster
 	t.rayCast = collision.NewRaycaster(&math32.Vector3{}, &math32.Vector3{})
 	t.rayCast.LinePrecision = 0.05
@@ -630,22 +670,27 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 	width, height := app.GetSize()
 	x := 2*(mev.Xpos/float32(width)) - 1
 	y := -2*(mev.Ypos/float32(height)) + 1
-	if debugFlag {
-		fmt.Println("onMouse x=", x)
-		fmt.Println("onMouse y=", y)
-	}
+	//	if debugFlag {
+	//		fmt.Println("onMouse x=", x)
+	//		fmt.Println("onMouse y=", y)
+	//	}
+	log.Debug("onMouse x= %f", x)
+	log.Debug("onMouse y= %f", y)
 
 	// Set the raycaster from the current camera and mouse coordinates
 	t.rayCast.SetFromCamera(cam, x, y)
-	if debugFlag {
-		fmt.Printf("rayCast:%+v\n", t.rayCast.Ray)
-	}
+	//	if debugFlag {
+	//		fmt.Printf("rayCast:%+v\n", t.rayCast.Ray)
+	//	}
+	log.Debug("rayCast:%+v\n", t.rayCast.Ray)
 
 	// Checks intersection with all objects in the scene
 	intersects := t.rayCast.IntersectObjects(scene.Children(), true)
-	if debugFlag {
-		fmt.Printf("intersects:%+v\n", intersects)
-	}
+	//	if debugFlag {
+	//		fmt.Printf("intersects:%+v\n", intersects)
+	//	}
+	log.Debug("intersects:%+v\n", intersects)
+
 	if len(intersects) == 0 {
 		return
 	}
@@ -655,10 +700,13 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 	router3D := obj.GetNode()
 	router3DName := router3D.Name()
 	if router3DName == "" {
-		fmt.Println("No Router selected. Try again.")
+		//		fmt.Println("No Router selected. Try again.")
+		log.Info("No Router selected. Try again.")
 	} else {
-		fmt.Println("Picked object Name=", router3DName)
-		fmt.Println("Picked object UserData=", router3D.UserData())
+		//		fmt.Println("Picked object Name=", router3DName)
+		//		fmt.Println("Picked object UserData=", router3D.UserData())
+		log.Info("Picked object Name= %s", router3DName)
+		log.Info("Picked object UserData= %s", router3D.UserData())
 	}
 
 	// Retrieve Router info from database
@@ -753,7 +801,8 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 
 // Dump3dScene writes the Collada file representing the 3D Scene
 func Dump3dScene(gv *gvapp) {
-	fmt.Println("Dumping 3D Scene")
+	//	fmt.Println("Dumping 3D Scene")
+	log.Debug("Dumping 3D Scene")
 	//	var decoder collada.Decoder
 	//	var out io.Writer
 	//decoder.Dump(out, 4)
@@ -773,11 +822,12 @@ func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB
 	if queryErr != nil {
 		//		fmt.Println("databaseForRead Query Router error", queryErr)
 		//		log.Fatal(queryErr)
-		log.Fatal("databaseForRead Query Router error %s", queryErr.Error())
+		log.Fatal("databaseForRead Query Router error %v", queryErr)
 	}
-	if debugFlag {
-		fmt.Println("Successful Routers table Select")
-	}
+	//	if debugFlag {
+	//		fmt.Println("Successful Routers table Select")
+	//	}
+	log.Debug("Successful Routers table Select")
 	for routerRows.Next() {
 		routerRows.Scan(&RouterID, &Name, &UpTime, &Contact, &Location, &Services, &GpsLat, &GpsLong, &GpsAlt)
 		// Load router struct from DB fields
@@ -797,7 +847,7 @@ func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB
 	if queryErr != nil {
 		//		fmt.Println("databaseForRead Query MAC error", queryErr)
 		//		log.Fatal(queryErr)
-		log.Fatal("databaseForRead Query MAC error %s", queryErr.Error())
+		log.Fatal("databaseForRead Query MAC error %v", queryErr)
 	}
 	i := 0
 	for macRows.Next() {
@@ -813,7 +863,7 @@ func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB
 	if queryErr != nil {
 		//		fmt.Println("databaseForRead Query IP error", queryErr)
 		//		log.Fatal(queryErr)
-		log.Fatal("databaseForRead Query IP error %s", queryErr.Error())
+		log.Fatal("databaseForRead Query IP error %v", queryErr)
 	}
 	j := 0
 	for ipRows.Next() {
@@ -821,9 +871,10 @@ func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB
 		// Load router struct from DB fields
 		router.Addresses.NetworkAddresses.IPAddress = append(router.Addresses.NetworkAddresses.IPAddress, IPAddr)
 
-		if debugFlag {
-			fmt.Println("OnMouse Router=", router)
-		}
+		//		if debugFlag {
+		//			fmt.Println("OnMouse Router=", router)
+		//		}
+		log.Debug("OnMouse Router= %v", router)
 		j++
 	}
 	return router
@@ -894,9 +945,10 @@ func calcDistance(debugFlag bool, posA *math32.Vector3, posB *math32.Vector3) (d
 	z1 := posA.Component(2)
 
 	distance = math.Sqrt(math.Pow(float64(x2-x1), 2.0) + math.Pow(float64(y2-y1), 2.0) + math.Pow(float64(z2-z1), 2.0))
-	if debugFlag {
-		fmt.Println("distance=", distance)
-	}
+	//	if debugFlag {
+	//		fmt.Println("distance=", distance)
+	//	}
+	log.Debug("distance= %f", distance)
 	return distance
 }
 

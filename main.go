@@ -56,14 +56,26 @@ const routerRadius float64 = 0.5
 const globeRadius float64 = 63.7
 
 func main() {
+	// Create logger
+	log = logger.New("GoVisn", nil)
+	log.AddWriter(logger.NewConsole(false))
+	log.SetFormat(logger.FTIME | logger.FMICROS)
+
 	flag.Parse() // Scan the arguments list
-	fmt.Println("GoVision version:", GoVisn)
 	if *versionFlag {
 		return
 	}
+
 	if *debugFlag {
-		fmt.Println("Debug option selected")
+		//		fmt.Println("Debug option selected")
+		log.SetLevel(logger.DEBUG)
+	} else {
+		log.SetLevel(logger.INFO)
 	}
+	log.Debug("Log Level set to DEBUG")
+
+	//fmt.Println("GoVision version:", GoVisn)
+	log.Info("GoVision version:%s", GoVisn)
 
 	if *sampleNetworkDB {
 		createsampledb()
@@ -116,7 +128,7 @@ func main() {
 		database, err := sql.Open("sqlite3", dbName)
 		if err != nil {
 			//			log.Fatalf("sql.Open() err: %v", err)
-			log.Fatal("sql.Open() err")
+			log.Fatal("sql.Open() err: %v", err)
 		}
 
 		// Discover the network
@@ -130,7 +142,7 @@ func main() {
 		database, err = sql.Open("sqlite3", dbName)
 		if err != nil {
 			//			log.Fatalf("sql.Open() err: %v", err)
-			log.Fatal("sql.Open() err")
+			log.Fatal("sql.Open() err: %v", err)
 		}
 
 		// Build Links
@@ -148,7 +160,7 @@ func main() {
 		if openErr != nil {
 			//			fmt.Println("Error opening database", *DbName)
 			//			log.Fatal(openErr)
-			log.Fatal("Error opening database")
+			log.Fatal("Error opening database: %v", openErr)
 		}
 		defer database.Close()
 
@@ -191,7 +203,7 @@ func main() {
 		database, err := sql.Open("sqlite3", dbName)
 		if err != nil {
 			//			log.Fatalf("sql.Open() err: %v", err)
-			log.Fatal("sql.Open() err")
+			log.Fatal("sql.Open() err: %v", err)
 		}
 		for i := 0; i < len(scannedRouters); i++ {
 
@@ -220,7 +232,8 @@ func main() {
 
 	if *visualizeFlag {
 		// Open the database containing the discovered network
-		fmt.Println("\nBeginning Network Visualization.")
+		//		fmt.Println("\nBeginning Network Visualization.")
+		log.Info("Beginning Network Visualization.")
 
 		databaseForRead, openErr := sql.Open("sqlite3", *DbName)
 		if openErr != nil {
@@ -240,7 +253,8 @@ func main() {
 		//		databaseForRead = visualizeNetwork(*debugFlag, databaseForRead)
 		databaseForRead = visualizeNetwork(*debugFlag, log, databaseForRead)
 	}
-	fmt.Println("GoVisn version", GoVisn, "ending.")
+	//	fmt.Println("GoVisn version", GoVisn, "ending.")
+	log.Info("GoVisn version %s", GoVisn+" ending.")
 }
 
 const constX = math.Pi / 180

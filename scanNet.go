@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"strconv"
+
 	//"log"
 	"strings"
 
@@ -20,10 +22,12 @@ const SCANNETVERSION = "0.0.2"
 
 func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, params g.GoSNMP) []ScannedRouter {
 
-	fmt.Println("\nfunc scanNet version", SCANNETVERSION, "started.")
-	if debugFlag {
-		fmt.Println("seed=", seed, "community=", community)
-	}
+	//	fmt.Println("\nfunc scanNet version", SCANNETVERSION, "started.")
+	log.Info("\nfunc scanNet version %s", SCANNETVERSION+"started.")
+	//	if debugFlag {
+	//		fmt.Println("seed=", seed, "community=", community)
+	//	}
+	log.Debug("seed= %s", seed+" community= %s"+community)
 
 	var scannedRouters []ScannedRouter
 
@@ -41,9 +45,10 @@ func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, 
 		//		log.Fatal(err)
 		log.Fatal(err.Error())
 	}
-	if debugFlag {
-		fmt.Println(len(subnetIPAddrs), "Host IP Addresses to be scanned=", subnetIPAddrs)
-	}
+	//	if debugFlag {
+	//		fmt.Println(len(subnetIPAddrs), "Host IP Addresses to be scanned=", subnetIPAddrs)
+	//	}
+	log.Debug(strconv.Itoa(len(subnetIPAddrs)) + "Host IP Addresses to be scanned= %s" + strings.Join(subnetIPAddrs, " "))
 
 	// Query all IP Addresses in the requested CIDR subnet
 	//	err = params.Connect()
@@ -89,9 +94,11 @@ func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, 
 		params.Conn.Close()
 	}
 
-	if debugFlag {
-		fmt.Println("Returning, scannedRouters=", scannedRouters)
-	}
-	fmt.Println("func scanNet", SCANNETVERSION, "ended.")
+	//	if debugFlag {
+	//		fmt.Println("Returning, scannedRouters=", scannedRouters)
+	//	}
+	log.Debug("Returning, scannedRouters= %v", scannedRouters)
+	//	fmt.Println("func scanNet", SCANNETVERSION, "ended.")
+	log.Info("func scanNet %s", SCANNETVERSION+" ended.")
 	return scannedRouters
 }
