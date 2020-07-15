@@ -436,7 +436,8 @@ func initDB(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 	/*
 	 *	Add Links table to DB
 	 */
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
+	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterID INTEGER, FromRouterName TEXT, FromRouterIP TEXT, ToRouterID INTEGER, ToRouterName TEXT, ToRouterIP TEXT)")
 	if err != nil {
 		//		log.Fatalf("Links Create err: %v", err)
 		log.Fatal("Links Create err: %v", err)
