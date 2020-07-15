@@ -959,6 +959,12 @@ func calcDistance(debugFlag bool, posA *math32.Vector3, posB *math32.Vector3) (d
 //	lineWidth and color to reflect the amount of traffic flowing over each link.
 func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB) *gvapp {
 	log.Debug("Updating Links")
+	// TODO
+	//	1) Add RouterID to Links DB table
+	//	2) For each Link in Links DB table
+	//		2.1) query the From and To Routers applicable interfaces outbound traffic
+	//		2.2) calculate bitsPerSec on the interface
+	//	3) Update the link lineWidth and color to indicate the calculated link Utilization
 
 	return (gv)
 }
