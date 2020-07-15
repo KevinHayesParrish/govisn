@@ -75,7 +75,7 @@ type Raycast struct {
 }
 
 func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.DB) *sql.DB {
-	const VISUALIZENETWORKVERSION = "0.2.4"
+	const VISUALIZENETWORKVERSION = "0.3.0"
 	//	if debugFlag {
 	//		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
 	//	}
@@ -501,6 +501,9 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(gv.scene, gv.cam)
+		if NetPollingEnabled {
+			gv = updateLinks(log, gv, databaseForRead)
+		}
 	})
 
 	//	if debugFlag {
@@ -554,8 +557,8 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 // FileExitSelected indicates the File Exit menuitem was selected
 var FileExitSelected bool = false
 
-// NetPolling indicates the Network Traffic Polling state
-var NetPolling bool = false
+// NetPollingEnabled indicates the Network Traffic Polling state
+var NetPollingEnabled bool = false
 
 // buildmenus creates the Gui menus and menuitems for the application
 func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
@@ -588,15 +591,15 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 			}
 		case "Enable Polling":
 			{
-				NetPolling = true
-				//				fmt.Println("Network Traffic Polling", NetPolling)
-				log.Debug("Network Traffic Polling %t", NetPolling)
+				NetPollingEnabled = true
+				//				fmt.Println("Network Traffic Polling", NetPollingEnabled)
+				log.Debug("Network Traffic Polling %t", NetPollingEnabled)
 			}
 		case "Disable Polling":
 			{
-				NetPolling = false
-				//				fmt.Println("Network Traffic Polling", NetPolling)
-				log.Debug("Network Traffic Polling %t", NetPolling)
+				NetPollingEnabled = false
+				//				fmt.Println("Network Traffic Polling", NetPollingEnabled)
+				log.Debug("Network Traffic Polling %t", NetPollingEnabled)
 			}
 		}
 	}
@@ -950,6 +953,14 @@ func calcDistance(debugFlag bool, posA *math32.Vector3, posB *math32.Vector3) (d
 	//	}
 	log.Debug("distance= %f", distance)
 	return distance
+}
+
+// UpdateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
+//	lineWidth and color to reflect the amount of traffic flowing over each link.
+func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB) *gvapp {
+	log.Debug("Updating Links")
+
+	return (gv)
 }
 
 // Render renders the mouse pick action
