@@ -19,6 +19,7 @@ import (
 	"github.com/g3n/engine/util/helper"
 	"github.com/g3n/engine/util/logger"
 	"github.com/g3n/engine/util/stats"
+	g "github.com/soniah/gosnmp"
 
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/geometry"
@@ -74,7 +75,7 @@ type Raycast struct {
 	rayCast *collision.Raycaster
 }
 
-func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.DB) *sql.DB {
+func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *sql.DB {
 	const VISUALIZENETWORKVERSION = "0.3.0"
 	//	if debugFlag {
 	//		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
@@ -502,7 +503,10 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(gv.scene, gv.cam)
 		if NetPollingEnabled {
-			gv = updateLinks(log, gv, databaseForRead)
+			gv = updateLinks(log, gv, databaseForRead, snmpTarget, community, params)
+			// Sleep for 10 seconds
+			//time.Sleep(10 * time.Second)
+			NetPollingEnabled = false
 		}
 	})
 
@@ -957,14 +961,74 @@ func calcDistance(debugFlag bool, posA *math32.Vector3, posB *math32.Vector3) (d
 
 // UpdateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
 //	lineWidth and color to reflect the amount of traffic flowing over each link.
-func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB) *gvapp {
+func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *gvapp {
 	log.Debug("Updating Links")
 	// TODO
-	//	1) Add RouterID to Links DB table
+	//	1) Add RouterID to Links DB table - DONE
 	//	2) For each Link in Links DB table
 	//		2.1) query the From and To Routers applicable interfaces outbound traffic
 	//		2.2) calculate bitsPerSec on the interface
 	//	3) Update the link lineWidth and color to indicate the calculated link Utilization
+	var LinkID int
+	var FromRouterID, FromRouterName, FromRouterIfIndex string
+
+	// GoSNMP struct
+	//	params := &g.GoSNMP{
+	//		Target:    snmpTarget,
+	//		Port:      uint16(port),
+	//		Community: community,
+	//		Version:   g.Version2c,
+	//		Timeout:   time.Duration(2) * time.Second,
+	//		Logger:    nil,
+	//		MaxOids:   6,
+	//	}
+
+	linkRows, err := databaseForRead.Query("SELECT LinkID, FromRouterID, FromRouterName, FromRouterIfIndex FROM Links")
+	if err != nil {
+		log.Fatal("databaseForRead Query Router error %v", err)
+	}
+	log.Debug("Successful Links table Query")
+	defer linkRows.Close()
+	for linkRows.Next() {
+		linkRows.Scan(&LinkID, &FromRouterID, &FromRouterName, &FromRouterIfIndex)
+		// SNMP Get Router Interface Outbound traffic (ifOutOctets 1)
+		oids := []string{
+			ifOutOctets + "." + FromRouterIfIndex, // ifOutOctets
+		}
+
+		snmpTarget = FromRouterName
+		params.Target = snmpTarget
+		err := params.Connect()
+		if err != nil {
+			//		log.Fatalf("Connect() err: %v", err)
+			log.Fatal("Connect() err: %v", err)
+		}
+		defer params.Conn.Close()
+
+		result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
+		if err != nil {
+			log.Fatal("Get() err %v", err)
+		}
+		if result == nil {
+			log.Fatal("No Router Interface found for Link definition. Error in LinkID: %d", LinkID)
+		} else {
+			ifOutOctets1 := result.Variables[0].Value.(uint)
+			// Sleep for 1 second
+			time.Sleep(1 * time.Second)
+
+			// SNMP Get Router Interface Outbound (ifOutOctets 2)
+			result, err = params.Get(oids) // Get() accepts up to g.MAX_OIDS
+			if err != nil {
+				log.Fatal("Get() err %v", err)
+			}
+			ifOutOctets2 := result.Variables[0].Value.(uint)
+
+			// Calculate differnce of ifOutOctets 2 and ifOutOctets 1) and multiply by 8.
+			// This is the approx. number of bits per second.
+			bitsPerSec := (ifOutOctets2 - ifOutOctets1) * 8
+			log.Debug("Link bps= %d", bitsPerSec)
+		}
+	}
 
 	return (gv)
 }
