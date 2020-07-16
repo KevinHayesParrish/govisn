@@ -15,7 +15,7 @@ import (
 )
 
 //buildLinksVersion is the file version sequence number
-const buildLinksVersion = "0.0.2"
+const buildLinksVersion = "0.0.3"
 
 func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 	fmt.Println("func buildLinks version", buildLinksVersion, "started")
@@ -53,6 +53,7 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 
 		//   Determine router interface using ipRouteIfIndex. This is the index of the interface. We can use this to get the interface IP address.
 
+		link.FromRouterID = RouterID
 		link.FromRouterName = Name // Current router
 
 		// Find FromRouterIP by DNS lookup by name
@@ -71,6 +72,11 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 			link.ToRouterName = ""
 		} else {
 			link.ToRouterName = rtrNames[0]
+			// TODO
+			//	1) query Router table where RouterName = link.ToRouterName
+			//	2) link.ToRouterID = result.rtrIDs[0]
+			rtrID := getRtrID(log, link.ToRouterName, database)
+			link.ToRouterID = rtrID
 		}
 
 		link.ToRouterIP = NextHop
@@ -88,13 +94,14 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 	routeTableRows.Close()
 
 	for i := 0; i < len(links); i++ {
-		// SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, FromRouterIP FROM Links
-		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?)")
+		//		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?)")
+		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterID, FromRouterName, FromRouterIP, ToRouterID, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?, ?, ?)")
 		if err != nil {
 			//			log.Fatalln("Links Insert Prepare err:", err.Error())
 			log.Fatal("Links Insert Prepare err")
 		}
-		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterName, links[i].FromRouterIP, links[i].ToRouterName, links[i].ToRouterIP)
+		//		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterName, links[i].FromRouterIP, links[i].ToRouterName, links[i].ToRouterIP)
+		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterID, links[i].FromRouterName, links[i].FromRouterIP, links[i].ToRouterID, links[i].ToRouterName, links[i].ToRouterIP)
 		if err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 				fmt.Println("Link already exists. Continue building links.")
@@ -108,4 +115,20 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 
 	fmt.Println("func buildLinks version", buildLinksVersion, "ending")
 	return database
+}
+
+// getRtrID retrieves the RouteID from the database, given a Router Name
+func getRtrID(log *logger.Logger, Name string, database *sql.DB) int {
+	// Retrive Router from the database
+	var RouterID int
+	routerRows, queryErr := database.Query("SELECT RouterID, Name FROM Routers WHERE RouterID = ?", Name)
+	if queryErr != nil {
+		log.Fatal("databaseForRead Query Router error %v", queryErr)
+	}
+	log.Debug("Successful Routers table Select")
+	for routerRows.Next() {
+		routerRows.Scan(&RouterID, &Name)
+		return RouterID
+	}
+	return RouterID
 }
