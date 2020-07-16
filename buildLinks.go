@@ -55,6 +55,7 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 
 		link.FromRouterID = RouterID
 		link.FromRouterName = Name // Current router
+		link.FromRouterIfIndex = IPRouteIfIndex
 
 		// Find FromRouterIP by DNS lookup by name
 		fromIPs := getHostIP(Name)
@@ -95,19 +96,21 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 
 	for i := 0; i < len(links); i++ {
 		//		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?)")
-		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterID, FromRouterName, FromRouterIP, ToRouterID, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?, ?, ?)")
+		//		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterID, FromRouterName, FromRouterIP, ToRouterID, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterID, FromRouterName, FromRouterIP, FromRouterIfIndex, ToRouterID, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 		if err != nil {
 			//			log.Fatalln("Links Insert Prepare err:", err.Error())
-			log.Fatal("Links Insert Prepare err")
+			log.Fatal("Links Insert Prepare err %v", err)
 		}
 		//		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterName, links[i].FromRouterIP, links[i].ToRouterName, links[i].ToRouterIP)
-		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterID, links[i].FromRouterName, links[i].FromRouterIP, links[i].ToRouterID, links[i].ToRouterName, links[i].ToRouterIP)
+		//		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterID, links[i].FromRouterName, links[i].FromRouterIP, links[i].ToRouterID, links[i].ToRouterName, links[i].ToRouterIP)
+		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterID, links[i].FromRouterName, links[i].FromRouterIP, links[i].FromRouterIfIndex, links[i].ToRouterID, links[i].ToRouterName, links[i].ToRouterIP)
 		if err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 				fmt.Println("Link already exists. Continue building links.")
 			} else {
 				//				log.Fatalln("Link INSERT error:", err.Error())
-				log.Fatal("Link INSERT error")
+				log.Fatal("Link INSERT error %v", err)
 			}
 		}
 		defer statement.Close()
