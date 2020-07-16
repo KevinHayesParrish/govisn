@@ -56,6 +56,7 @@ const routerRadius float64 = 0.5
 const globeRadius float64 = 63.7
 
 func main() {
+
 	// Create logger
 	log = logger.New("GoVisn", nil)
 	log.AddWriter(logger.NewConsole(false))
@@ -151,6 +152,9 @@ func main() {
 
 	}
 
+	snmpPort := "161"
+	snmpTarget := seed
+
 	var scannedRouters []ScannedRouter
 
 	if *scanNetFlag != "" {
@@ -164,8 +168,8 @@ func main() {
 		}
 		defer database.Close()
 
-		snmpPort := "161"
-		snmpTarget := seed
+		//		snmpPort := "161"
+		//		snmpTarget := seed
 		if len(snmpTarget) <= 0 {
 			//			log.Fatalf("environment variable not set: GOSNMP_TARGET")
 			log.Fatal("environment variable not set: GOSNMP_TARGET")
@@ -250,8 +254,20 @@ func main() {
 			log.Fatal("Error opening databaseForUpdate %v", *DbName)
 		}
 		defer databaseForUpdate.Close()
+
+		// GoSNMP struct
+		port, _ := strconv.ParseUint(snmpPort, 10, 16)
+		params := &g.GoSNMP{
+			Target:    snmpTarget,
+			Port:      uint16(port),
+			Community: *community,
+			Version:   g.Version2c,
+			Timeout:   time.Duration(2) * time.Second,
+			Logger:    nil,
+			MaxOids:   6,
+		}
 		//		databaseForRead = visualizeNetwork(*debugFlag, databaseForRead)
-		databaseForRead = visualizeNetwork(*debugFlag, log, databaseForRead)
+		databaseForRead = visualizeNetwork(*debugFlag, log, databaseForRead, params)
 	}
 	//	fmt.Println("GoVisn version", GoVisn, "ending.")
 	log.Info("GoVisn version %s", GoVisn+" ending.")
