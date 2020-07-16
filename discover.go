@@ -20,7 +20,7 @@ import (
 */
 
 // DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.3.5"
+const DISCOVERYVERSION = "0.3.6"
 
 func discover(debugFlag bool, log *logger.Logger, dbName string, snmpTarget string, community string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
 
@@ -437,7 +437,8 @@ func initDB(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 	 *	Add Links table to DB
 	 */
 	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterID INTEGER, FromRouterName TEXT, FromRouterIP TEXT, ToRouterID INTEGER, ToRouterName TEXT, ToRouterIP TEXT)")
+	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterID INTEGER, FromRouterName TEXT, FromRouterIP TEXT, ToRouterID INTEGER, ToRouterName TEXT, ToRouterIP TEXT)")
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterID INTEGER, FromRouterName TEXT, FromRouterIP TEXT, FromRouterIfIndex Text, ToRouterID INTEGER, ToRouterName TEXT, ToRouterIP TEXT)")
 	if err != nil {
 		//		log.Fatalf("Links Create err: %v", err)
 		log.Fatal("Links Create err: %v", err)
