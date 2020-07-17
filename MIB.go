@@ -21,6 +21,7 @@ const ipRouteTableOID string = "1.3.6.1.2.1.4.21"
 const ipRouteDestOID string = "1.3.6.1.2.1.4.21.1.1"
 const ipRouteIfIndexOID string = "1.3.6.1.2.1.4.21.1.2"
 const ipRouteNextHopOID string = "1.3.6.1.2.1.4.21.1.7"
+const ifSpeed string = "1.3.6.1.2.1.2.2.1.5"
 const ifOutOctets string = "1.3.6.1.2.1.2.2.1.16"
 
 // Asn1BER is the type of the SNMP PDU
