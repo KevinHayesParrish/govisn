@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	//"log"
 	"math"
@@ -629,10 +630,11 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 
 	// Create linksMenu and add it to the menu bar
 	m2 := gui.NewMenu()
-	m2.AddOption("Enable Network Traffic Polling").
+	//	m2.AddOption("Enable Network Traffic Polling").
+	m2.AddOption("Update Network Links").
 		SetId("Enable Polling")
-	m2.AddOption("Disable Network Traffic Polling").
-		SetId("Disable Polling")
+		//	m2.AddOption("Disable Network Traffic Polling").
+		//		SetId("Disable Polling")
 	mb.AddMenu("Links", m2).
 		SetId("Enable").
 		SetShortcut(window.ModAlt, window.Key1)
@@ -959,18 +961,20 @@ func calcDistance(debugFlag bool, posA *math32.Vector3, posB *math32.Vector3) (d
 	return distance
 }
 
-// UpdateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
+//
+// updateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
 //	lineWidth and color to reflect the amount of traffic flowing over each link.
+//
 func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *gvapp {
-	log.Debug("Updating Links")
+	log.Info("Updating Links")
 	// TODO
 	//	1) Add RouterID to Links DB table - DONE
-	//	2) For each Link in Links DB table
-	//		2.1) query the From and To Routers applicable interfaces outbound traffic
-	//		2.2) calculate bitsPerSec on the interface
+	//	2) For each Link in Links DB table - DONE
+	//		2.1) query the From Routers applicable interfaces outbound traffic - DONE
+	//		2.2) calculate bitsPerSec on the interface - DONE
 	//	3) Update the link lineWidth and color to indicate the calculated link Utilization
 	var LinkID int
-	var FromRouterID, FromRouterName, FromRouterIfIndex string
+	var FromRouterID, FromRouterName, FromRouterIfIndex, ToRouterName string
 
 	// GoSNMP struct
 	//	params := &g.GoSNMP{
@@ -983,36 +987,51 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 	//		MaxOids:   6,
 	//	}
 
-	linkRows, err := databaseForRead.Query("SELECT LinkID, FromRouterID, FromRouterName, FromRouterIfIndex FROM Links")
+	//	linkRows, err := databaseForRead.Query("SELECT LinkID, FromRouterID, FromRouterName, FromRouterIfIndex FROM Links")
+	linkRows, err := databaseForRead.Query("SELECT LinkID, FromRouterID, FromRouterName, FromRouterIfIndex, ToRouterName FROM Links")
 	if err != nil {
 		log.Fatal("databaseForRead Query Router error %v", err)
 	}
 	log.Debug("Successful Links table Query")
 	defer linkRows.Close()
+
+	//
+	// Calculate link bits per second
+	//
 	for linkRows.Next() {
-		linkRows.Scan(&LinkID, &FromRouterID, &FromRouterName, &FromRouterIfIndex)
+
+		//
+		// Calculate link bits per second
+		//
+		linkRows.Scan(&LinkID, &FromRouterID, &FromRouterName, &FromRouterIfIndex, &ToRouterName)
+
 		// SNMP Get Router Interface Outbound traffic (ifOutOctets 1)
 		oids := []string{
 			ifOutOctets + "." + FromRouterIfIndex, // ifOutOctets
+			ifSpeed + "." + FromRouterIfIndex,     // ifSpeed
 		}
 
 		snmpTarget = FromRouterName
 		params.Target = snmpTarget
 		err := params.Connect()
 		if err != nil {
-			//		log.Fatalf("Connect() err: %v", err)
 			log.Fatal("Connect() err: %v", err)
 		}
 		defer params.Conn.Close()
 
 		result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 		if err != nil {
-			log.Fatal("Get() err %v", err)
+			if strings.Contains(err.Error(), "Request timeout") {
+				log.Warn("Router %s", snmpTarget+" SNMP Timeout. Continuing.")
+			} else {
+				log.Fatal("Get() err %v", err)
+			}
 		}
 		if result == nil {
-			log.Fatal("No Router Interface found for Link definition. Error in LinkID: %d", LinkID)
+			log.Warn("No Router Interface found for Link definition. Error in LinkID: %d", LinkID)
 		} else {
 			ifOutOctets1 := result.Variables[0].Value.(uint)
+			ifSpeed1 := result.Variables[1].Value.(uint)
 			// Sleep for 1 second
 			time.Sleep(1 * time.Second)
 
@@ -1026,9 +1045,39 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 			// Calculate differnce of ifOutOctets 2 and ifOutOctets 1) and multiply by 8.
 			// This is the approx. number of bits per second.
 			bitsPerSec := (ifOutOctets2 - ifOutOctets1) * 8
-			log.Debug("Link bps= %d", bitsPerSec)
+			log.Debug("LinkID %s", strconv.Itoa(LinkID)+" (From "+FromRouterName+"To "+ToRouterName+"): bps= "+strconv.FormatInt(int64(bitsPerSec), 10))
+
+			// set linkColor and linkWidth, depending on linkUtilization
+			var linkUtil = float32(bitsPerSec / ifSpeed1)
+			var linkColor = math32.ColorName("white")
+			var linkWidth = 1
+
+			if linkUtil < 0.75 {
+				linkColor = math32.ColorName("lime") // Lime Green
+				linkWidth = 1
+			} else if linkUtil >= 0.75 && linkUtil < 0.90 {
+				linkColor = math32.ColorName("yellow") // Yellow
+				linkWidth = 2
+			} else if linkUtil >= 0.90 && linkUtil <= 1.0 {
+				linkColor = math32.ColorName("red") // Red
+				linkWidth = 3
+			}
+			log.Debug("linkColor = %v", linkColor)
+			log.Debug("linkWidth = %d", linkWidth)
+
+			//
+			// Update Link lineWidth and color, depending on link utilization
+			//
+
+			// Find 3D line object
+
+			// Set line object color
+
+			// Set line object width
 		}
 	}
+
+	log.Info("Links Updated.")
 
 	return (gv)
 }
