@@ -114,10 +114,12 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 	a := app.App()
 	gv.Application = a
 	gv.scene = core.NewNode()
+	gv.scene.SetName("GoVisionScene")
 
 	// Create perspective camera
 	gv.camPos = math32.Vector3{X: 0, Y: 0, Z: (float32)(globeRadius * 2.0)}
 	gv.cam = camera.New(1) // perspective camera with defaults
+	gv.cam.SetName("camera")
 	gv.cam.SetPosition(0, 0, (float32)(globeRadius*2.0))
 
 	// Setup orbit control for the camera
@@ -138,9 +140,11 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 
 	// Create and Add lights to the scene
 	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1.0)
+	ambientLight.SetName("ambient")
 	gv.scene.Add(ambientLight)
 
 	//	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
+	//  pointLight.SetName("pointLight")
 	//	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
 	//	gv.scene.Add(pointLight)
 
@@ -150,6 +154,7 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 
 	// Add an axis helper to the scene
 	axes := helper.NewAxes(1)
+	axes.SetName("helperAxes")
 	gv.scene.Add(axes)
 
 	// Set background color to black
@@ -199,6 +204,7 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 	globeMat.SetOpacity(.50)
 
 	globeMesh := graphic.NewMesh(globe3D, globeMat)
+	globeMesh.SetName("globe")
 	globeMesh.SetPosition(0, 0, 0)
 	gv.scene.Add(globeMesh)
 
@@ -231,6 +237,8 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		rtr3D := geometry.NewCylinder(routerRadius, routerRadius, 16, 2, true, true)
 		mat := material.NewStandard(math32.NewColor("DarkBlue"))
 		cylinderMesh := graphic.NewMesh(rtr3D, mat)
+		cylinderMesh.SetName(router.System.Name)
+		cylinderMesh.SetUserData(strconv.Itoa(router.System.RouterID))
 
 		// Set coordinates and altitude
 		x, y, z = calcCoordinates(GpsLat, GpsLong, GpsAlt)
@@ -248,9 +256,7 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 
 		// Add Router object to 3D scene.
 		cylinderMesh.SetPosition(x, y, z)
-		//		cylinderMesh.SetName(string(router.System.RouterID))
-		//		cylinderMesh.SetUserData(string(router.System.RouterID))
-		cylinderMesh.SetName(strconv.Itoa(router.System.RouterID))
+		cylinderMesh.SetName(router.System.Name)
 		cylinderMesh.SetUserData(strconv.Itoa(router.System.RouterID))
 		//		if debugFlag {
 		//			fmt.Println("cylinderMesh Name=", cylinderMesh.Name())
@@ -437,7 +443,7 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 			//			mat.SetLineWidth(1.0)
 		}
 		link3D := graphic.NewLines(linkGeom, mat)
-		link3D.SetName(string(link.LinkID))
+		link3D.SetName(strconv.Itoa(link.LinkID))
 		// Build Link using glLine - END
 
 		// Build Link using Polygon
@@ -987,6 +993,10 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 	//		MaxOids:   6,
 	//	}
 
+	//
+	// Retrieve the links from the database
+	//
+
 	//	linkRows, err := databaseForRead.Query("SELECT LinkID, FromRouterID, FromRouterName, FromRouterIfIndex FROM Links")
 	linkRows, err := databaseForRead.Query("SELECT LinkID, FromRouterID, FromRouterName, FromRouterIfIndex, ToRouterName FROM Links")
 	if err != nil {
@@ -996,7 +1006,7 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 	defer linkRows.Close()
 
 	//
-	// Calculate link bits per second
+	// Loop through all the links
 	//
 	for linkRows.Next() {
 
@@ -1070,6 +1080,9 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 			//
 
 			// Find 3D line object
+			sceneChildren := gv.scene.Children()
+			log.Debug("scene.Name %s", gv.scene.Name())
+			log.Debug("sceneChildren: %v", sceneChildren)
 
 			// Set line object color
 
