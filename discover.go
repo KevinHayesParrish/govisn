@@ -24,14 +24,16 @@ const DISCOVERYVERSION = "0.3.6"
 
 func discover(debugFlag bool, log *logger.Logger, dbName string, snmpTarget string, community string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
 
-	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.")
+	//	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.")
+	log.Info("\nfunc discover version %s", DISCOVERYVERSION+" started.")
 
 	// Discover network, constrained by input parm maximum hops away from snmpTarget node
 	maxHops, _ := strconv.Atoi(maxHopsStr)
 	for i := 0; i <= maxHops; i++ {
-		if debugFlag {
-			fmt.Println("Discover iteration")
-		}
+		//		if debugFlag {
+		//			fmt.Println("Discover iteration")
+		//		}
+		log.Debug("Discover iteration")
 	}
 
 	// Get Router attributes
@@ -62,9 +64,10 @@ func discover(debugFlag bool, log *logger.Logger, dbName string, snmpTarget stri
 			MaxOids:   6,
 		}
 	*/
-	if debugFlag {
-		fmt.Println("params=", params)
-	}
+	//	if debugFlag {
+	//		fmt.Println("params=", params)
+	//	}
+	log.Debug("params= %v", params)
 
 	err := params.Connect()
 	if err != nil {
@@ -79,9 +82,10 @@ func discover(debugFlag bool, log *logger.Logger, dbName string, snmpTarget stri
 
 	getRouterInfo(debugFlag, log, snmpTarget, community, maxHopsStr, params, router, database)
 
-	if debugFlag {
-		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
-	}
+	//	if debugFlag {
+	//		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
+	//	}
+	log.Debug("func discovery version %s", DISCOVERYVERSION+" ended.")
 
 	return database
 }
@@ -95,46 +99,54 @@ func getInterfaces(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 		//		log.Fatalf("Get() err: %v", getError)
 		log.Fatal("Get() err: %v", getError)
 	}
-	if debugFlag {
-		fmt.Println("ifNumber walkPDU=", getPDU)
-	}
+	//	if debugFlag {
+	//		fmt.Println("ifNumber walkPDU=", getPDU)
+	//	}
+	log.Debug("ifNumber walkPDU= %v", getPDU)
+
 	nbrOfInterfaces := getPDU.Variables[0].Value.(int)
-	if debugFlag {
-		fmt.Println("nbrOfInterfaces =", nbrOfInterfaces)
-	}
+	//	if debugFlag {
+	//		fmt.Println("nbrOfInterfaces =", nbrOfInterfaces)
+	//	}
+	log.Debug("nbrOfInterfaces= %v", nbrOfInterfaces)
+
 	// get ifTable
 	walkPDU, walkError := params.WalkAll(ifTableOID)
 	if walkError != nil {
 		//		log.Fatalf("Get() err: %v", walkError)
 		log.Fatal("Get() err: %v", walkError)
 	}
-	if debugFlag {
-		fmt.Println("\nifTable PDU=", walkPDU)
-	}
+	//	if debugFlag {
+	//		fmt.Println("\nifTable PDU=", walkPDU)
+	//	}
+	log.Debug("\nifTable PDU= %v", walkPDU)
 
 	var interfaceTable ifTable
 
-	if debugFlag {
-		fmt.Println("len(walkPDU)=", len(walkPDU))
-	}
+	//	if debugFlag {
+	//		fmt.Println("len(walkPDU)=", len(walkPDU))
+	//	}
+	log.Debug("len(walkPDU)= %d", len(walkPDU))
 
 	for i := 0; i < len(walkPDU); i++ { // skip ifIndex array within walkPDU
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifIndexOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifIndexType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifIndex = walkPDU[i].Value.(int)
-			if debugFlag {
-				fmt.Println("ifIndex=", interfaceTable.ifEntry.ifIndex)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifIndex=", interfaceTable.ifEntry.ifIndex)
+			//			}
+			log.Debug("ifIndex= %d", interfaceTable.ifEntry.ifIndex)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifDescrOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifDescrType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifDescr = string(walkPDU[i].Value.([]uint8))
-			if debugFlag {
-				fmt.Println("ifDescr=", interfaceTable.ifEntry.ifDescr)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifDescr=", interfaceTable.ifEntry.ifDescr)
+			//			}
+			log.Debug("ifDescr= %s", interfaceTable.ifEntry.ifDescr)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
@@ -149,27 +161,30 @@ func getInterfaces(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 			default:
 				interfaceTable.ifEntry.ifType = "other"
 			}
-			if debugFlag {
-				fmt.Println("ifType=", interfaceTable.ifEntry.ifType)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifType=", interfaceTable.ifEntry.ifType)
+			//			}
+			log.Debug("ifType= %s", interfaceTable.ifEntry.ifType)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifMtuOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifMtuType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifMtu = walkPDU[i].Value.(int)
-			if debugFlag {
-				fmt.Println("ifMtu=", interfaceTable.ifEntry.ifMtu) // TESTING ONLY
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifMtu=", interfaceTable.ifEntry.ifMtu) // TESTING ONLY
+			//			}
+			log.Debug("ifMtu= %d", interfaceTable.ifEntry.ifMtu)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifSpeedOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifSpeedType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifSpeed = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifSpeed=", interfaceTable.ifEntry.ifSpeed)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifSpeed=", interfaceTable.ifEntry.ifSpeed)
+			//			}
+			log.Debug("ifSpeed= %v", interfaceTable.ifEntry.ifSpeed)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
@@ -202,9 +217,10 @@ func getInterfaces(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 				interfaceTable.ifEntry.ifPhysAddress = "Null0"
 			}
 
-			if debugFlag {
-				fmt.Println("ifPhysAddress=", interfaceTable.ifEntry.ifPhysAddress)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifPhysAddress=", interfaceTable.ifEntry.ifPhysAddress)
+			//			}
+			log.Debug("ifPhysAddress= %s", interfaceTable.ifEntry.ifPhysAddress)
 
 			//			writeMacToDB(debugFlag, router, interfaceTable, database)
 			writeMacToDB(debugFlag, log, router, interfaceTable, database)
@@ -223,9 +239,10 @@ func getInterfaces(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 			case 3:
 				interfaceTable.ifEntry.ifAdminStatus = "testing(3)"
 			}
-			if debugFlag {
-				fmt.Println("ifAdminStatus=", interfaceTable.ifEntry.ifAdminStatus)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifAdminStatus=", interfaceTable.ifEntry.ifAdminStatus)
+			//			}
+			log.Debug("ifAdminStatus= %s", interfaceTable.ifEntry.ifAdminStatus)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
@@ -240,135 +257,150 @@ func getInterfaces(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 			case 3:
 				interfaceTable.ifEntry.ifOperStatus = "testing(3)"
 			}
-			if debugFlag {
-				fmt.Println("ifOperStatus=", interfaceTable.ifEntry.ifOperStatus)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifOperStatus=", interfaceTable.ifEntry.ifOperStatus)
+			//			}
+			log.Debug("ifOperStatus= %s", interfaceTable.ifEntry.ifOperStatus)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifLastChangeOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifLastChangeType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifLastChange = walkPDU[i].Value.(uint32)
-			if debugFlag {
-				fmt.Println("ifLastChange=", interfaceTable.ifEntry.ifLastChange)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifLastChange=", interfaceTable.ifEntry.ifLastChange)
+			//			}
+			log.Debug("ifLastChange= %d", interfaceTable.ifEntry.ifLastChange)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifInOctetsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInOctetsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInOctets = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifInOctets=", interfaceTable.ifEntry.ifInOctets)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifInOctets=", interfaceTable.ifEntry.ifInOctets)
+			//			}
+			log.Debug("ifInOctets= %d", interfaceTable.ifEntry.ifInOctets)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifInUcastPktsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInUcastPktsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInUcastPkts = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifInucastPkts=", interfaceTable.ifEntry.ifInUcastPkts)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifInucastPkts=", interfaceTable.ifEntry.ifInUcastPkts)
+			//			}
+			log.Debug("ifInucastPkts= %d", interfaceTable.ifEntry.ifInUcastPkts)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifInNUcastPktsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInNUcastPktsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInNUcastPkts = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifINUcastPkts=", interfaceTable.ifEntry.ifInUcastPkts)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifINUcastPkts=", interfaceTable.ifEntry.ifInUcastPkts)
+			//			}
+			log.Debug("ifINUcastPkts= %d", interfaceTable.ifEntry.ifInUcastPkts)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifInDiscardsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInDiscardsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInDiscards = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifDiscards=", interfaceTable.ifEntry.ifInDiscards)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifDiscards=", interfaceTable.ifEntry.ifInDiscards)
+			//			}
+			log.Debug("ifDiscards= %d", interfaceTable.ifEntry.ifInDiscards)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifInErrorsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInErrorsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInErrors = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifInErrors=", interfaceTable.ifEntry.ifInErrors)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifInErrors=", interfaceTable.ifEntry.ifInErrors)
+			//			}
+			log.Debug("ifInErrors= %d", interfaceTable.ifEntry.ifInErrors)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifInUnknownProtosOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInUnknownProtosType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInUnknownProtos = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifInUnknownProtos=", interfaceTable.ifEntry.ifInUnknownProtos)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifInUnknownProtos=", interfaceTable.ifEntry.ifInUnknownProtos)
+			//			}
+			log.Debug("ifInUnknownProtos= %d", interfaceTable.ifEntry.ifInUnknownProtos)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifOutOctetsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutOctetsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutOctets = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifOutOctets=", interfaceTable.ifEntry.ifOutOctets)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifOutOctets=", interfaceTable.ifEntry.ifOutOctets)
+			//			}
+			log.Debug("ifOutOctets= %d", interfaceTable.ifEntry.ifOutOctets)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifOutUcastPktsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutUcastPktsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutUcastPkts = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifOutUcastPkts=", interfaceTable.ifEntry.ifOutUcastPkts)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifOutUcastPkts=", interfaceTable.ifEntry.ifOutUcastPkts)
+			//			}
+			log.Debug("ifOutUcastPkts= %d", interfaceTable.ifEntry.ifOutUcastPkts)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifOutNUcastPktsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutNUcastPktsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutNUcastPkts = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifOutNUcastPkts=", interfaceTable.ifEntry.ifOutNUcastPkts)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifOutNUcastPkts=", interfaceTable.ifEntry.ifOutNUcastPkts)
+			//			}
+			log.Debug("ifOutNUcastPkts= %d", interfaceTable.ifEntry.ifOutNUcastPkts)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifOutDiscardsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutDiscardsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutDiscards = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifOutDiscards=", interfaceTable.ifEntry.ifOutDiscards)
-			}
+			//			if debugFlag
+			//				fmt.Println("ifOutDiscards=", interfaceTable.ifEntry.ifOutDiscards)
+			//			}
+			log.Debug("ifOutDiscards= %d", interfaceTable.ifEntry.ifOutDiscards)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifOutErrorsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutErrorsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutErrors = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifOutErrors=", interfaceTable.ifEntry.ifOutErrors)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifOutErrors=", interfaceTable.ifEntry.ifOutErrors)
+			//			}
+			log.Debug("ifOutErrors= %d", interfaceTable.ifEntry.ifOutErrors)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifOutQLenOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutQLenType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutQLen = walkPDU[i].Value.(uint)
-			if debugFlag {
-				fmt.Println("ifOutQLen=", interfaceTable.ifEntry.ifOutQLen)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifOutQLen=", interfaceTable.ifEntry.ifOutQLen)
+			//			}
+			log.Debug("ifOutQLen= %d", interfaceTable.ifEntry.ifOutQLen)
 			i++
 		}
 		for k := 0; k < nbrOfInterfaces; k++ {
 			interfaceTable.ifEntry.ifSpecificOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifSpecificType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifSpecific = walkPDU[i].Value.(string)
-			if debugFlag {
-				fmt.Println("ifSpecific=", interfaceTable.ifEntry.ifSpecific)
-			}
+			//			if debugFlag {
+			//				fmt.Println("ifSpecific=", interfaceTable.ifEntry.ifSpecific)
+			//			}
+			log.Debug("ifSpecific= %s", interfaceTable.ifEntry.ifSpecific)
 			i++
 		}
 
@@ -383,9 +415,10 @@ func initDB(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 	 */
 
 	initDbVersion := "0.0.3"
-	if debugFlag {
-		fmt.Println("initDB version:", initDbVersion)
-	}
+	//	if debugFlag {
+	//		fmt.Println("initDB version:", initDbVersion)
+	//	}
+	log.Debug("initDB version %s", initDbVersion)
 
 	/*
 	 *	Add Routers table to DB
@@ -452,10 +485,12 @@ func initDB(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 func getRtrName(ipAddr string) []string {
 	names, err := net.LookupAddr(ipAddr)
 	if err != nil {
-		fmt.Println("No reverse lookup found for", ipAddr)
+		//		fmt.Println("No reverse lookup found for", ipAddr)
+		log.Warn("No reverse lookup found for %s", ipAddr)
 	}
 	if len(names) == 0 {
-		fmt.Println("No FQDN records for", ipAddr)
+		//		fmt.Println("No FQDN records for", ipAddr)
+		log.Warn("No FQDN records for %s", ipAddr)
 		return names
 	}
 	return names
@@ -464,10 +499,12 @@ func getRtrName(ipAddr string) []string {
 func getHostIP(routerName string) []string {
 	addrs, err := net.LookupHost(routerName)
 	if err != nil {
-		fmt.Println("No Hostname lookup found for", routerName)
+		//		fmt.Println("No Hostname lookup found for", routerName)
+		log.Warn("No Hostname lookup found for %s", routerName)
 	}
 	if len(addrs) == 0 {
-		fmt.Println("No Hostname records for", routerName)
+		//		fmt.Println("No Hostname records for", routerName)
+		log.Warn("No Hostname records for %s", routerName)
 		return addrs
 	}
 	return addrs
@@ -477,10 +514,12 @@ func getGPS(sysName string) []string {
 	txts, err := net.LookupTXT(sysName)
 	if err != nil {
 		//		panic(err)
-		fmt.Println("No TXT records for", sysName)
+		//		fmt.Println("No TXT records for", sysName)
+		log.Debug("No TXT records for %s", sysName)
 	}
 	if len(txts) == 0 {
-		fmt.Println("No DNS TXT records for", sysName)
+		//		fmt.Println("No DNS TXT records for", sysName)
+		log.Debug("No DNS TXT records for %s", sysName)
 	}
 	return txts
 }
@@ -501,7 +540,10 @@ func writeMacToDB(debugFlag bool, log *logger.Logger, router Router, interfaceTa
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			// Continue executing if this is a duplicate MAC Address. This assume this router is being processed again.
 			// In case this is a duplicate MAC Address within the network, print error output to stdoutput.
-			fmt.Println("\n****\n Non-Unique MAC Address", interfaceTable.ifEntry.ifPhysAddress, "\n This may be because this router is being re-discovered.\n If not, then this is a serious network violation condition.\n****")
+			//			fmt.Println("\n****\n Non-Unique MAC Address", interfaceTable.ifEntry.ifPhysAddress, "\n This may be because this router is being re-discovered.\n If not, then this is a serious network violation condition.\n****")
+			log.Warn("\n****\n Non-Unique MAC Address %s", interfaceTable.ifEntry.ifPhysAddress+
+				"\n This may be because this router is being re-discovered."+
+				"\n If not, then this is a serious network violation condition.\n****")
 		} else {
 			//			fmt.Printf("RouterMac Insert Exec err: %v", err)
 			//			log.Fatal(err)
@@ -523,19 +565,22 @@ func getIPAddresses(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router
 		//		log.Fatalf("Get(ifIndexPDU) err: %v", err)
 		log.Fatal("Get(ifIndexPDU) err: %v", err)
 	}
-	if debugFlag {
-		fmt.Println("\nipAdEntAddr PDU=", walkPDU)
-		fmt.Println("\nifIndex PDU=", ifIndexPDU)
-	}
+	//	if debugFlag {
+	//		fmt.Println("\nipAdEntAddr PDU=", walkPDU)
+	//		fmt.Println("\nifIndex PDU=", ifIndexPDU)
+	//	}
+	log.Debug("\nipAdEntAddr PDU= %v", walkPDU)
+	log.Debug("\nifIndex PDU= %v", ifIndexPDU)
 
 	var ipTable ipAddrTable
 
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntAddr = walkPDU[i].Value.(string)
 		ipTable.ipAddrEntry.ipAdEntIfIndex = ifIndexPDU[i].Value.(int)
-		if debugFlag {
-			fmt.Println("ipAdEntAddr=", ipTable.ipAddrEntry.ipAdEntAddr)
-		}
+		//		if debugFlag {
+		//			fmt.Println("ipAdEntAddr=", ipTable.ipAddrEntry.ipAdEntAddr)
+		//		}
+		log.Debug("ipAdEntAddr= %s", ipTable.ipAddrEntry.ipAdEntAddr)
 
 		// Add row to RouterIp table
 		//		statement, err := database.Prepare("INSERT INTO RouterIp (RouterID, IpAddr) VALUES (?, ?)")
@@ -551,7 +596,10 @@ func getIPAddresses(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 				// Continue executing if this is a duplicate IP Address. This assume this router is being processed again.
 				// In case this is a duplicate MAC Address within the network, print error output to stdoutput.
-				fmt.Println("\n****\n Non-Unique IP Address", ipTable.ipAddrEntry.ipAdEntAddr, "\n This may be because this router is being re-discovered.\n If not, then this is a serious network violation condition.\n****")
+				//				fmt.Println("\n****\n Non-Unique IP Address", ipTable.ipAddrEntry.ipAdEntAddr, "\n This may be because this router is being re-discovered.\n If not, then this is a serious network violation condition.\n****")
+				log.Warn("\n****\n Non-Unique IP Address %s", ipTable.ipAddrEntry.ipAdEntAddr+
+					"\n This may be because this router is being re-discovered."+
+					"\n If not, then this is a serious network violation condition.\n****")
 			} else {
 				//				fmt.Printf("RouterIp Exec Insert Exec err: %v", err)
 				//				log.Fatal(err)
@@ -565,23 +613,26 @@ func getIPAddresses(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router
 	walkPDU, err = params.WalkAll(ipAdEntNetMask)
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntNetMask = walkPDU[i].Value.(string)
-		if debugFlag {
-			fmt.Println("ipAdEntNetMask=", ipTable.ipAddrEntry.ipAdEntNetMask)
-		}
+		//		if debugFlag {
+		//			fmt.Println("ipAdEntNetMask=", ipTable.ipAddrEntry.ipAdEntNetMask)
+		//		}
+		log.Debug("ipAdEntNetMask= %s", ipTable.ipAddrEntry.ipAdEntNetMask)
 	}
 	walkPDU, err = params.WalkAll(ipAdEntBcastAddr)
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntBcastAddr = walkPDU[i].Value.(int)
-		if debugFlag {
-			fmt.Println("ipAdEntBcastAddr=", ipTable.ipAddrEntry.ipAdEntBcastAddr)
-		}
+		//		if debugFlag {
+		//			fmt.Println("ipAdEntBcastAddr=", ipTable.ipAddrEntry.ipAdEntBcastAddr)
+		//		}
+		log.Debug("ipAdEntBcastAddr= %d", ipTable.ipAddrEntry.ipAdEntBcastAddr)
 	}
 	walkPDU, err = params.WalkAll(ipAdEntReasmMaxSize)
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntReasmMaxSize = walkPDU[i].Value.(int)
-		if debugFlag {
-			fmt.Println("ipAdEntReasmMaxSize=", ipTable.ipAddrEntry.ipAdEntReasmMaxSize)
-		}
+		//		if debugFlag {
+		//			fmt.Println("ipAdEntReasmMaxSize=", ipTable.ipAddrEntry.ipAdEntReasmMaxSize)
+		//		}
+		log.Debug("ipAdEntReasmMaxSize= %d", ipTable.ipAddrEntry.ipAdEntReasmMaxSize)
 	}
 }
 
@@ -593,27 +644,30 @@ func getIPRouteTable(debugFlag bool, log *logger.Logger, params *g.GoSNMP, route
 		//		log.Fatalf("Get(ipRouteDestPDU) err: %v", err)
 		log.Fatal("Get(ipRouteDestPDU) err")
 	}
-	if debugFlag {
-		fmt.Println("\nipRouteDestPDU PDU=", ipRouteDestPDU)
-	}
+	//	if debugFlag {
+	//		fmt.Println("\nipRouteDestPDU PDU=", ipRouteDestPDU)
+	//	}
+	log.Debug("\nipRouteDestPDU PDU= %v", ipRouteDestPDU)
 
 	ipRouteIfIndexPDU, err := params.WalkAll(ipRouteIfIndexOID)
 	if err != nil {
 		//		log.Fatalf("Get(ipRouteIfIndexPDU) err: %v", err)
 		log.Fatal("Get(ipRouteIfIndexPDU) err")
 	}
-	if debugFlag {
-		fmt.Println("\nipRouteIfIndexPDU PDU=", ipRouteIfIndexPDU)
-	}
+	//	if debugFlag {
+	//		fmt.Println("\nipRouteIfIndexPDU PDU=", ipRouteIfIndexPDU)
+	//	}
+	log.Debug("\nipRouteIfIndexPDU PDU= %v", ipRouteIfIndexPDU)
 
 	ipRouteNextHopPDU, err := params.WalkAll(ipRouteNextHopOID)
 	if err != nil {
 		//		log.Fatalf("Get(ipRouteNextHopPDU) err: %v", err)
 		log.Fatal("Get(ipRouteNextHopPDU) err")
 	}
-	if debugFlag {
-		fmt.Println("\nipRouteNextHopPDU PDU=", ipRouteNextHopPDU)
-	}
+	//	if debugFlag {
+	//		fmt.Println("\nipRouteNextHopPDU PDU=", ipRouteNextHopPDU)
+	//	}
+	log.Debug("\nipRouteNextHopPDU PDU= %v", ipRouteNextHopPDU)
 
 	// Parse Dest and NextHop PDUs, adding row to ipRouteTable for each PDU element.
 	var ipRouteTab ipRouteTable
@@ -622,11 +676,14 @@ func getIPRouteTable(debugFlag bool, log *logger.Logger, params *g.GoSNMP, route
 		ipRouteTab.ipRouteEntry.ipRouteDest = ipRouteDestPDU[i].Value.(string)
 		ipRouteTab.ipRouteEntry.ipRouteIfIndex = ipRouteIfIndexPDU[i].Value.(int)
 		ipRouteTab.ipRouteEntry.ipRouteNextHop = ipRouteNextHopPDU[i].Value.(string)
-		if debugFlag {
-			fmt.Println("ipRouteDest=", ipRouteTab.ipRouteEntry.ipRouteDest)
-			fmt.Println("ipRouteIfIndex=", ipRouteTab.ipRouteEntry.ipRouteIfIndex)
-			fmt.Println("ipRouteNextHop=", ipRouteTab.ipRouteEntry.ipRouteNextHop)
-		}
+		//		if debugFlag {
+		//			fmt.Println("ipRouteDest=", ipRouteTab.ipRouteEntry.ipRouteDest)
+		//			fmt.Println("ipRouteIfIndex=", ipRouteTab.ipRouteEntry.ipRouteIfIndex)
+		//			fmt.Println("ipRouteNextHop=", ipRouteTab.ipRouteEntry.ipRouteNextHop)
+		//		}
+		log.Debug("ipRouteDest= %s", ipRouteTab.ipRouteEntry.ipRouteDest)
+		log.Debug("ipRouteIfIndex= %d", ipRouteTab.ipRouteEntry.ipRouteIfIndex)
+		log.Debug("ipRouteNextHop= %s", ipRouteTab.ipRouteEntry.ipRouteNextHop)
 
 		// Add row to RouteTable table
 		statement, _ := database.Prepare("INSERT INTO RouteTable (RouterID, DestAddr, IPRouteIfIndex, NextHop) VALUES (?, ?, ?, ?)")
@@ -700,15 +757,22 @@ func getRouterInfo(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 		}
 	}
 
-	if debugFlag {
-		fmt.Println("router.System.Name=", router.System.Name)
-		fmt.Println("router.System.Description=", router.System.Description)
-		fmt.Println("router.System.UpTime=", router.System.UpTime)
-		fmt.Println("router.System.Contact=", router.System.Contact)
-		fmt.Println("router.System.Location=", router.System.Location)
-		fmt.Println("router.System.Services=", router.System.Services)
-		fmt.Println("router.System.GPS=", router.System.GPS)
-	}
+	//	if debugFlag {
+	//		fmt.Println("router.System.Name=", router.System.Name)
+	//		fmt.Println("router.System.Description=", router.System.Description)
+	//		fmt.Println("router.System.UpTime=", router.System.UpTime)
+	//		fmt.Println("router.System.Contact=", router.System.Contact)
+	//		fmt.Println("router.System.Location=", router.System.Location)
+	//		fmt.Println("router.System.Services=", router.System.Services)
+	//		fmt.Println("router.System.GPS=", router.System.GPS)
+	//	}
+	log.Debug("router.System.Name= %s", router.System.Name)
+	log.Debug("router.System.Description= %s", router.System.Description)
+	log.Debug("router.System.UpTime= %d", router.System.UpTime)
+	log.Debug("router.System.Contact= %s", router.System.Contact)
+	log.Debug("router.System.Location= %s", router.System.Location)
+	log.Debug("router.System.Services= %d", router.System.Services)
+	log.Debug("router.System.GPS= %v", router.System.GPS)
 
 	// Write Router row to database
 	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
@@ -730,11 +794,12 @@ func getRouterInfo(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) // Add router
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-			fmt.Println("Router", Name, "is already exists in database. Continuing discovery.")
+			//			fmt.Println("Router", Name, "is already exists in database. Continuing discovery.")
+			log.Warn("Router %s", Name+" already exists in database. Continuing discovery.")
 			routerIsInDB = true
 		} else {
-			fmt.Printf("RouterMac Insert Exec err: %v", err)
-			log.Fatal("RouterMac Insert Exec err")
+			//			fmt.Printf("RouterMac Insert Exec err: %v", err)
+			log.Fatal("RouterMac Insert Exec err: %v", err)
 		}
 	}
 	defer statement.Close()
