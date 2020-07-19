@@ -19,7 +19,9 @@ const createsampledbVersion = "0.1.9"
 
 func createsampledb() {
 	var log *logger.Logger
-	fmt.Println("createdampledb version:", createsampledbVersion)
+	//	fmt.Println("createdampledb version:", createsampledbVersion)
+	log.Debug("createdampledb version %s", createsampledbVersion)
+
 	database, _ := sql.Open("sqlite3", "./samplenetwork.db")
 	/*
 	 *	Add Routers table to DB
