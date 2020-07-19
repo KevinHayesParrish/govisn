@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"hash/crc32"
 
 	//"log"
@@ -15,10 +14,11 @@ import (
 )
 
 //buildLinksVersion is the file version sequence number
-const buildLinksVersion = "0.0.3"
+const buildLinksVersion = "0.0.4"
 
 func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
-	fmt.Println("func buildLinks version", buildLinksVersion, "started")
+	//	fmt.Println("func buildLinks version", buildLinksVersion, "started")
+	log.Debug("func buildLinks version %s", buildLinksVersion+" started")
 
 	/* TODO
 	 *
@@ -32,9 +32,6 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 	if err != nil {
 		//		log.Fatalln("databaseForRead JOIN error", err.Error())
 		log.Fatal("databaseForRead JOIN error")
-	}
-	if debugFlag {
-		fmt.Println("Successful Routers/RouteTable JOIN")
 	}
 	defer routeTableRows.Close()
 
@@ -61,7 +58,8 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 		fromIPs := getHostIP(Name)
 		link.FromRouterIP = fromIPs[0]
 		if len(fromIPs) < 1 {
-			fmt.Println("No Router IP Address the link from Router", Name)
+			//			fmt.Println("No Router IP Address the link from Router", Name)
+			log.Warn("No Router IP Address the link from Router %s", Name)
 			link.FromRouterIP = ""
 		} else {
 			link.FromRouterIP = fromIPs[0]
@@ -69,7 +67,8 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 
 		rtrNames := getRtrName(NextHop)
 		if len(rtrNames) < 1 {
-			fmt.Println("No Router Name for Route Destination", NextHop)
+			//			fmt.Println("No Router Name for Route Destination", NextHop)
+			log.Warn("No Router Name for Route Destination %s", NextHop)
 			link.ToRouterName = ""
 		} else {
 			link.ToRouterName = rtrNames[0]
@@ -86,7 +85,8 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 		link.LinkID = int(crc32.ChecksumIEEE([]byte(link.FromRouterIP + link.ToRouterIP)))
 
 		if link.FromRouterName == link.ToRouterName {
-			fmt.Println("From and To Routers are the same. Link not added to database.")
+			//			fmt.Println("From and To Routers are the same. Link not added to database.")
+			log.Info("From and To Routers are the same. Link not added to database.")
 		} else {
 			links = append(links, link)
 		}
@@ -107,7 +107,8 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterID, links[i].FromRouterName, links[i].FromRouterIP, links[i].FromRouterIfIndex, links[i].ToRouterID, links[i].ToRouterName, links[i].ToRouterIP)
 		if err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-				fmt.Println("Link already exists. Continue building links.")
+				//				fmt.Println("Link already exists. Continue building links.")
+				log.Info("Link already exists. Continue building links.")
 			} else {
 				//				log.Fatalln("Link INSERT error:", err.Error())
 				log.Fatal("Link INSERT error %v", err)
@@ -116,7 +117,9 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 		defer statement.Close()
 	}
 
-	fmt.Println("func buildLinks version", buildLinksVersion, "ending")
+	//	fmt.Println("func buildLinks version", buildLinksVersion, "ending")
+	log.Debug("func buildLinks version %s", buildLinksVersion+" ending")
+
 	return database
 }
 
