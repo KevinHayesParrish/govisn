@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"fmt"
 	"math"
 	"strconv"
 	"time"
@@ -68,15 +67,14 @@ func main() {
 	}
 
 	if *debugFlag {
-		//		fmt.Println("Debug option selected")
 		log.SetLevel(logger.DEBUG)
 	} else {
 		log.SetLevel(logger.INFO)
 	}
 	log.Debug("Log Level set to DEBUG")
 
-	//fmt.Println("GoVision version:", GoVisn)
-	log.Info("GoVision version:%s", GoVisn)
+	log.Info("GoVision version %s", GoVisn+
+		" started")
 
 	if *sampleNetworkDB {
 		createsampledb()
@@ -95,21 +93,20 @@ func main() {
 	if *discoverFlag != "" {
 		seed = *discoverFlag
 		if *debugFlag {
-			fmt.Println("seed=", seed, "community=", *community)
+			log.Debug("seed= %s", seed+
+				"community= %s"+*community)
 		}
 
 		snmpPort := "161"
 		snmpTarget := seed
 		if len(snmpTarget) <= 0 {
-			//			log.Fatalf("environment variable not set: GOSNMP_TARGET")
 			log.Fatal("environment variable not set: GOSNMP_TARGET")
 		} else {
 			if *debugFlag {
-				fmt.Println("snmpTarget=", snmpTarget)
+				log.Debug("snmpTarget= %s", snmpTarget)
 			}
 		}
 		if len(snmpPort) <= 0 {
-			//			log.Fatalf("environment variable not set: GOSNMP_PORT")
 			log.Fatal("environment variable not set: GOSNMP_PORT")
 		}
 		port, _ := strconv.ParseUint(snmpPort, 10, 16)
@@ -128,12 +125,10 @@ func main() {
 		// Open the database connection
 		database, err := sql.Open("sqlite3", dbName)
 		if err != nil {
-			//			log.Fatalf("sql.Open() err: %v", err)
 			log.Fatal("sql.Open() err: %v", err)
 		}
 
 		// Discover the network
-		//		database = discover(*debugFlag, dbName, seed, *community, params, *maxHops, database)
 		database = discover(*debugFlag, log, dbName, seed, *community, params, *maxHops, database)
 
 		// Close database. Completed initialization and update of all tables, except Links.
@@ -142,7 +137,6 @@ func main() {
 		// Open database. buildLinks joins Router and RouteTable tables.
 		database, err = sql.Open("sqlite3", dbName)
 		if err != nil {
-			//			log.Fatalf("sql.Open() err: %v", err)
 			log.Fatal("sql.Open() err: %v", err)
 		}
 
@@ -162,24 +156,18 @@ func main() {
 		// Open the database connection
 		database, openErr := sql.Open("sqlite3", *DbName)
 		if openErr != nil {
-			//			fmt.Println("Error opening database", *DbName)
-			//			log.Fatal(openErr)
-			log.Fatal("Error opening database: %v", openErr)
+			log.Fatal("Error opening database: %s" + *DbName + "err %s" + openErr.Error())
 		}
 		defer database.Close()
 
 		//		snmpPort := "161"
 		//		snmpTarget := seed
 		if len(snmpTarget) <= 0 {
-			//			log.Fatalf("environment variable not set: GOSNMP_TARGET")
 			log.Fatal("environment variable not set: GOSNMP_TARGET")
 		} else {
-			if *debugFlag {
-				fmt.Println("snmpTarget=", snmpTarget)
-			}
+			log.Debug("snmpTarget= %s", snmpTarget)
 		}
 		if len(snmpPort) <= 0 {
-			//			log.Fatalf("environment variable not set: GOSNMP_PORT")
 			log.Fatal("environment variable not set: GOSNMP_PORT")
 		}
 		port, _ := strconv.ParseUint(snmpPort, 10, 16)
@@ -198,15 +186,15 @@ func main() {
 		// Scan the requested network for Router hosts
 		//		scannedRouters = scanNet(*debugFlag, seed, *community, *params)
 		scannedRouters = scanNet(*debugFlag, log, seed, *community, *params)
-		if *debugFlag {
-			fmt.Println("scnnedRouters=", scannedRouters)
-		}
+		//		if *debugFlag {
+		//			fmt.Println("scnnedRouters=", scannedRouters)
+		//		}
+		log.Debug("scnnedRouters= %v", scannedRouters)
 
 		// Discover router information from list of scanned routers.
 		// Open the database connection
 		database, err := sql.Open("sqlite3", dbName)
 		if err != nil {
-			//			log.Fatalf("sql.Open() err: %v", err)
 			log.Fatal("sql.Open() err: %v", err)
 		}
 		for i := 0; i < len(scannedRouters); i++ {
@@ -221,8 +209,6 @@ func main() {
 			// Open database. buildLinks joins Router and RouteTable tables.
 			database, err = sql.Open("sqlite3", dbName)
 			if err != nil {
-				//				log.Fatalf("sql.Open() err: %v", err)
-				//				log.Fatalf("sql.Open() err")
 				log.Fatal("sql.Open() err %v", err)
 			}
 
@@ -236,21 +222,16 @@ func main() {
 
 	if *visualizeFlag {
 		// Open the database containing the discovered network
-		//		fmt.Println("\nBeginning Network Visualization.")
 		log.Info("Beginning Network Visualization.")
 
 		databaseForRead, openErr := sql.Open("sqlite3", *DbName)
 		if openErr != nil {
-			//			fmt.Println("Error opening databaseForRead", *DbName)
-			//			log.Fatal(openErr)
 			log.Fatal("Error opening databaseForRead %v", *DbName)
 		}
 		defer databaseForRead.Close()
 
 		databaseForUpdate, openErr := sql.Open("sqlite3", *DbName)
 		if openErr != nil {
-			//			fmt.Println("Error opening databaseForUpdate", *DbName)
-			//			log.Fatal(openErr)
 			log.Fatal("Error opening databaseForUpdate %v", *DbName)
 		}
 		defer databaseForUpdate.Close()
@@ -266,10 +247,8 @@ func main() {
 			Logger:    nil,
 			MaxOids:   6,
 		}
-		//		databaseForRead = visualizeNetwork(*debugFlag, databaseForRead)
 		databaseForRead = visualizeNetwork(*debugFlag, log, databaseForRead, snmpTarget, *community, params)
 	}
-	//	fmt.Println("GoVisn version", GoVisn, "ending.")
 	log.Info("GoVisn version %s", GoVisn+" ending.")
 }
 
