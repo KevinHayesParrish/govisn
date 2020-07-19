@@ -22,7 +22,6 @@ import (
 	"github.com/g3n/engine/util/stats"
 	g "github.com/soniah/gosnmp"
 
-	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/geometry"
 	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/graphic"
@@ -30,6 +29,7 @@ import (
 	"github.com/g3n/engine/light"
 	"github.com/g3n/engine/window"
 
+	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/material"
 	"github.com/g3n/engine/math32"
 	"github.com/g3n/engine/text"
@@ -77,7 +77,7 @@ type Raycast struct {
 }
 
 func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *sql.DB {
-	const VISUALIZENETWORKVERSION = "0.3.0"
+	const VISUALIZENETWORKVERSION = "0.3.1"
 	//	if debugFlag {
 	//		fmt.Println("visualizeNetwork", VISUALIZENETWORKVERSION, "func started")
 	//	}
@@ -256,7 +256,7 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 
 		// Add Router object to 3D scene.
 		cylinderMesh.SetPosition(x, y, z)
-		cylinderMesh.SetName(router.System.Name)
+		//cylinderMesh.SetName(router.System.Name)
 		cylinderMesh.SetUserData(strconv.Itoa(router.System.RouterID))
 		//		if debugFlag {
 		//			fmt.Println("cylinderMesh Name=", cylinderMesh.Name())
@@ -434,11 +434,13 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
 
 		mat := material.NewStandard(math32.NewColor("White"))
+
 		// Check Runtime environment.
 		// OpenGL Implementation on MacOS will only accept Line width of 1.0
 		if runtime.GOOS == "darwin" {
 			mat.SetLineWidth(1.0)
-			fmt.Println("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept 1.0 ***")
+			//			fmt.Println("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept 1.0 ***")
+			log.Info("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept lineWidth of 1.0 ***")
 			//		} else {
 			//			mat.SetLineWidth(1.0)
 		}
@@ -1083,16 +1085,65 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 			sceneChildren := gv.scene.Children()
 			log.Debug("scene.Name %s", gv.scene.Name())
 			log.Debug("sceneChildren: %v", sceneChildren)
+			// loop: parse scene Children getting each node
+			link := getRouterFromScene(log, sceneChildren, LinkID)
+			log.Debug("link found: %v", link)
+			if link == nil {
+				log.Warn("updateLinks: link not found in 3D scene.")
+				continue
+			}
 
+			//
 			// Set line object color
+			//
+			// Convert INode to IGraphic
+			ig, ok := link.(graphic.IGraphic)
+			if !ok {
+				log.Fatal("Error when converting link INode to IGraphic")
+			}
+			// Get graphic object
+			gr := ig.GetGraphic()
+			imat := gr.GetMaterial(0)
+
+			type matI interface {
+				EmissiveColor() math32.Color
+				SetEmissiveColor(*math32.Color)
+				//AmientColor() math32.Color
+				//SetAmbientColor(*math32.Color)
+				SetLineWidth(float32)
+			}
+			v := imat.(matI)
+			//v.SetEmissiveColor(&math32.Color{R: 0, G: 1, B: 0})
+			v.SetEmissiveColor(&linkColor)
+			//v.SetAmbientColor(&linkColor)
 
 			// Set line object width
+			// Check Runtime environment.
+			// OpenGL Implementation on MacOS will only accept Line width of 1.0
+			if runtime.GOOS == "darwin" {
+				v.SetLineWidth(1.0)
+				log.Info("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept lineWidth of 1.0 ***")
+			}
+
+			gr.SetChanged(true)
+			gr.Render(gv.Application.Gls())
 		}
 	}
 
 	log.Info("Links Updated.")
 
 	return (gv)
+}
+
+func getRouterFromScene(log *logger.Logger, sceneChildren []core.INode, LinkID int) core.INode {
+	var link core.INode
+	for i := 0; i < len(sceneChildren); i++ {
+		if sceneChildren[i].Name() == strconv.Itoa(LinkID) {
+			link = sceneChildren[i]
+			break
+		}
+	}
+	return link
 }
 
 // Render renders the mouse pick action
