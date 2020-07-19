@@ -1062,20 +1062,20 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 			// set linkColor and linkWidth, depending on linkUtilization
 			var linkUtil = float32(bitsPerSec / ifSpeed1)
 			var linkColor = math32.ColorName("white")
-			var linkWidth = 1
+			var linkWidth float32 = 1.0
 
 			if linkUtil < 0.75 {
 				linkColor = math32.ColorName("lime") // Lime Green
-				linkWidth = 1
+				linkWidth = 1.0
 			} else if linkUtil >= 0.75 && linkUtil < 0.90 {
 				linkColor = math32.ColorName("yellow") // Yellow
-				linkWidth = 2
+				linkWidth = 2.0
 			} else if linkUtil >= 0.90 && linkUtil <= 1.0 {
 				linkColor = math32.ColorName("red") // Red
-				linkWidth = 3
+				linkWidth = 3.0
 			}
 			log.Debug("linkColor = %v", linkColor)
-			log.Debug("linkWidth = %d", linkWidth)
+			log.Debug("linkWidth = %f", linkWidth)
 
 			//
 			// Update Link lineWidth and color, depending on link utilization
@@ -1123,6 +1123,8 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 			if runtime.GOOS == "darwin" {
 				v.SetLineWidth(1.0)
 				log.Info("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept lineWidth of 1.0 ***")
+			} else {
+				v.SetLineWidth(linkWidth)
 			}
 
 			gr.SetChanged(true)
