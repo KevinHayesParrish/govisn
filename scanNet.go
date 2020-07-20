@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strconv"
 
 	//"log"
@@ -22,11 +21,7 @@ const SCANNETVERSION = "0.0.2"
 
 func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, params g.GoSNMP) []ScannedRouter {
 
-	//	fmt.Println("\nfunc scanNet version", SCANNETVERSION, "started.")
 	log.Info("\nfunc scanNet version %s", SCANNETVERSION+"started.")
-	//	if debugFlag {
-	//		fmt.Println("seed=", seed, "community=", community)
-	//	}
 	log.Debug("seed= %s", seed+" community= %s"+community)
 
 	var scannedRouters []ScannedRouter
@@ -42,21 +37,11 @@ func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, 
 	// get all the addresses within the cidr subnet, given the input parameter.
 	subnetIPAddrs, err := getHosts(cidr)
 	if err != nil {
-		//		log.Fatal(err)
 		log.Fatal(err.Error())
 	}
-	//	if debugFlag {
-	//		fmt.Println(len(subnetIPAddrs), "Host IP Addresses to be scanned=", subnetIPAddrs)
-	//	}
 	log.Debug(strconv.Itoa(len(subnetIPAddrs)) + "Host IP Addresses to be scanned= %s" + strings.Join(subnetIPAddrs, " "))
 
 	// Query all IP Addresses in the requested CIDR subnet
-	//	err = params.Connect()
-	//	if err != nil {
-	//		log.Fatalf("Connect() err: %v", err)
-	//	}
-	//	defer params.Conn.Close()
-
 	for i := 0; i < len(subnetIPAddrs); i++ {
 		// get sysName and sysServices
 		oids := []string{
@@ -66,11 +51,11 @@ func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, 
 
 		fqdn := getRtrName(subnetIPAddrs[i])
 		params.Target = subnetIPAddrs[i]
+
 		// Build SNMP connection to Router
 		err = params.Connect()
 		if err != nil {
-			//			log.Fatalf("Connect() err: %v", err)
-			fmt.Println("Router not SNMP Enabled, or SNMP parameters incorrect. Continuing to scan CIDR.")
+			log.Warn("Router not SNMP Enabled, or SNMP parameters incorrect. Continuing to scan CIDR.")
 			params.Conn.Close()
 			continue
 		}
@@ -78,10 +63,9 @@ func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, 
 		result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 		if err != nil {
 			if strings.Contains(err.Error(), "Request timeout") || strings.Contains(err.Error(), "connection refused") {
-				fmt.Println(subnetIPAddrs[i], "not answering SNMP get. Continuing network scan.")
+				log.Warn(subnetIPAddrs[i] + "not answering SNMP get. Continuing network scan.")
 				continue
 			} else {
-				//				log.Fatalf("Get() err: %v", err)
 				log.Fatal("Get() err: %v", err)
 			}
 		}
@@ -94,11 +78,7 @@ func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, 
 		params.Conn.Close()
 	}
 
-	//	if debugFlag {
-	//		fmt.Println("Returning, scannedRouters=", scannedRouters)
-	//	}
 	log.Debug("Returning, scannedRouters= %v", scannedRouters)
-	//	fmt.Println("func scanNet", SCANNETVERSION, "ended.")
 	log.Info("func scanNet %s", SCANNETVERSION+" ended.")
 	return scannedRouters
 }
