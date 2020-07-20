@@ -92,10 +92,9 @@ func main() {
 
 	if *discoverFlag != "" {
 		seed = *discoverFlag
-		if *debugFlag {
-			log.Debug("seed= %s", seed+
-				"community= %s"+*community)
-		}
+		//		if *debugFlag {
+		log.Debug("seed= %s", seed+" community= %v"+*community)
+		//		}
 
 		snmpPort := "161"
 		snmpTarget := seed
