@@ -621,6 +621,7 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 
 	// Retrieve Router info from database
 	router := RetrieveRouter(debugFlag, router3DName, databaseForRead, app)
+	log.Debug("router= %v", router)
 
 	// Add Router info to 3D scene
 	fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
@@ -713,7 +714,8 @@ func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB
 
 	var UpTime uint32
 	// Retrive Router from the database
-	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers WHERE RouterID = ?", router3DName)
+	//	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers WHERE RouterID = ?", router3DName)
+	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = ?", router3DName)
 	if queryErr != nil {
 		log.Fatal("databaseForRead Query Router error %v", queryErr)
 	}
