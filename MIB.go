@@ -27,6 +27,10 @@ const ifOutOctets string = "1.3.6.1.2.1.2.2.1.16"
 // Asn1BER is the type of the SNMP PDU
 type Asn1BER byte
 
+// Copyright 2020 Kevin Hayes Parrish. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Asn1BER's - http://www.ietf.org/rfc/rfc1442.txt
 const (
 	EndOfContents     Asn1BER = 0x00
