@@ -889,7 +889,8 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 			if strings.Contains(err.Error(), "Request timeout") {
 				log.Warn("Router %s", snmpTarget+" SNMP Timeout. Continuing.")
 			} else {
-				log.Fatal("Get() err %v", err)
+				//				log.Fatal("Get() err %v", err)
+				log.Warn("SNMP Get() error: %v", err)
 			}
 		}
 		if result == nil {
