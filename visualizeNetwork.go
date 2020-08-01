@@ -17,7 +17,6 @@ import (
 	"github.com/g3n/engine/camera"
 	"github.com/g3n/engine/renderer"
 	"github.com/g3n/engine/util"
-	"github.com/g3n/engine/util/helper"
 	"github.com/g3n/engine/util/logger"
 	"github.com/g3n/engine/util/stats"
 	g "github.com/soniah/gosnmp"
@@ -140,9 +139,9 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 	//	gv.scene.Add(dirLight)
 
 	// Add an axis helper to the scene
-	axes := helper.NewAxes(1)
-	axes.SetName("helperAxes")
-	gv.scene.Add(axes)
+	//axes := helper.NewAxes(1)
+	//axes.SetName("helperAxes")
+	//gv.scene.Add(axes)
 
 	// Set background color to black
 	a.Gls().ClearColor(0.0, 0.0, 0.0, 0.0)
@@ -182,10 +181,11 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 
 	// Create a sphere representing the globe
 	globe3D := geometry.NewSphere(globeRadius, 16, 16)
-	globeMat := material.NewStandard(&math32.Color{R: 1.0, G: 1.0, B: 1.0}) // White 255, 255, 255
+	//globeMat := material.NewStandard(&math32.Color{R: 1.0, G: 1.0, B: 1.0}) // White 255, 255, 255
+	globeMat := material.NewStandard(math32.NewColor("grey"))
 	globeMat.AddTexture(globeTex)
 	globeMat.SetTransparent(true)
-	globeMat.SetOpacity(.50)
+	globeMat.SetOpacity(.30)
 
 	globeMesh := graphic.NewMesh(globe3D, globeMat)
 	globeMesh.SetName("globe")
@@ -365,7 +365,8 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 
 		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
 
-		mat := material.NewStandard(math32.NewColor("White"))
+		//mat := material.NewStandard(math32.NewColor("White"))
+		mat := material.NewStandard(math32.NewColor("grey"))
 
 		// Check Runtime environment.
 		// OpenGL Implementation on MacOS will only accept Line width of 1.0
@@ -919,15 +920,17 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 			var linkColor = math32.ColorName("white")
 			var linkWidth float32 = 1.0
 
+			//linkUtil = 0.76 // **** TESTING ONLY. REMOVE WHEN TESTING COMPLETED ****
+
 			if linkUtil < 0.75 {
 				linkColor = math32.ColorName("lime") // Lime Green
 				linkWidth = 1.0
 			} else if linkUtil >= 0.75 && linkUtil < 0.90 {
 				linkColor = math32.ColorName("yellow") // Yellow
-				linkWidth = 2.0
+				linkWidth = 2.5
 			} else if linkUtil >= 0.90 && linkUtil <= 1.0 {
 				linkColor = math32.ColorName("red") // Red
-				linkWidth = 3.0
+				linkWidth = 5.0
 			}
 			log.Debug("linkColor = %v", linkColor)
 			log.Debug("linkWidth = %f", linkWidth)
