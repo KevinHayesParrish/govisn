@@ -7,6 +7,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"fmt"
 	"math"
 	"strconv"
 	"time"
@@ -22,7 +23,7 @@ import (
  */
 
 //GOVISNVERSION is the file version number
-const GOVISNVERSION = "0.9.0"
+const GOVISNVERSION = "0.10.0"
 
 var log *logger.Logger
 
@@ -67,6 +68,7 @@ func main() {
 
 	flag.Parse() // Scan the arguments list
 	if *versionFlag {
+		fmt.Println("GoVision version", GOVISNVERSION)
 		return
 	}
 
