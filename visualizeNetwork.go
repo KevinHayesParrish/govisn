@@ -41,6 +41,9 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// VISUALIZENETWORKVERSION is the version number of the visualizeNetwork func
+const VISUALIZENETWORKVERSION = "0.3.1"
+
 // App contains the application state
 type App struct {
 	*app.Application                // Embedded standard application object
@@ -76,7 +79,7 @@ type Raycast struct {
 }
 
 func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *sql.DB {
-	const VISUALIZENETWORKVERSION = "0.3.1"
+	//	const VISUALIZENETWORKVERSION = "0.3.1"
 	log.Debug("visualizeNetwork %s", VISUALIZENETWORKVERSION+" started")
 
 	// Retrieve the Routers table
@@ -145,6 +148,8 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 
 	// Set background color to black
 	a.Gls().ClearColor(0.0, 0.0, 0.0, 0.0)
+
+	gv = addTitle(log, gv)
 
 	// Build Menus
 	buildMenus(debugFlag, gv, a, databaseForRead)
@@ -1016,3 +1021,49 @@ func (t *Raycast) Update(a *app.Application, deltaTime time.Duration) {}
 
 // Cleanup is called once at the end of the demo.
 func (t *Raycast) Cleanup(a *app.Application) {}
+
+// Add a title to the scene
+func addTitle(log *logger.Logger, gv *gvapp) *gvapp {
+
+	//	fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
+	//	font, err := text.NewFont(fontfile)
+	//	if err != nil {
+	//		log.Fatal("Error loading font %s" + err.Error() + "\n Insure govisn /data/fonts is copied to GOBIN")
+	//	}
+
+	//	font.SetLineSpacing(1.0)
+	//	font.SetPointSize(100)
+	//	font.SetDPI(72)
+	//	font.SetFgColor(&math32.Color4{R: 0, G: 0, B: 0, A: 1})
+	//	font.SetBgColor(&math32.Color4{R: 1, G: 1, B: 1, A: 0.8})
+	//canvas := text.NewCanvas(300, 200, &math32.Color4{R: 1, G: 1, B: 1, A: 0.8})
+	//	rtext := "GoVisn version " + GOVISNVERSION
+	//	swidth, sheight := font.MeasureText(rtext)
+	//	canvas := text.NewCanvas(swidth, sheight, &math32.Color4{R: 1, G: 1, B: 1, A: 1})
+	//	canvas.DrawText(0, 0, rtext, font)
+	//	tex3 := texture.NewTexture2DFromRGBA(canvas.RGBA)
+	//	mat3 := material.NewStandard(&math32.Color{R: 1, G: 1, B: 1})
+	//	mat3.AddTexture(tex3)
+	//	aspect := float32(swidth) / float32(sheight)
+	//	mesh3 := graphic.NewSprite(aspect, 1, mat3)
+	//	mesh3.SetPosition(10.0, 10.0, 0.0)
+	//	gv.scene.Add(title)
+
+	//	titleLines := []string{
+	//		"GoVision version " + GOVISNVERSION,
+	//		"Copyright 2020 Kevin Hayes Parrish",
+	//		"All rights reserved.",
+	//	}
+	title := gui.NewLabel("GoVision version " + GOVISNVERSION)
+	//	title := gui.NewLabel(strings.Join(titleLines, "  "))
+	title.SetPosition(100, 0)
+	title.SetBordersColor(math32.NewColor("grey"))
+	title.SetBgColor(math32.NewColor("black"))
+	title.SetColor(math32.NewColor("white"))
+	title.SetBorders(1, 1, 1, 1)
+	title.SetPaddings(5, 5, 5, 5)
+	title.SetFontSize(15)
+	gv.scene.Add(title)
+
+	return gv
+}
