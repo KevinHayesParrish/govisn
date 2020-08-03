@@ -441,15 +441,35 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		}
 	}
 
+	// Creating a 60 second timer for auto link update feature
+	linkUpdateTimer := time.NewTimer(60 * time.Second)
+	updateLinksOK := false
+
 	// Run the application
 	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(gv.scene, gv.cam)
-		if NetPollingEnabled {
+
+		// Notifying channel under go function
+		go func() {
+			<-linkUpdateTimer.C
+
+			// set NetPollingEnabled switch when timer is fired
+			//NetPollingEnabled = true
+			if NetPollingEnabled {
+				updateLinksOK = true
+			}
+
+			// Reset the linkUpdateTimer to 60 seconds
+			linkUpdateTimer.Reset(60 * time.Second)
+			log.Info("linkUpdateTimer Reset")
+		}()
+
+		//		if NetPollingEnabled {
+		if updateLinksOK {
 			gv = updateLinks(log, gv, databaseForRead, snmpTarget, community, params)
-			// Sleep for 10 seconds
-			//time.Sleep(10 * time.Second)
-			NetPollingEnabled = false
+			//			NetPollingEnabled = false
+			updateLinksOK = false
 		}
 	})
 
@@ -559,8 +579,10 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 
 	// Create linksMenu and add it to the menu bar
 	m2 := gui.NewMenu()
-	m2.AddOption("Update Network Links").
+	m2.AddOption("Enable Auto-Link Update").
 		SetId("Enable Polling")
+	m2.AddOption("Disable Auto-Link Update").
+		SetId("Disable Polling")
 	mb.AddMenu("Links", m2).
 		SetId("Enable").
 		SetShortcut(window.ModAlt, window.Key1)
