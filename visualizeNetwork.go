@@ -579,9 +579,9 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 
 	// Create linksMenu and add it to the menu bar
 	m2 := gui.NewMenu()
-	m2.AddOption("Enable Auto-Link Update").
+	m2.AddOption("Enable Auto-Update Links").
 		SetId("Enable Polling")
-	m2.AddOption("Disable Auto-Link Update").
+	m2.AddOption("Disable Auto-Update Links").
 		SetId("Disable Polling")
 	mb.AddMenu("Links", m2).
 		SetId("Enable").
