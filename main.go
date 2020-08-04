@@ -23,7 +23,7 @@ import (
  */
 
 //GOVISNVERSION is the file version number
-const GOVISNVERSION = "0.10.0"
+const GOVISNVERSION = "0.10.1"
 
 var log *logger.Logger
 
@@ -42,7 +42,7 @@ var DbName = flag.String("f", "govisnDiscoveredNet.db", "Name of the discovered 
 var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 
 //discoverFlag is the option to discover a network
-var discoverFlag = flag.String("di", "", "Discover a network using seed IP Address")
+var discoverFlag = flag.String("di", "", "Discover a network using a seed IP Address")
 
 var seed = "127.0.0.1"
 
