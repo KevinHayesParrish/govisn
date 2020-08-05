@@ -188,7 +188,7 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 	globe3D := geometry.NewSphere(globeRadius, 16, 16)
 	//globeMat := material.NewStandard(&math32.Color{R: 1.0, G: 1.0, B: 1.0}) // White 255, 255, 255
 	globeMat := material.NewStandard(math32.NewColor("grey"))
-	globeMat.AddTexture(globeTex)
+	//globeMat.AddTexture(globeTex)
 	globeMat.SetTransparent(true)
 	globeMat.SetOpacity(.30)
 
