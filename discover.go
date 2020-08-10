@@ -43,52 +43,19 @@ func discover(debugFlag bool, log *logger.Logger, dbName string, snmpTarget stri
 	// Get Router attributes
 	var router Router
 
-	/*
-		snmpPort := "161"
-		if len(snmpTarget) <= 0 {
-			log.Fatalf("environment variable not set: GOSNMP_TARGET")
-		} else {
-			if debugFlag {
-				fmt.Println("snmpTarget=", snmpTarget)
-			}
-		}
-		if len(snmpPort) <= 0 {
-			log.Fatalf("environment variable not set: GOSNMP_PORT")
-		}
-		port, _ := strconv.ParseUint(snmpPort, 10, 16)
-
-		// GoSNMP struct
-		params := &g.GoSNMP{
-			Target:    snmpTarget,
-			Port:      uint16(port),
-			Community: community,
-			Version:   g.Version2c,
-			Timeout:   time.Duration(2) * time.Second,
-			Logger:    nil,
-			MaxOids:   6,
-		}
-	*/
-	//	if debugFlag {
-	//		fmt.Println("params=", params)
-	//	}
 	log.Debug("params= %v", params)
 
 	err := params.Connect()
 	if err != nil {
-		//		log.Fatalf("Connect() err: %v", err)
 		log.Fatal("Connect() err: %v", err)
 	}
 	defer params.Conn.Close()
 
 	// Initialize the database
-	//	database = initDB(debugFlag, database)
 	database = initDB(debugFlag, log, database)
 
 	getRouterInfo(debugFlag, log, snmpTarget, community, maxHopsStr, params, router, database)
 
-	//	if debugFlag {
-	//		fmt.Println("func discovery version", DISCOVERYVERSION, "ended.")
-	//	}
 	log.Debug("func discovery version %s", DISCOVERYVERSION+" ended.")
 
 	return database
