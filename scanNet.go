@@ -67,7 +67,7 @@ func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, 
 		result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 		if err != nil {
 			if strings.Contains(err.Error(), "Request timeout") || strings.Contains(err.Error(), "connection refused") {
-				log.Warn(subnetIPAddrs[i] + "not answering SNMP get. Continuing network scan.")
+				log.Warn(subnetIPAddrs[i] + " not answering SNMP get. Continuing network scan.")
 				continue
 			} else {
 				log.Fatal("Get() err: %v", err)
