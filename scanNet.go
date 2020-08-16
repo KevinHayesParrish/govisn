@@ -25,8 +25,8 @@ const SCANNETVERSION = "0.0.2"
 
 func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, params g.GoSNMP) []ScannedRouter {
 
-	log.Info("\nfunc scanNet version %s", SCANNETVERSION+"started.")
-	log.Debug("seed= %s", seed+" community= %s"+community)
+	log.Info("\nfunc scanNet version %s ", SCANNETVERSION+"started.")
+	log.Debug("seed= %s", seed+" community= %s "+community)
 
 	var scannedRouters []ScannedRouter
 
@@ -43,7 +43,7 @@ func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	log.Debug(strconv.Itoa(len(subnetIPAddrs)) + "Host IP Addresses to be scanned= %s" + strings.Join(subnetIPAddrs, " "))
+	log.Debug(strconv.Itoa(len(subnetIPAddrs)) + "Host IP Addresses to be scanned= %s " + strings.Join(subnetIPAddrs, " "))
 
 	// Query all IP Addresses in the requested CIDR subnet
 	for i := 0; i < len(subnetIPAddrs); i++ {
