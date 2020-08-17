@@ -125,31 +125,6 @@ func main() {
 		seed = *discoverFlag
 		log.Debug("seed= %s", seed+" community= "+*community)
 
-		//		snmpPort := "161"
-		//		snmpTarget := seed
-		//		if len(snmpTarget) <= 0 {
-		//			log.Fatal("environment variable not set: GOSNMP_TARGET")
-		//		} else {
-		//			if *debugFlag {
-		//				log.Debug("snmpTarget= %s", snmpTarget)
-		//			}
-		//		}
-		//		if len(snmpPort) <= 0 {
-		//			log.Fatal("environment variable not set: GOSNMP_PORT")
-		//		}
-		//		port, _ := strconv.ParseUint(snmpPort, 10, 16)
-
-		// GoSNMP struct
-		//		params := &g.GoSNMP{
-		//			Target:    snmpTarget,
-		//			Port:      uint16(port),
-		//			Community: *community,
-		//			Version:   g.Version2c,
-		//			Timeout:   time.Duration(2) * time.Second,
-		//			Logger:    nil,
-		//			MaxOids:   6,
-		//		}
-
 		// Open the database connection
 		database, err := sql.Open("sqlite3", dbName)
 		if err != nil {
@@ -158,7 +133,9 @@ func main() {
 
 		// Discover the network
 		params.Target = seed
-		database = discover(*debugFlag, log, dbName, seed, *community, params, *maxHops, database)
+		//		database = discover(*debugFlag, log, dbName, seed, *community, params, *maxHops, database)
+		routerList := walkRouteTable(log, seed, *community, params)
+		log.Debug("routerList discovered by walkRouteTable = %s", routerList)
 
 		// Close database. Completed initialization and update of all tables, except Links.
 		database.Close()
