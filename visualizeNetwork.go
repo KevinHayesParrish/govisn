@@ -1071,16 +1071,17 @@ func addTitle(log *logger.Logger, gv *gvapp) *gvapp {
 	//	mesh3.SetPosition(10.0, 10.0, 0.0)
 	//	gv.scene.Add(title)
 
-	//	titleLines := []string{
-	//		"GoVision version " + GOVISNVERSION,
-	//		"Copyright 2020 Kevin Hayes Parrish",
-	//		"All rights reserved.",
-	//	}
-	title := gui.NewLabel("GoVision version " + GOVISNVERSION)
-	//	title := gui.NewLabel(strings.Join(titleLines, "  "))
+	titleLines := []string{
+		"                  GoVision version " + GOVISNVERSION,
+		"\nNetwork Visualization in 3D from " + *DbName,
+		//		"Copyright 2020 Kevin Hayes Parrish",
+		//		"All rights reserved.",
+	}
+	title := gui.NewLabel(strings.Join(titleLines, "  "))
+	//title := gui.NewLabel("GoVision version " + GOVISNVERSION)
 	title.SetPosition(100, 0)
 	title.SetBordersColor(math32.NewColor("grey"))
-	title.SetBgColor(math32.NewColor("black"))
+	title.SetBgColor(math32.NewColor("blue"))
 	title.SetColor(math32.NewColor("white"))
 	title.SetBorders(1, 1, 1, 1)
 	title.SetPaddings(5, 5, 5, 5)
