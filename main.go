@@ -134,8 +134,10 @@ func main() {
 		// Discover the network
 		params.Target = seed
 		//		database = discover(*debugFlag, log, dbName, seed, *community, params, *maxHops, database)
-		routerList := walkRouteTable(log, seed, *community, params)
-		log.Debug("routerList discovered by walkRouteTable = %s", routerList)
+		//		routerList := walkRouteTable(log, seed, *community, params)
+		walkRouteTableMap := walkRouteTableMap(log, seed, *community, params)
+		//		log.Debug("routerList discovered by walkRouteTable = %s", routerList)
+		log.Debug("walkRouteTableMap = %v", walkRouteTableMap)
 
 		// Close database. Completed initialization and update of all tables, except Links.
 		database.Close()
