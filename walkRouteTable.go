@@ -84,3 +84,48 @@ func walkRouteTable(log *logger.Logger, seed string, community string, params *g
 	log.Info("\nfunc walkRouteTable version %s ", WALKROUTETABLEVERSION+" ended.")
 	return scannedRouters
 }
+
+func walkRouteTableMap(log *logger.Logger, seed string, community string, params *g.GoSNMP) map[string]string {
+
+	log.Info("\nfunc walkRouteTableMap version %s", WALKROUTETABLEVERSION+" started.")
+	log.Debug("seed= %s", seed+" community= "+community)
+
+	fqdn := getRtrName(seed)
+	params.Target = seed
+
+	// Build SNMP connection to Router
+	err := params.Connect()
+	if err != nil {
+		log.Warn("Router not SNMP Enabled, or SNMP parameters incorrect. Continuing to scan CIDR.")
+		params.Conn.Close()
+	}
+
+	scannedRouterMap := make(map[string]string)
+
+	// Add seed router to list of routers
+	fqdn = getRtrName(seed)
+	scannedRouterMap[fqdn[0]] = seed
+
+	// Retrieve the route table and add each Next Hop address to the list of routers
+	ipRouteNextHopPDU, err := params.WalkAll(ipRouteNextHopOID)
+	if err != nil {
+		log.Fatal("Get(ipRouteNextHopPDU) err")
+	}
+	log.Debug("\nipRouteNextHopPDU PDU= %v", ipRouteNextHopPDU)
+
+	for i := 0; i < len(ipRouteNextHopPDU); i++ {
+		fqdn = getRtrName(ipRouteNextHopPDU[i].Value.(string))
+		scannedRouterMap[fqdn[0]] = ipRouteNextHopPDU[i].Value.(string)
+	}
+
+	nbrOfRouters := len(scannedRouters)
+	for j := 0; j < nbrOfRouters; j++ {
+		params.Target = scannedRouters[j].IPAddress
+		log.Debug("Recusively calling walkRouteTable." + scannedRouters[j].IPAddress + " params.Target=" + params.Target)
+		scannedRouterMap = walkRouteTableMap(log, scannedRouters[j].IPAddress, community, params)
+	}
+
+	params.Conn.Close()
+	log.Info("\nfunc walkRouteTableMap version %s ", WALKROUTETABLEVERSION+" ended.")
+	return scannedRouterMap
+}
