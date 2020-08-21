@@ -118,11 +118,17 @@ func walkRouteTableMap(log *logger.Logger, seed string, community string, params
 		scannedRouterMap[fqdn[0]] = ipRouteNextHopPDU[i].Value.(string)
 	}
 
-	nbrOfRouters := len(scannedRouters)
+	// retrieve IP Addresses of scanned routers
+	var IPAddresses []string
+	for _, IPAddress := range scannedRouterMap {
+		IPAddresses = append(IPAddresses, IPAddress)
+	}
+
+	nbrOfRouters := len(scannedRouterMap)
 	for j := 0; j < nbrOfRouters; j++ {
-		params.Target = scannedRouters[j].IPAddress
-		log.Debug("Recusively calling walkRouteTable." + scannedRouters[j].IPAddress + " params.Target=" + params.Target)
-		scannedRouterMap = walkRouteTableMap(log, scannedRouters[j].IPAddress, community, params)
+		params.Target = IPAddresses[j]
+		log.Debug("Recusively calling walkRouteTable." + IPAddresses[j] + " params.Target=" + params.Target)
+		scannedRouterMap = walkRouteTableMap(log, IPAddresses[j], community, params)
 	}
 
 	params.Conn.Close()
