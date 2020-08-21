@@ -108,6 +108,9 @@ func walkRouteTableMap(log *logger.Logger, seed string, community string, params
 
 	// Retrieve the route table and add each Next Hop address to the list of routers
 	ipRouteNextHopPDU, err := params.WalkAll(ipRouteNextHopOID)
+
+	// TODO = Allow for no SNMP agent on router
+
 	if err != nil {
 		log.Fatal("Get(ipRouteNextHopPDU) err")
 	}
