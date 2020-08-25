@@ -4,6 +4,8 @@ import (
 
 	//"log"
 
+	"strings"
+
 	"github.com/g3n/engine/util/logger"
 	_ "github.com/mattn/go-sqlite3"
 	g "github.com/soniah/gosnmp"
@@ -107,12 +109,20 @@ func walkRouteTableMap(log *logger.Logger, seed string, community string, params
 	scannedRouterMap[fqdn[0]] = seed
 
 	// Retrieve the route table and add each Next Hop address to the list of routers
+	// TODO = Allow for no SNMP agent on router
 	ipRouteNextHopPDU, err := params.WalkAll(ipRouteNextHopOID)
 
-	// TODO = Allow for no SNMP agent on router
-
+	//	if err != nil {
+	//		log.Fatal("Get(ipRouteNextHopPDU) err")
+	//	}
 	if err != nil {
-		log.Fatal("Get(ipRouteNextHopPDU) err")
+		if strings.Contains(err.Error(), "Request timeout") || strings.Contains(err.Error(), "connection refused") {
+			log.Warn(seed + " not answering SNMP get. Continue walking route table.")
+			return scannedRouterMap
+			//		} else {
+			//			log.Fatal("Get() err: %v", err)
+		}
+		log.Fatal("Get() err: %v", err)
 	}
 	log.Debug("\nipRouteNextHopPDU PDU= %v", ipRouteNextHopPDU)
 
