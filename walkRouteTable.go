@@ -4,6 +4,7 @@ import (
 
 	//"log"
 
+	"strconv"
 	"strings"
 
 	"github.com/g3n/engine/util/logger"
@@ -141,7 +142,17 @@ func walkRouteTableMap(log *logger.Logger, seed string, community string, params
 	for j := 0; j < nbrOfRouters; j++ {
 		params.Target = IPAddresses[j]
 		log.Debug("Recusively calling walkRouteTable." + IPAddresses[j] + " params.Target=" + params.Target)
-		scannedRouterMap = walkRouteTableMap(log, IPAddresses[j], community, params)
+		walkedHops++
+		strMaxHops, err := strconv.Atoi(*maxHops)
+		if err != nil {
+			log.Fatal("walkRouteTable: strconv eror.")
+		}
+		if walkedHops < strMaxHops {
+			scannedRouterMap = walkRouteTableMap(log, IPAddresses[j], community, params)
+		} else {
+			log.Debug("end of recursion.")
+			break
+		}
 	}
 
 	params.Conn.Close()
