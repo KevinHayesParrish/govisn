@@ -47,7 +47,7 @@ var discoverFlag = flag.String("di", "", "Discover a network using a seed IP Add
 var seed = "127.0.0.1"
 
 var community = flag.String("co", "public", "SNMP Community ReadOnly String")
-var maxHops = flag.String("m", "0", "Scope of discovery. Maximum number of Hops from seed.")
+var maxHops = flag.String("m", "10", "Scope of discovery. Maximum number of Hops from seed.")
 var visualizeFlag = flag.Bool("vi", false, "Visualize the Network.")
 
 //scanNetFlag is the startup option to scan the network for SNMP capable routers.
@@ -58,6 +58,9 @@ const routerRadius float64 = 0.5
 
 //globeRadius is the radius of the 3D object representing the earth
 const globeRadius float64 = 63.7
+
+//walkedHops is the number of hops walked away from the seed
+var walkedHops = 0
 
 func main() {
 
@@ -135,14 +138,16 @@ func main() {
 		params.Target = seed
 		//		database = discover(*debugFlag, log, dbName, seed, *community, params, *maxHops, database)
 		//		routerList := walkRouteTable(log, seed, *community, params)
-		walkRouteTableMap := walkRouteTableMap(log, seed, *community, params)
+		//		walkRouteTableMap := walkRouteTableMap(log, seed, *community, params)
+		//		walkRouteTableMap := walkRouteTableMap(log, seed, *community, params)
+		scannedRouterMap := walkRouteTableMap(log, seed, *community, params)
 		//		log.Debug("routerList discovered by walkRouteTable = %s", routerList)
-		log.Debug("walkRouteTableMap = %v", walkRouteTableMap)
+		log.Debug("scannedRouterMap = %v", scannedRouterMap)
 
 		// Close database. Completed initialization and update of all tables, except Links.
 		database.Close()
 
-		if len(walkRouteTableMap) < 1 {
+		if len(scannedRouterMap) < 1 {
 			log.Warn("No routers discovered. Ending execution.")
 			return
 		}
@@ -153,6 +158,25 @@ func main() {
 			log.Fatal("sql.Open() err: %v", err)
 		}
 
+		for _, IPAddress := range scannedRouterMap {
+
+			// Discover the router's information and add to database
+			params.Target = IPAddress
+			database = discover(*debugFlag, log, dbName, IPAddress, *community, params, *maxHops, database)
+
+			// Close database. Completed initialization and update of all tables, except Links.
+			database.Close()
+
+			// Open database. buildLinks joins Router and RouteTable tables.
+			database, err = sql.Open("sqlite3", dbName)
+			if err != nil {
+				log.Fatal("sql.Open() err %v", err)
+			}
+
+			// Build Links
+			database = buildLinks(*debugFlag, log, database)
+
+		}
 		// Build Links
 		database = buildLinks(*debugFlag, log, database)
 		database.Close()
