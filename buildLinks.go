@@ -7,6 +7,7 @@ package main
 import (
 	"database/sql"
 	"hash/crc32"
+	"os"
 
 	//"log"
 	"strings"
@@ -35,7 +36,11 @@ func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
 	routeTableRows, err := database.Query("SELECT RouterID, Name, DestAddr, IPRouteIfIndex, NextHop FROM Routers INNER JOIN RouteTable USING (RouterID)")
 	if err != nil {
 		//		log.Fatalln("databaseForRead JOIN error", err.Error())
-		log.Fatal("databaseForRead JOIN error")
+		//		log.Fatal("databaseForRead JOIN error. %s", err.Error())
+		log.Warn("buildLinks. databaseForRead JOIN error. %s", err.Error())
+		log.Warn("No Routers Discovered. Check that all routers support SNMP with MIB II.")
+		os.Exit(1)
+		//		return database
 	}
 	defer routeTableRows.Close()
 
