@@ -688,7 +688,7 @@ func getRouterInfo(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 	if err != nil {
 		//		log.Fatalf("Get() err: %v", err)
-		log.Fatal("Get() err")
+		log.Fatal("Get() err %s", err.Error())
 	}
 
 	// get FQDN with IP Address
