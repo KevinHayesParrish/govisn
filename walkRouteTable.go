@@ -117,7 +117,7 @@ func walkRouteTableMap(log *logger.Logger, seed string, community string, params
 	//	}
 	if err != nil {
 		if strings.Contains(err.Error(), "Request timeout") || strings.Contains(err.Error(), "connection refused") {
-			log.Warn(seed + " not answering SNMP get. Continue walking route table.")
+			log.Warn("walkRouteTable: " + seed + " not answering SNMP get. Continue walking route table.")
 			return scannedRouterMap
 			//		} else {
 			//			log.Fatal("Get() err: %v", err)
