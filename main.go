@@ -142,6 +142,11 @@ func main() {
 		// Close database. Completed initialization and update of all tables, except Links.
 		database.Close()
 
+		if len(walkRouteTableMap) < 1 {
+			log.Warn("No routers discovered. Ending execution.")
+			return
+		}
+
 		// Open database. buildLinks joins Router and RouteTable tables.
 		database, err = sql.Open("sqlite3", dbName)
 		if err != nil {
