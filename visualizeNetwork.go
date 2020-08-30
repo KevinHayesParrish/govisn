@@ -230,10 +230,12 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		// Set coordinates and altitude
 		x, y, z = calcCoordinates(GpsLat, GpsLong, GpsAlt)
 
-		log.Debug("x = %s", strconv.FormatFloat(float64(x), 'f', 5, 32)+"y = %s"+strconv.FormatFloat(float64(y), 'f', 5, 32)+"z = %s"+strconv.FormatFloat(float64(z), 'f', 5, 32))
+		//		log.Debug("x = %s", strconv.FormatFloat(float64(x), 'f', 5, 32)+"y = %s"+strconv.FormatFloat(float64(y), 'f', 5, 32)+"z = %s"+strconv.FormatFloat(float64(z), 'f', 5, 32))
+		log.Debug("x = %s", strconv.FormatFloat(float64(x), 'f', 5, 32)+"y = "+strconv.FormatFloat(float64(y), 'f', 5, 32)+"z = "+strconv.FormatFloat(float64(z), 'f', 5, 32))
 		log.Debug("router = %v", routers[routerArrayIndex])
 		log.Debug("router.System.GPS = %s", routers[routerArrayIndex].System.GPS)
-		log.Debug("RouterID= %s", strconv.Itoa(RouterID)+"Name= %s"+Name)
+		//		log.Debug("RouterID= %s", strconv.Itoa(RouterID)+"Name= %s"+Name)
+		log.Debug("RouterID= %s", strconv.Itoa(RouterID)+"Name= "+Name)
 
 		// Add Router object to 3D scene.
 		cylinderMesh.SetPosition(x, y, z)
@@ -324,7 +326,8 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 		FromRouterX = linksFromRouterGpsLat
 		FromRouterY = linksFromRouterGpsLong
 		FromRouterZ = linksFromRouterGpsAlt
-		log.Debug("returned from getRouterCoordinatesName func: FromRouterX= %s", FromRouterX+" FromRouterY= %s"+FromRouterY+" FromRouterZ= %s"+FromRouterZ)
+		//		log.Debug("returned from getRouterCoordinatesName func: FromRouterX= %s", FromRouterX+" FromRouterY= %s"+FromRouterY+" FromRouterZ= %s"+FromRouterZ)
+		log.Debug("returned from getRouterCoordinatesName func: FromRouterX= %s", FromRouterX+" FromRouterY= "+FromRouterY+" FromRouterZ= "+FromRouterZ)
 
 		//  Query database for FromRouter GPS coordinates
 		log.Debug("ToRouterName= %s", link.ToRouterName)
