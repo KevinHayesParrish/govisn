@@ -4,6 +4,13 @@ Please review the LICENSE file before usinging the application.
 
 A 3D network visualization tool written in golang.
 
+## Prerequisites
+1. All routers to be discovered must support SNMP to properly discover the network.
+2. All routers to be discovered must have DNS TXT records providing GPS Lat, Long and Altitude. This allows for proper placement of the router object on the surface of a sphere, which represents the Earth. Example:  
+      1. router.domain.home. TXT 86400 "Lat=38.889847"  
+      2. router.domain.home. TXT 86400 "Long=-77.011325"  
+      3. router.domain.home. TXT 86400 "Alt=100"  
+
 ## History of the Project
 This project is a continuation of the work that started with Java application **vrmlNet**, which was developed in 1998. vrmlNet created VRML code that could be rendered by VRML Browser Plug-ins.
 
@@ -19,11 +26,16 @@ Dynamic updates of the 3D model are still under development. This feature will p
 
 ## Attributions
 
-GoVisn is written in the go language and uses [go-sqlite3](https://github.com/mattn/go-sqlite3), [gosnmp](https://github.com/soniah/gosnmp) and [G3N](https://github.com/g3n/engine) libraries for their database, SNMP and 3D rendering capabilities. Many thanks to the authors of these libraries for the use of their work. Yasuhiro Matsumoto (a.k.a mattn) and G.J.R. Timmer for [go-sqlite3](https://github.com/mattn/go-sqlite3), Sonia Hamilton, sonia@snowfrog.net for [gosnmp](https://github.com/soniah/gosnmp), and Daniel Salvadori and leonsal for [G3N](https://github.com/g3n/engine). I stand on the shoulders of giants.
+GoVisn is written in the go language and uses [go-sqlite3](https://github.com/mattn/go-sqlite3), [gosnmp](https://github.com/soniah/gosnmp) and [G3N](https://github.com/g3n/engine) libraries for their database, SNMP and 3D rendering capabilities. Many thanks to the authors of these libraries for the use of their work.  
+1. Yasuhiro Matsumoto (a.k.a mattn) and G.J.R. Timmer for [go-sqlite3](https://github.com/mattn/go-sqlite3), 
+2. Sonia Hamilton, sonia@snowfrog.net for [gosnmp](https://github.com/soniah/gosnmp), and 
+3. Daniel Salvadori and leonsal for [G3N](https://github.com/g3n/engine).  
+
+I stand on the shoulders of giants.
   
 ## Caveats  
 1. The Apple MacOS implementation of G3N only allows a linewidth of 1. Therefore, on MacOS implementations of GoVisn, the network links will always be a linewidth of 1, regardless of the link utilization percentage.  
-2. The technique to disover the Layer 3 network using a single router seed address to is still under development. I need to port the resursion algorithm from the Java V15N app to golang.  
+2. When executing GoVisn on a monitor with 16x10 aspect ration (a laptop, for instance), G3N may not properly support the menu bars and items. Mouse clicking may also not be accurate. There may be a bug in the G3N implementation, or I may not be properly utilizing G3N.
 
 ## Usage of GoVisn:
 govisn *options*
@@ -34,7 +46,8 @@ govisn *options*
 >
 >**-co** *string*  
 >> SNMP Community ReadOnly String  
->> *(default: "public")*
+>> *(default: "public")*  
+>> Currently, only one SNMP Community in the option is allowed. If multiple SNMP communities exist with the network to be discovered, then multiple executions of GoVision will be necessary to update the database with all routers in the network.
 >
 >**-cr**  
 >> Create a sample database.  
@@ -45,7 +58,7 @@ govisn *options*
 >
 >**-di** *string*  
 >> Discover a network using seed IP Address  
->> **(Under development)**
+>> This option discovered the network by starting with a seed IP Address. GoVision then walks the seed router's routing table. It recursively walks routing tables to discover the network, limited by the Max Hops option.
 >
 >**-f** *string*
 >> Name of the discovered network database -or-  
@@ -57,8 +70,8 @@ govisn *options*
 >> **(DEPRECATED)**  
 >
 >**-m** *string*
->>Scope of discovery. Maximum number of Hops from seed. 
->>        *(default: "0")*
+>>Scope of discovery. Maximum number of Hops away from seed router. 
+>>        *(default: "10")*
 >
 >**-s** *string*  
 >> Scan the CIDR network for SNMP capable routers.  
@@ -75,7 +88,9 @@ govisn *options*
 ### Execution Examples
 1. Scan a subnet, create a database, then visualize the Layer 3 network.  
       govisn -s *192.168.1.0/24* -f *test.db* -vi -co *public*
-2. Visualize the Layer 3 network, using test.db database and SNMP community public  
+2. Discover the network using a seed address and Max Hops, then create the database.
+      govisn -di 192.168.1.1 -co *public* -f *test.db*
+3. Visualize the Layer 3 network, using test.db database and SNMP community public  
       govisn -vi -f test.db -co public  
-3. Visualize the Layer 3 network with Debug logging enabled.  
+4. Visualize the Layer 3 network with Debug logging enabled.  
       govisn -vi -f test.db -co public -de
