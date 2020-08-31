@@ -68,7 +68,7 @@ func getInterfaces(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 	getPDU, getError := params.Get(ifNumberArray)
 	if getError != nil {
 		//		log.Fatalf("Get() err: %v", getError)
-		log.Fatal("Get() err: %v", getError)
+		log.Fatal("Get() err: %s", getError.Error())
 	}
 	//	if debugFlag {
 	//		fmt.Println("ifNumber walkPDU=", getPDU)
@@ -685,22 +685,46 @@ func getRouterInfo(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 		sysServicesOID + ".0", // sysServices
 	}
 
-	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
-	if err != nil {
-		//		log.Fatalf("Get() err: %v", err)
-		//		log.Fatal("Get() err %s", err.Error())
-		log.Fatal("Get() err %s", err.Error()+"\nRouter not responding to SNMP Get. Continuing with network discovery.")
-	}
-
 	// get FQDN with IP Address
 	fqdn := getRtrName(snmpTarget)
 
-	router.System.Name = fqdn[0]
-	router.System.Description = string(result.Variables[1].Value.([]byte))
-	router.System.UpTime = result.Variables[2].Value.(uint32)
-	router.System.Contact = string(result.Variables[3].Value.([]byte))
-	router.System.Location = string(result.Variables[4].Value.([]byte))
-	router.System.Services = result.Variables[5].Value.(int)
+	var routerSupportsSNMP bool
+	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
+	if err != nil {
+		if strings.Contains(err.Error(), "Request timeout") {
+			log.Warn("Get() err %s", err.Error()+
+				"\nRouter "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
+
+			router.System.Name = fqdn[0]
+			router.System.Description = ""
+			router.System.UpTime = 0
+			router.System.Contact = ""
+			router.System.Location = ""
+			router.System.Services = 0
+			routerSupportsSNMP = false
+		} else {
+			log.Fatal("Get() err %s", err.Error())
+		}
+	} else {
+		routerSupportsSNMP = true
+		router.System.Name = fqdn[0]
+		router.System.Description = string(result.Variables[1].Value.([]byte))
+		router.System.UpTime = result.Variables[2].Value.(uint32)
+		router.System.Contact = string(result.Variables[3].Value.([]byte))
+		router.System.Location = string(result.Variables[4].Value.([]byte))
+		router.System.Services = result.Variables[5].Value.(int)
+
+	}
+
+	// get FQDN with IP Address
+	//fqdn := getRtrName(snmpTarget)
+
+	//	router.System.Name = fqdn[0]
+	//	router.System.Description = string(result.Variables[1].Value.([]byte))
+	//	router.System.UpTime = result.Variables[2].Value.(uint32)
+	//	router.System.Contact = string(result.Variables[3].Value.([]byte))
+	//	router.System.Location = string(result.Variables[4].Value.([]byte))
+	//	router.System.Services = result.Variables[5].Value.(int)
 
 	/*
 		// Retrieve GPS data from DNS
@@ -729,15 +753,6 @@ func getRouterInfo(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 		}
 	}
 
-	//	if debugFlag {
-	//		fmt.Println("router.System.Name=", router.System.Name)
-	//		fmt.Println("router.System.Description=", router.System.Description)
-	//		fmt.Println("router.System.UpTime=", router.System.UpTime)
-	//		fmt.Println("router.System.Contact=", router.System.Contact)
-	//		fmt.Println("router.System.Location=", router.System.Location)
-	//		fmt.Println("router.System.Services=", router.System.Services)
-	//		fmt.Println("router.System.GPS=", router.System.GPS)
-	//	}
 	log.Debug("router.System.Name= %s", router.System.Name)
 	log.Debug("router.System.Description= %s", router.System.Description)
 	log.Debug("router.System.UpTime= %d", router.System.UpTime)
@@ -776,7 +791,8 @@ func getRouterInfo(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 	}
 	defer statement.Close()
 
-	if !routerIsInDB {
+	//	if !routerIsInDB {
+	if !routerIsInDB && routerSupportsSNMP {
 		//		getInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
 		getInterfaces(debugFlag, log, snmpTarget, community, maxHopsStr, params, router, database)
 
