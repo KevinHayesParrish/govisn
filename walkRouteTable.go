@@ -17,6 +17,7 @@ var scannedRouters []ScannedRouter
 // WALKROUTETABLEVERSION is the file version number
 const WALKROUTETABLEVERSION = "0.1.0"
 
+/*
 func walkRouteTable(log *logger.Logger, seed string, community string, params *g.GoSNMP) []ScannedRouter {
 
 	log.Info("\nfunc walkRouteTable version %s", WALKROUTETABLEVERSION+" started.")
@@ -87,6 +88,7 @@ func walkRouteTable(log *logger.Logger, seed string, community string, params *g
 	log.Info("\nfunc walkRouteTable version %s ", WALKROUTETABLEVERSION+" ended.")
 	return scannedRouters
 }
+*/
 
 func walkRouteTableMap(log *logger.Logger, seed string, community string, params *g.GoSNMP) map[string]string {
 
