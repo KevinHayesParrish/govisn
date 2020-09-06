@@ -259,6 +259,11 @@ func main() {
 
 	}
 
+	if *kmlFlag != "" {
+		kmlFilename := *kmlFlag
+		exportKML(log, kmlFilename, *DbName)
+	}
+
 	if *visualizeFlag {
 		// Open the database containing the discovered network
 		log.Info("Beginning Network Visualization.")
@@ -287,11 +292,6 @@ func main() {
 			MaxOids:   6,
 		}
 		databaseForRead = visualizeNetwork(*debugFlag, log, databaseForRead, snmpTarget, *community, params)
-	}
-
-	if *kmlFlag != "" {
-		kmlFilename := *kmlFlag
-		exportKML(log, kmlFilename, *DbName)
 	}
 	log.Info("GoVisn version %s", GOVISNVERSION+" ending.")
 }
