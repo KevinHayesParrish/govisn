@@ -23,7 +23,7 @@ import (
  */
 
 //GOVISNVERSION is the file version number
-const GOVISNVERSION = "0.10.5"
+const GOVISNVERSION = "0.11.0"
 
 var log *logger.Logger
 
@@ -43,6 +43,8 @@ var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 
 //discoverFlag is the option to discover a network
 var discoverFlag = flag.String("di", "", "Discover a network using a seed IP Address")
+
+var kmlFlag = flag.String("k", "govisn.kml", "Export GoVisn database to KML format file")
 
 var seed = "127.0.0.1"
 
@@ -285,6 +287,11 @@ func main() {
 			MaxOids:   6,
 		}
 		databaseForRead = visualizeNetwork(*debugFlag, log, databaseForRead, snmpTarget, *community, params)
+	}
+
+	if *kmlFlag != "" {
+		kmlFilename := *kmlFlag
+		exportKML(log, kmlFilename, *DbName)
 	}
 	log.Info("GoVisn version %s", GOVISNVERSION+" ending.")
 }
