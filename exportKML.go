@@ -39,11 +39,9 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 	var GpsAlt string
 	k := kml.KML(
 		kml.Document(
-			//			kml.Placemark(
 			kml.Name("Routers"),
 			kml.Description("KML representation of a network."),
 		),
-		//		),
 	)
 	kmlFile, err := os.Create(kmlFilename)
 	if err != nil {
@@ -78,23 +76,21 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 
 	// Add the links to the KML document
 	// Retrieve the Links table
-	linkRows, queryErr := databaseForRead.Query("SELECT FromRouterName, ToRouterName FROM Links")
+	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouterName, ToRouterName FROM Links")
 	if queryErr != nil {
 		log.Fatal("databaseForRead Query error %v", queryErr)
 	}
 	log.Debug("Successful Links table Select")
 
-	//	var FromGpsLongFloat float64
-	//	var FromGpsLatFloat float64
-	//	var FromGpsAltFloat float64
-	//	var ToGpsLongFloat float64
-	//	var ToGpsLatFloat float64
-	//	var ToGpsAltFloat float64
 	var FromRouterName, ToRouterName string
+	var LinkID int
 	for linkRows.Next() {
-		linkRows.Scan(&FromRouterName, &ToRouterName)
+		linkRows.Scan(&LinkID, &FromRouterName, &ToRouterName)
+
+		var routerName string
 		// retrieve From Router coordinates
-		fromRouterRows, queryErr := databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name=?", FromRouterName)
+		routerName = FromRouterName
+		fromRouterRows, queryErr := databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name=?", routerName)
 		if queryErr != nil {
 			log.Fatal("databaseForRead Query error %v", queryErr)
 		}
@@ -102,7 +98,7 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 		var FromGpsLatFloat float64
 		var FromGpsAltFloat float64
 		for fromRouterRows.Next() {
-			fromRouterRows.Scan(&Name, &Description, &Location, &GpsLat, &GpsLong, &GpsAlt)
+			fromRouterRows.Scan(&Name, &GpsLat, &GpsLong, &GpsAlt)
 			s, _ := strconv.ParseFloat(GpsLong, 64)
 			FromGpsLongFloat = s
 			s, _ = strconv.ParseFloat(GpsLat, 64)
@@ -110,16 +106,18 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 			s, _ = strconv.ParseFloat(GpsAlt, 64)
 			FromGpsAltFloat = s
 		}
-		// retrieve To Router coordinates
+
+		// retrieve ToRouter coordinates
 		var ToGpsLongFloat float64
 		var ToGpsLatFloat float64
 		var ToGpsAltFloat float64
-		toRouterRows, queryErr := databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name=?", ToRouterName)
+		routerName = ToRouterName
+		toRouterRows, queryErr := databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name=?", routerName)
 		if queryErr != nil {
 			log.Fatal("databaseForRead Query error %v", queryErr)
 		}
 		for toRouterRows.Next() {
-			toRouterRows.Scan(&Name, &Description, &Location, &GpsLat, &GpsLong, &GpsAlt)
+			toRouterRows.Scan(&Name, &GpsLat, &GpsLong, &GpsAlt)
 			s, _ := strconv.ParseFloat(GpsLong, 64)
 			ToGpsLongFloat = s
 			s, _ = strconv.ParseFloat(GpsLat, 64)
@@ -127,10 +125,10 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 			s, _ = strconv.ParseFloat(GpsAlt, 64)
 			ToGpsAltFloat = s
 		}
+
 		k.Add(
 			kml.Placemark(
-				//kml.Name(Name),
-				//kml.Description(Description),
+				kml.Name(strconv.Itoa(LinkID)),
 				kml.LineString(
 					kml.Coordinates(kml.Coordinate{Lon: FromGpsLongFloat, Lat: FromGpsLatFloat, Alt: FromGpsAltFloat},
 						kml.Coordinate{Lon: ToGpsLongFloat, Lat: ToGpsLatFloat, Alt: ToGpsAltFloat}),
