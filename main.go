@@ -44,7 +44,7 @@ var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 //discoverFlag is the option to discover a network
 var discoverFlag = flag.String("di", "", "Discover a network using a seed IP Address")
 
-var kmlFlag = flag.String("k", "govisn.kml", "Export GoVisn database to KML format file")
+var kmlFlag = flag.String("k", "", "Export GoVisn database to KML format file")
 
 var seed = "127.0.0.1"
 
