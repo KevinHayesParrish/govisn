@@ -129,7 +129,7 @@
             "host": "127.0.0.1",
             "program": "/Users/kevin/go/src/govisn",
             "env": {},
-            "args": ["-k", "/Users/kevin/test.kml", "-f", "/Users/kevin/test.db", "-de"]
+            "args": ["-k", "/Users/kevin/test2.kml", "-f", "/Users/kevin/test2.db", "-de"]
         }
        ]
 }
