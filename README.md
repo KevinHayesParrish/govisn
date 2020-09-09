@@ -27,9 +27,10 @@ Dynamic updates of the 3D model are still under development. This feature will p
 ## Attributions
 
 GoVisn is written in the go language and uses [go-sqlite3](https://github.com/mattn/go-sqlite3), [gosnmp](https://github.com/soniah/gosnmp) and [G3N](https://github.com/g3n/engine) libraries for their database, SNMP and 3D rendering capabilities. Many thanks to the authors of these libraries for the use of their work.  
-1. Yasuhiro Matsumoto (a.k.a mattn) and G.J.R. Timmer for [go-sqlite3](https://github.com/mattn/go-sqlite3), 
-2. Sonia Hamilton, sonia@snowfrog.net for [gosnmp](https://github.com/soniah/gosnmp), and 
-3. Daniel Salvadori and leonsal for [G3N](https://github.com/g3n/engine).  
+1. Yasuhiro Matsumoto (a.k.a mattn) and G.J.R. Timmer for [go-sqlite3](https://github.com/mattn/go-sqlite3) 
+2. Sonia Hamilton, sonia@snowfrog.net for [gosnmp](https://github.com/soniah/gosnmp)  
+3. Daniel Salvadori and leonsal for [G3N](https://github.com/g3n/engine)  
+4. Tom Payne for [go-kml](https://github.com/twpayne/go-kml)  
 
 I stand on the shoulders of giants.
   
