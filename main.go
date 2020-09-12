@@ -23,7 +23,7 @@ import (
  */
 
 //GOVISNVERSION is the file version number
-const GOVISNVERSION = "0.11.0"
+const GOVISNVERSION = "0.11.1"
 
 var log *logger.Logger
 
@@ -103,6 +103,8 @@ func main() {
 
 	snmpPort := "161"
 	snmpTarget := seed
+	log.Debug("snmpPort=%s", snmpPort)
+	log.Debug("snmpTarget=%s", snmpTarget)
 	if len(snmpTarget) <= 0 {
 		log.Fatal("environment variable not set: GOSNMP_TARGET")
 	} else {
@@ -125,6 +127,7 @@ func main() {
 		Logger:    nil,
 		MaxOids:   6,
 	}
+	log.Debug("params=%v", params)
 
 	if *discoverFlag != "" {
 		seed = *discoverFlag
@@ -138,10 +141,7 @@ func main() {
 
 		// Discover the network
 		params.Target = seed
-		//		database = discover(*debugFlag, log, dbName, seed, *community, params, *maxHops, database)
-		//		routerList := walkRouteTable(log, seed, *community, params)
-		//		walkRouteTableMap := walkRouteTableMap(log, seed, *community, params)
-		//		walkRouteTableMap := walkRouteTableMap(log, seed, *community, params)
+		log.Debug("params=%v", params)
 		scannedRouterMap := walkRouteTableMap(log, seed, *community, params)
 		//		log.Debug("routerList discovered by walkRouteTable = %s", routerList)
 		log.Debug("scannedRouterMap = %v", scannedRouterMap)
@@ -195,7 +195,7 @@ func main() {
 		// Open the database connection
 		database, openErr := sql.Open("sqlite3", *DbName)
 		if openErr != nil {
-			log.Fatal("Error opening database: %s" + *DbName + "err %s" + openErr.Error())
+			log.Fatal("Error opening database: %s" + *DbName + "err:" + openErr.Error())
 		}
 		defer database.Close()
 
@@ -228,7 +228,7 @@ func main() {
 		//		if *debugFlag {
 		//			fmt.Println("scnnedRouters=", scannedRouters)
 		//		}
-		log.Debug("scnnedRouters= %v", scannedRouters)
+		log.Debug("scannedRouters= %v", scannedRouters)
 
 		// Discover router information from list of scanned routers.
 		// Open the database connection
