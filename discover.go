@@ -29,7 +29,7 @@ const DISCOVERYVERSION = "0.3.6"
 func discover(debugFlag bool, log *logger.Logger, dbName string, snmpTarget string, community string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
 
 	//	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.")
-	log.Info("\nfunc discover version %s", DISCOVERYVERSION+" started.")
+	log.Info("func discover version %s", DISCOVERYVERSION+" started.")
 
 	// Discover network, constrained by input parm maximum hops away from snmpTarget node
 	maxHops, _ := strconv.Atoi(maxHopsStr)
