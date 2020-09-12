@@ -93,7 +93,9 @@ func walkRouteTable(log *logger.Logger, seed string, community string, params *g
 func walkRouteTableMap(log *logger.Logger, seed string, community string, params *g.GoSNMP) map[string]string {
 
 	log.Info("\nfunc walkRouteTableMap version %s", WALKROUTETABLEVERSION+" started.")
-	log.Debug("seed= %s", seed+" community= "+community)
+	log.Debug("seed=%s", seed)
+	log.Debug("community=%s", community)
+	log.Debug("params.snmpTarget=%s", params.Target)
 
 	fqdn := getRtrName(seed)
 	params.Target = seed
@@ -109,6 +111,7 @@ func walkRouteTableMap(log *logger.Logger, seed string, community string, params
 
 	// Add seed router to list of routers
 	fqdn = getRtrName(seed)
+	log.Debug("fqdn=%v", fqdn)
 	scannedRouterMap[fqdn[0]] = seed
 
 	// Retrieve the route table and add each Next Hop address to the list of routers
