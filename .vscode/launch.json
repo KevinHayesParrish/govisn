@@ -45,7 +45,7 @@
             "host": "127.0.0.1",
             "program": "/Users/kevin/go/src/govisn",
             "env": {},
-            "args": ["-di", "10.0.0.1", "-co", "idontknow", "-f", "/Users/kevin/test.db"]
+            "args": ["-di", "192.168.1.116", "-co", "idontknow", "-f", "/Users/kevin/test3.db"]
         },
         {
             "name": "govisn -di -co -de -f",
