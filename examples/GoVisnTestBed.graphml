@@ -37,7 +37,7 @@
             </y:ModelParameter>
           </y:NodeLabel>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="72.689453125" x="4.0" xml:space="preserve" y="-22.701171875">r-phys-uplink<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0189061156527931" labelRatioY="0.5" nodeRatioX="0.5" nodeRatioY="-0.5" offsetX="0.0" offsetY="-4.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="97.416015625" x="-109.19030380249023" xml:space="preserve" y="4.0">f0/0: 192.168.136<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.5" labelRatioY="-0.5" nodeRatioX="-0.5" nodeRatioY="-0.5" offsetX="-11.774288177490234" offsetY="4.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="107.423828125" x="-119.19811630249023" xml:space="preserve" y="4.0">f0/0: 192.168.1.136<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.5" labelRatioY="-0.5" nodeRatioX="-0.5" nodeRatioY="-0.5" offsetX="-11.774288177490234" offsetY="4.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="74.0546875" x="22.859500885009766" xml:space="preserve" y="52.50991439819336">f0/1: 10.0.0.1<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="-0.24533008616085555" labelRatioY="-0.5" nodeRatioX="0.5" nodeRatioY="0.5" offsetX="0.0" offsetY="10.78891372680664" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="true"/>
           <y:SVGModel svgBoundsPolicy="0">
@@ -166,7 +166,7 @@
               <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="-0.5" nodeRatioX="0.0" nodeRatioY="0.5" offsetX="0.0" offsetY="4.0" upX="0.0" upY="-1.0"/>
             </y:ModelParameter>
           </y:NodeLabel>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="38.67578125" x="1.5216102600097656" xml:space="preserve" y="-22.701171875">r-lan-1<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.5" nodeRatioX="0.0" nodeRatioY="-0.5" offsetX="0.0" offsetY="-4.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="38.67578125" x="-42.67578125" xml:space="preserve" y="11.50991439819336">r-lan-1<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.5" labelRatioY="0.0" nodeRatioX="-0.5" nodeRatioY="0.0" offsetX="-4.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="74.0546875" x="45.71900177001953" xml:space="preserve" y="-9.3505859375">f0/0: 10.0.0.4<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="-0.5" labelRatioY="0.0" nodeRatioX="0.5" nodeRatioY="-0.5" offsetX="4.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="74.0546875" x="45.71900177001953" xml:space="preserve" y="32.37041473388672">f0/1: 10.0.1.1<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="-0.5" labelRatioY="0.0" nodeRatioX="0.5" nodeRatioY="0.5" offsetX="4.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:SVGNodeProperties usingVisualBounds="true"/>
@@ -267,7 +267,6 @@
       </data>
     </node>
     <node id="n11">
-      <data key="d5"/>
       <data key="d6">
         <y:SVGNode>
           <y:Geometry height="41.72100067138672" width="41.71900177001953" x="263.14049911499023" y="62.63949966430664"/>
@@ -402,7 +401,6 @@
       </data>
     </edge>
     <edge id="e11" source="n11" target="n1">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
