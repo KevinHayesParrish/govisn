@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Routers</name>
+    <description>KML representation of a network.</description>
+  </Document>
+  <Placemark>
+    <name>r-lan-10.parrish.home.</name>
+    <description>Cisco IOS Software, 2600 Software (C2691-ADVENTERPRISEK9-M), Version 12.4(15)T14, RELEASE SOFTWARE (fc2)&#xD;&#xA;Technical Support: http://www.cisco.com/techsupport&#xD;&#xA;Copyright (c) 1986-2010 by Cisco Systems, Inc.&#xD;&#xA;Compiled Tue 17-Aug-10 07:38 by prod_rel_team</description>
+    <Point>
+      <coordinates>166.6918,-77.851576,100</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>r-phys-uplink.parrish.home.</name>
+    <description>Cisco IOS Software, 2600 Software (C2691-ADVENTERPRISEK9-M), Version 12.4(15)T14, RELEASE SOFTWARE (fc2)&#xD;&#xA;Technical Support: http://www.cisco.com/techsupport&#xD;&#xA;Copyright (c) 1986-2010 by Cisco Systems, Inc.&#xD;&#xA;Compiled Tue 17-Aug-10 07:38 by prod_rel_team</description>
+    <Point>
+      <coordinates>139.747697,35.682423,25</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>r-lan-3.parrish.home.</name>
+    <description>Cisco IOS Software, 2600 Software (C2691-ADVENTERPRISEK9-M), Version 12.4(15)T14, RELEASE SOFTWARE (fc2)&#xD;&#xA;Technical Support: http://www.cisco.com/techsupport&#xD;&#xA;Copyright (c) 1986-2010 by Cisco Systems, Inc.&#xD;&#xA;Compiled Tue 17-Aug-10 07:38 by prod_rel_team</description>
+    <Point>
+      <coordinates>151.175126,-33.939994,25</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>r-lan-2.parrish.home.</name>
+    <description>Cisco IOS Software, 2600 Software (C2691-ADVENTERPRISEK9-M), Version 12.4(15)T14, RELEASE SOFTWARE (fc2)&#xD;&#xA;Technical Support: http://www.cisco.com/techsupport&#xD;&#xA;Copyright (c) 1986-2010 by Cisco Systems, Inc.&#xD;&#xA;Compiled Tue 17-Aug-10 07:38 by prod_rel_team</description>
+    <Point>
+      <coordinates>-121.357168,38.419639,35</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>r-lan-1.parrish.home.</name>
+    <description>Cisco IOS Software, 2600 Software (C2691-ADVENTERPRISEK9-M), Version 12.4(15)T14, RELEASE SOFTWARE (fc2)&#xD;&#xA;Technical Support: http://www.cisco.com/techsupport&#xD;&#xA;Copyright (c) 1986-2010 by Cisco Systems, Inc.&#xD;&#xA;Compiled Tue 17-Aug-10 07:38 by prod_rel_team</description>
+    <Point>
+      <coordinates>-0.124972,51.53429,10</coordinates>
+    </Point>
+  </Placemark>
+  <Placemark>
+    <name>2187952519</name>
+    <LineString>
+      <coordinates>139.747697,35.682423,25 0,0</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>3653827063</name>
+    <LineString>
+      <coordinates>139.747697,35.682423,25 151.175126,-33.939994,25</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>1086433357</name>
+    <LineString>
+      <coordinates>139.747697,35.682423,25 -121.357168,38.419639,35</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>1818747051</name>
+    <LineString>
+      <coordinates>139.747697,35.682423,25 0,0</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>3323265340</name>
+    <LineString>
+      <coordinates>-0.124972,51.53429,10 139.747697,35.682423,25</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>3245917477</name>
+    <LineString>
+      <coordinates>-0.124972,51.53429,10 -121.357168,38.419639,35</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>1591622321</name>
+    <LineString>
+      <coordinates>-0.124972,51.53429,10 166.6918,-77.851576,100</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>3513652607</name>
+    <LineString>
+      <coordinates>-121.357168,38.419639,35 139.747697,35.682423,25</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>1326088412</name>
+    <LineString>
+      <coordinates>-121.357168,38.419639,35 151.175126,-33.939994,25</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>3907201466</name>
+    <LineString>
+      <coordinates>151.175126,-33.939994,25 139.747697,35.682423,25</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>4019121571</name>
+    <LineString>
+      <coordinates>151.175126,-33.939994,25 -121.357168,38.419639,35</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>1881674295</name>
+    <LineString>
+      <coordinates>151.175126,-33.939994,25 166.6918,-77.851576,100</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>2605558893</name>
+    <LineString>
+      <coordinates>166.6918,-77.851576,100 151.175126,-33.939994,25</coordinates>
+    </LineString>
+  </Placemark>
+  <Placemark>
+    <name>1502633368</name>
+    <LineString>
+      <coordinates>166.6918,-77.851576,100 0,0</coordinates>
+    </LineString>
+  </Placemark>
+</kml>
