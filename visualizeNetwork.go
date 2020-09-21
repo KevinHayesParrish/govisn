@@ -42,7 +42,7 @@ import (
 )
 
 // VISUALIZENETWORKVERSION is the version number of the visualizeNetwork func
-const VISUALIZENETWORKVERSION = "0.3.1"
+const VISUALIZENETWORKVERSION = "0.3.2"
 
 // App contains the application state
 type App struct {
@@ -103,7 +103,7 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 	a := app.App()
 	gv.Application = a
 	gv.scene = core.NewNode()
-	gv.scene.SetName("GoVisionScene")
+	gv.scene.SetName("GoVisnScene")
 
 	// Create perspective camera
 	gv.camPos = math32.Vector3{X: 0, Y: 0, Z: (float32)(globeRadius * 2.0)}
@@ -1075,13 +1075,13 @@ func addTitle(log *logger.Logger, gv *gvapp) *gvapp {
 	//	gv.scene.Add(title)
 
 	titleLines := []string{
-		"                  GoVision version " + GOVISNVERSION,
+		"                  GoVisn version " + GOVISNVERSION,
 		"\nNetwork Visualization in 3D from " + *DbName,
 		//		"Copyright 2020 Kevin Hayes Parrish",
 		//		"All rights reserved.",
 	}
 	title := gui.NewLabel(strings.Join(titleLines, "  "))
-	//title := gui.NewLabel("GoVision version " + GOVISNVERSION)
+	//title := gui.NewLabel("GoVisn version " + GOVISNVERSION)
 	title.SetPosition(100, 0)
 	title.SetBordersColor(math32.NewColor("grey"))
 	title.SetBgColor(math32.NewColor("blue"))
