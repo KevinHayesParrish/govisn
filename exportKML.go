@@ -37,12 +37,18 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 	var GpsLat string
 	var GpsLong string
 	var GpsAlt string
-	k := kml.KML(
-		kml.Document(
-			kml.Name("Routers"),
-			kml.Description("KML representation of a network."),
-		),
+	doc := kml.Document(
+		kml.Name("GoVisn"),
+		kml.Description("KML representation of a network."),
+		//		kml.Placemark(kml.Name("router 1"),
+		//			kml.LineString(
+		//				kml.Coordinates(kml.Coordinate{Lon: 0.0, Lat: 0.0, Alt: 0.0}),
+		//			),
+		//		),
 	)
+	//	k := kml.KML(
+	//		kml.Document(doc),
+	//	)
 	kmlFile, err := os.Create(kmlFilename)
 	if err != nil {
 		log.Fatal("Cannot Create %s", kmlFilename+" error="+err.Error())
@@ -63,7 +69,8 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 		s, _ = strconv.ParseFloat(GpsAlt, 64)
 		GpsAltFloat = s
 
-		k.Add(
+		//		k.Add(
+		doc.Add(
 			kml.Placemark(
 				kml.Name(Name),
 				kml.Description(Description),
@@ -126,7 +133,8 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 			ToGpsAltFloat = s
 		}
 
-		k.Add(
+		//		k.Add(
+		doc.Add(
 			kml.Placemark(
 				kml.Name(strconv.Itoa(LinkID)),
 				kml.LineString(
@@ -139,7 +147,8 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 	}
 
 	// Write the KML document to the file
-	if err := k.WriteIndent(kmlFile, "", "  "); err != nil {
+	//	if err := k.WriteIndent(kmlFile, "", "  "); err != nil {
+	if err := doc.WriteIndent(kmlFile, "", "  "); err != nil {
 		log.Fatal(err.Error())
 	}
 
