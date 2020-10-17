@@ -12,17 +12,19 @@ A 3D network visualization tool written in golang.
       3. router.domain.home. TXT 86400 "Alt=100"  
 
 ## History of the Project
-This project is a continuation of the work that started with Java application **vrmlNet**, which was developed in 1998. vrmlNet created VRML code that could be rendered by aVRML Browser Plug-in.
+This project is a continuation of the work that started with Java application **vrmlNet**, which was developed in 1998. vrmlNet created VRML code that could be rendered by a VRML Browser Plug-in.
 
 In the early 2000's VRML technology had sunset. A second generation of the project, **V15N** (pronounced *vi-zn*), was developed beginning in the Fall of 2003. This was a complete re-write of vrmlNet . Unlike vrmlNet, which used the Virtual Reality Modeling Language (VRML), V15N used the Java 3D API for rendering a 3D visualization of a network. The application took as input a seed IP Address and used SNMP to walk the routing tables of routers within a network. It then used Java3D to visualize that network in a virtual 3D space.
 
 **GoVisn** is the third generation of this 3D network visualization tool. By the Fall of 2018, 3D visualization technology had left Java3D behind. I was looking to continue the 3D network visualization concept, plus learn a new coding language. It was time to again re-write the application. Rather than develop a multi-tiered web-based application, I chose to keep with the original pinciples of the project:  
-1. Free Open Source Software with a simple implmentation.  
+1. Free Open Source Software.  
 1. Build something a network engineer could deploy, without requiring complicated systems engineering or administation tasks.  
   
 GoVisn is a single executable application. The command line executable takes startup options to scan a subnet for routers. It then queries those routers using SNMP to create a sqlite3 database. The database is used to render the 3D scene containing the router objects and the network links between them.  
   
-Dynamic updates of the 3D model are still under development. This feature will periodically query router interfaces and calculate an approximate link utilization percentage. Depending on the link utilization, the 3D network link will be modified to reflect that utilization.
+Dynamic updates of the 3D model are still under development. This feature will periodically query router interfaces and calculate an approximate link utilization percentage. Depending on the link utilization, the 3D network link will be modified to reflect that utilization.  
+
+GoVisn will export the discovered network from the sqlite3 database to a KML file using the -k option. This KML file can be used to visualize the network with Google Earth or other geospacial applications.
 
 ## Attributions
 
