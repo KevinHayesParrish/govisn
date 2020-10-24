@@ -41,65 +41,69 @@ I stand on the shoulders of giants.
 2. When executing GoVisn on a monitor with 16x10 aspect ratio (a laptop, for instance), G3N may not properly support the menu bars and items. Mouse clicking may also not be accurate. There may be a bug in the G3N implementation, or I may not be properly utilizing G3N.
 
 ## Usage of GoVisn:
-govisn *options*
-### Options
->**-a**  
->>Test opening an ArangoDB database  
->> **(DEPRECATED)**  
->
->**-co** *string*  
->> SNMP Community ReadOnly String  
->> *(default: "public")*  
->> Currently, only one SNMP Community in the option is allowed. If multiple SNMP communities exist with the network to be discovered, then multiple executions of GoVision will be necessary to update the database with all routers in the network.
->
->**-cr**  
->> Create a sample database.  
->>**(DEPRECATED)**  
->
->**-de**  
->> Print Debug statements.
->
->**-di** *string*  
->> Discover a network using seed IP Address  
->> This option discovers the network by starting with a seed IP Address. GoVision then walks the seed router's routing table. It recursively walks routing tables to discover the network, limited by the Max Hops option (-m).
->
->**-f** *string*
->> Name of the discovered network database -or-  
->> Name of the XML input file, if combined with -l option.  
->> (default "govisnDiscoveredNet.db")
->
->**-l**  
->> Load a database from an XML document.  
->> **(DEPRECATED)**  
->
->**-k** *string*
->> Export the network routers and links from the database to a KML file for use in geospacial applications.
->> The export filename must be supplied as part of the option.
->
->**-m** *string*
->>Scope of discovery. Maximum number of Hops away from seed router. 
->>        *(default: "10")*
->
->**-s** *string*  
->> Scan the CIDR network for SNMP capable routers.  
->> CIDR format = x.x.x.x/n. ex: 192.168.1.0/24  
->> Once the network is scanned, the list of found routers
->> will be queried and their information added to the database.
->
->**-v**  
->> Print the GoVision version number.
->  
->**-vi**  
->> Visualize the Network with a 3D model, using G3N.
+### Options  
+* **-a**  
+      Test opening an ArangoDB database  
+      **(DEPRECATED)**  
+
+* **-co** *string*  
+      SNMP Community ReadOnly String  
+      *(default: "public")*  
+      Currently, only one SNMP Community in the option is allowed. If multiple SNMP communities exist with the network to be discovered, then multiple executions of GoVision will be necessary to update the database with all routers in the network.
+
+* **-cr**  
+      Create a sample database.  
+      **(DEPRECATED)**  
+
+* **-de**  
+      Print Debug statements.
+
+* **-di** *string*  
+      Discover a network using seed IP Address  
+      This option discovers the network by starting with a seed IP Address. GoVision then walks the seed router's routing table. It recursively walks routing tables to discover the network, limited by the Max Hops option (-m).
+
+* **-f** *string*
+      Name of the discovered network database -or-  
+      Name of the XML input file, if combined with -l option.  
+      (default "govisnDiscoveredNet.db")
+
+* **-l**  
+      Load a database from an XML document.  
+      **(DEPRECATED)**  
+
+* **-k** *string*
+      Export the network routers and links from the database to a KML file for use in geospacial applications.
+      The export filename must be supplied as part of the option.
+
+* **-m** *string*
+      Scope of discovery. Maximum number of Hops away from seed router. 
+      *(default: "10")*
+
+* **-s** *string*  
+      Scan the CIDR network for SNMP capable routers.  
+CIDR format = x.x.x.x/n. ex: 192.168.1.0/24  
+Once the network is scanned, the list of found routers
+will be queried and their information added to the database.
+
+* **-v**  
+      Print the GoVision version number.
+  
+* **-vi**  
+      Visualize the Network with a 3D model, using G3N.
 
 ### Execution Examples  
 1. Scan a subnet, create a database, then visualize the Layer 3 network.  
->>govisn -s *192.168.1.0/24* -f *test.db* -vi -co *public*
+      govisn -s *192.168.1.0/24* -f *test.db* -vi -co *public*
+
 2. Discover the network using a seed address and Max Hops, then create the database.
->>govisn -di 192.168.1.1 -co *public* -f *test.db*
+      govisn -di 192.168.1.1 -co *public* -f *test.db*
+
 3. Visualize the Layer 3 network, using test.db database and SNMP community public  
->>govisn -vi -f test.db -co public  
+      govisn -vi -f test.db -co public  
+
 4. Visualize the Layer 3 network with Debug logging enabled.  
->>govisn -vi -f test.db -co public -de
+      govisn -vi -f test.db -co public -de
+
 5. Export the database to a KML file.  
->>govisn -k test.kml -f test.db   
+      govisn -k test.kml -f test.db   
+      
