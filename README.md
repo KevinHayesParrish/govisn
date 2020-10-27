@@ -81,7 +81,7 @@ I stand on the shoulders of giants.
 
 * **-s** *string*  
       Scan the CIDR network for SNMP capable routers.  
-CIDR format = x.x.x.x/n. ex: 192.168.1.0/24  
+CIDR format = x.x.x.x/n *(ex: 192.168.1.0/24)*  
 Once the network is scanned, the list of found routers
 will be queried and their information added to the database.
 
@@ -93,10 +93,10 @@ will be queried and their information added to the database.
 
 ### Execution Examples  
 1. Scan a subnet, create a database, then visualize the Layer 3 network.  
-      govisn -s *192.168.1.0/24* -f *test.db* -vi -co *public*
+      govisn -s 192.168.1.0/2 -f test.db -vi -co public
 
 2. Discover the network using a seed address and Max Hops, then create the database.
-      govisn -di 192.168.1.1 -co *public* -f *test.db*
+      govisn -di 192.168.1.1 -co public -f test.db
 
 3. Visualize the Layer 3 network, using test.db database and SNMP community public  
       govisn -vi -f test.db -co public  
