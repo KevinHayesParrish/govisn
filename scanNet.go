@@ -12,7 +12,9 @@ import (
 
 	"github.com/g3n/engine/util/logger"
 	_ "github.com/mattn/go-sqlite3"
-	g "github.com/soniah/gosnmp"
+
+	//g "github.com/soniah/gosnmp"
+	g "github.com/gosnmp/gosnmp"
 )
 
 /*
@@ -23,7 +25,7 @@ import (
 // SCANNETVERSION is the file version number
 const SCANNETVERSION = "0.0.2"
 
-func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, params g.GoSNMP) []ScannedRouter {
+func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, params *g.GoSNMP) []ScannedRouter {
 
 	log.Info("func scanNet version %s ", SCANNETVERSION+"started.")
 	log.Debug(" seed=%s", seed+" community="+community)
