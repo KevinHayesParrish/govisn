@@ -9,7 +9,9 @@ import (
 
 	"github.com/g3n/engine/util/logger"
 	_ "github.com/mattn/go-sqlite3"
-	g "github.com/soniah/gosnmp"
+
+	//g "github.com/soniah/gosnmp"
+	g "github.com/gosnmp/gosnmp"
 )
 
 var scannedRouters []ScannedRouter
