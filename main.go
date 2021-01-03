@@ -15,7 +15,9 @@ import (
 	//	"github.com/g3n/g3nd/material"
 	"github.com/g3n/engine/util/logger"
 	_ "github.com/mattn/go-sqlite3"
-	g "github.com/soniah/gosnmp"
+
+	//g "github.com/soniah/gosnmp"
+	g "github.com/gosnmp/gosnmp"
 )
 
 /*
@@ -23,7 +25,7 @@ import (
  */
 
 //GOVISNVERSION is the file version number
-const GOVISNVERSION = "0.11.1"
+const GOVISNVERSION = "0.12.0"
 
 var log *logger.Logger
 
@@ -224,7 +226,7 @@ func main() {
 
 		// Scan the requested network for Router hosts
 		//		scannedRouters = scanNet(*debugFlag, seed, *community, *params)
-		scannedRouters = scanNet(*debugFlag, log, seed, *community, *params)
+		scannedRouters = scanNet(*debugFlag, log, seed, *community, params)
 		//		if *debugFlag {
 		//			fmt.Println("scnnedRouters=", scannedRouters)
 		//		}
