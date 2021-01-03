@@ -19,7 +19,9 @@ import (
 	"github.com/g3n/engine/util"
 	"github.com/g3n/engine/util/logger"
 	"github.com/g3n/engine/util/stats"
-	g "github.com/soniah/gosnmp"
+
+	//g "github.com/soniah/gosnmp"
+	g "github.com/gosnmp/gosnmp"
 
 	"github.com/g3n/engine/geometry"
 	"github.com/g3n/engine/gls"
