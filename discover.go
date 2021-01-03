@@ -15,7 +15,8 @@ import (
 	"strings"
 
 	"github.com/g3n/engine/util/logger"
-	g "github.com/soniah/gosnmp"
+	//g "github.com/soniah/gosnmp"
+	g "github.com/gosnmp/gosnmp"
 )
 
 /*
