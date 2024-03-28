@@ -124,7 +124,7 @@ func walkRouteTableMap(log *logger.Logger, seed string, community string, params
 	//		log.Fatal("Get(ipRouteNextHopPDU) err")
 	//	}
 	if err != nil {
-		if strings.Contains(err.Error(), "Request timeout") || strings.Contains(err.Error(), "connection refused") {
+		if strings.Contains(err.Error(), "request timeout") || strings.Contains(err.Error(), "connection refused") {
 			log.Warn("walkRouteTable: " + seed + " not answering SNMP get. Continue walking route table.")
 			return scannedRouterMap
 			//		} else {
