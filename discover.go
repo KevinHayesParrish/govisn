@@ -459,10 +459,13 @@ func getRtrName(ipAddr string) []string {
 	if err != nil {
 		//		fmt.Println("No reverse lookup found for", ipAddr)
 		log.Warn("No reverse lookup found for %s", ipAddr)
+		names[0] = ipAddr
+		return names
 	}
 	if len(names) == 0 {
 		//		fmt.Println("No FQDN records for", ipAddr)
 		log.Warn("No FQDN records for %s", ipAddr)
+		names[0] = ipAddr
 		return names
 	}
 	return names
