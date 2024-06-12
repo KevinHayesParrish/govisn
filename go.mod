@@ -1,4 +1,4 @@
-module bitbucket.org/kparrish/govisn
+module github.com/KevinHayesParrish/govisn
 
 go 1.12
 
