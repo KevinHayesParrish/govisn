@@ -142,5 +142,5 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 	}
 
 	log.Info("exportKML version %s ", EXPORTKMLVERSION+" ending")
-	return
+	//	return
 }

@@ -24,8 +24,8 @@ import (
 * TODO:
  */
 
-//GOVISNVERSION is the file version number
-const GOVISNVERSION = "0.12.0"
+// GOVISNVERSION is the file version number
+const GOVISNVERSION = "0.12.1"
 
 var log *logger.Logger
 
@@ -40,10 +40,10 @@ var dbName = "govisnDiscoveredNet.db"
 // DbName is the name of the discovered network database file or name of XML input file
 var DbName = flag.String("f", "govisnDiscoveredNet.db", "Name of the discovered network database -or-\nName of the XML input file, if combined with -l option.")
 
-//testArangodb is the startup option to test accessing an ArangoDB database
+// testArangodb is the startup option to test accessing an ArangoDB database
 var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 
-//discoverFlag is the option to discover a network
+// discoverFlag is the option to discover a network
 var discoverFlag = flag.String("di", "", "Discover a network using a seed IP Address")
 
 var kmlFlag = flag.String("k", "", "Export GoVisn database to KML format file")
@@ -54,16 +54,16 @@ var community = flag.String("co", "public", "SNMP Community ReadOnly String")
 var maxHops = flag.String("m", "10", "Scope of discovery. Maximum number of Hops from seed.")
 var visualizeFlag = flag.Bool("vi", false, "Visualize the Network.")
 
-//scanNetFlag is the startup option to scan the network for SNMP capable routers.
+// scanNetFlag is the startup option to scan the network for SNMP capable routers.
 var scanNetFlag = flag.String("s", "", "Scan the CIDR network for SNMP capable routers.\nCIDR format = x.x.x.x/n. ex: 192.168.1.0/24\nOnce the network is scanned, the list of found routers\nwill be queried and their information added to the database.")
 
-//routerRadius is the radius of the 3D object representing a network router
+// routerRadius is the radius of the 3D object representing a network router
 const routerRadius float64 = 0.5
 
-//globeRadius is the radius of the 3D object representing the earth
+// globeRadius is the radius of the 3D object representing the earth
 const globeRadius float64 = 63.7
 
-//walkedHops is the number of hops walked away from the seed
+// walkedHops is the number of hops walked away from the seed
 var walkedHops = 0
 
 func main() {
@@ -126,7 +126,7 @@ func main() {
 		Community: *community,
 		Version:   g.Version2c,
 		Timeout:   time.Duration(2) * time.Second,
-		Logger:    nil,
+		Logger:    g.Default.Logger,
 		MaxOids:   6,
 	}
 	log.Debug("params=%v", params)
@@ -166,7 +166,9 @@ func main() {
 
 			// Discover the router's information and add to database
 			params.Target = IPAddress
-			database = discover(*debugFlag, log, dbName, IPAddress, *community, params, *maxHops, database)
+			//			database = discover(*debugFlag, log, dbName, IPAddress, *community, params, *maxHops, database)
+			//			database = discover(log, dbName, IPAddress, *community, params, *maxHops, database)
+			database = discover(log, IPAddress, params, *maxHops, database)
 
 			// Close database. Completed initialization and update of all tables, except Links.
 			database.Close()
@@ -178,11 +180,13 @@ func main() {
 			}
 
 			// Build Links
-			database = buildLinks(*debugFlag, log, database)
+			//			database = buildLinks(*debugFlag, log, database)
+			database = buildLinks(log, database)
 
 		}
 		// Build Links
-		database = buildLinks(*debugFlag, log, database)
+		//		database = buildLinks(*debugFlag, log, database)
+		database = buildLinks(log, database)
 		database.Close()
 
 	}
@@ -220,13 +224,14 @@ func main() {
 			Community: *community,
 			Version:   g.Version2c,
 			Timeout:   time.Duration(2) * time.Second,
-			Logger:    nil,
+			Logger:    g.Default.Logger,
 			MaxOids:   6,
 		}
 
 		// Scan the requested network for Router hosts
 		//		scannedRouters = scanNet(*debugFlag, seed, *community, *params)
-		scannedRouters = scanNet(*debugFlag, log, seed, *community, params)
+		//		scannedRouters = scanNet(*debugFlag, log, seed, *community, params)
+		scannedRouters = scanNet(log, seed, *community, params)
 		//		if *debugFlag {
 		//			fmt.Println("scnnedRouters=", scannedRouters)
 		//		}
@@ -242,7 +247,9 @@ func main() {
 
 			// Discover the router's information and add to database
 			params.Target = scannedRouters[i].IPAddress
-			database = discover(*debugFlag, log, dbName, scannedRouters[i].IPAddress, *community, params, *maxHops, database)
+			//			database = discover(*debugFlag, log, dbName, scannedRouters[i].IPAddress, *community, params, *maxHops, database)
+			//			database = discover(log, dbName, scannedRouters[i].IPAddress, *community, params, *maxHops, database)
+			database = discover(log, scannedRouters[i].IPAddress, params, *maxHops, database)
 
 			// Close database. Completed initialization and update of all tables, except Links.
 			database.Close()
@@ -254,7 +261,8 @@ func main() {
 			}
 
 			// Build Links
-			database = buildLinks(*debugFlag, log, database)
+			//			database = buildLinks(*debugFlag, log, database)
+			database = buildLinks(log, database)
 
 		}
 		database.Close()
@@ -290,10 +298,11 @@ func main() {
 			Community: *community,
 			Version:   g.Version2c,
 			Timeout:   time.Duration(2) * time.Second,
-			Logger:    nil,
+			Logger:    g.Default.Logger,
 			MaxOids:   6,
 		}
-		databaseForRead = visualizeNetwork(*debugFlag, log, databaseForRead, snmpTarget, *community, params)
+		//		databaseForRead = visualizeNetwork(*debugFlag, log, databaseForRead, snmpTarget, *community, params)
+		databaseForRead = visualizeNetwork(log, databaseForRead, snmpTarget, *community, params)
 	}
 	log.Info("GoVisn version %s", GOVISNVERSION+" ending.")
 }

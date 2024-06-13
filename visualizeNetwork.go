@@ -80,7 +80,8 @@ type Raycast struct {
 	rayCast *collision.Raycaster
 }
 
-func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *sql.DB {
+// func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *sql.DB {
+func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *sql.DB {
 	//	const VISUALIZENETWORKVERSION = "0.3.1"
 	log.Debug("visualizeNetwork %s", VISUALIZENETWORKVERSION+" started")
 
@@ -154,7 +155,8 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 	gv = addTitle(log, gv)
 
 	// Build Menus
-	buildMenus(debugFlag, gv, a, databaseForRead)
+	//	buildMenus(debugFlag, gv, a, databaseForRead)
+	buildMenus(gv, a, databaseForRead)
 
 	var RouterID int
 	var Name string
@@ -175,7 +177,8 @@ func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.D
 
 	// Setup Mouse clicking of objects within the 3D scene
 	var t Raycast
-	t.Initialize(debugFlag, gv.scene, gv.cam, gv, a, databaseForRead)
+	//	t.Initialize(debugFlag, gv.scene, gv.cam, gv, a, databaseForRead)
+	t.Initialize(gv.scene, gv.cam, gv, a, databaseForRead)
 
 	// Create Globe texture
 	gobinDir := os.Getenv("GOBIN")
@@ -527,7 +530,8 @@ var FileExitSelected bool = false
 var NetPollingEnabled bool = false
 
 // buildmenus creates the Gui menus and menuitems for the application
-func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
+// func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
+func buildMenus(gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
 	log.Debug("Starting func buildMenus")
 
 	// Event handler for menu clicks
@@ -605,7 +609,8 @@ func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *
 }
 
 // Initialize the raycaster
-func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB) {
+// func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB) {
+func (t *Raycast) Initialize(scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB) {
 	log.Debug("Initializing the raycaster")
 
 	// Creates the raycaster
@@ -615,12 +620,14 @@ func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camer
 
 	// Subscribe to mouse button down events
 	app.SubscribeID(window.OnMouseDown, app, func(evname string, ev interface{}) {
-		t.onMouse(debugFlag, scene, cam, gv, app, databaseForRead, ev)
+		//		t.onMouse(debugFlag, scene, cam, gv, app, databaseForRead, ev)
+		t.onMouse(scene, cam, gv, app, databaseForRead, ev)
 	})
 }
 
 // onMouse is executed when an object in the 3D scene is selected with a mouse click
-func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB, ev interface{}) {
+// func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB, ev interface{}) {
+func (t *Raycast) onMouse(scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB, ev interface{}) {
 	// Convert mouse coordinates to normalized device coordinates
 	mev := ev.(*window.MouseEvent)
 	width, height := app.GetSize()
@@ -653,7 +660,8 @@ func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, 
 	}
 
 	// Retrieve Router info from database
-	router := RetrieveRouter(debugFlag, router3DName, databaseForRead, app)
+	//	router := RetrieveRouter(debugFlag, router3DName, databaseForRead, app)
+	router := RetrieveRouter(router3DName, databaseForRead, app)
 	log.Debug("router= %v", router)
 
 	// Add Router info to 3D scene
@@ -738,8 +746,11 @@ func Dump3dScene(gv *gvapp) {
 }
 
 // RetrieveRouter is called when an object in the 3D scene is mouse clicked. It retrieve's the
-//   routers information from the database and opens a new window to display it.
-func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB, app *app.Application) Router {
+//
+//	routers information from the database and opens a new window to display it.
+//
+// func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB, app *app.Application) Router {
+func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Application) Router {
 	var router Router
 	var RouterID, Services int
 	var Name, Contact, Location, GpsLat, GpsLong, GpsAlt string
@@ -867,10 +878,9 @@ func calcDistance(debugFlag bool, posA *math32.Vector3, posB *math32.Vector3) (d
 	return distance
 }
 
-//
 // updateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
-//	lineWidth and color to reflect the amount of traffic flowing over each link.
 //
+//	lineWidth and color to reflect the amount of traffic flowing over each link.
 func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *gvapp {
 	log.Info("Updating Links")
 	// TODO

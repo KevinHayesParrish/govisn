@@ -27,7 +27,9 @@ import (
 // DISCOVERYVERSION is the file version number
 const DISCOVERYVERSION = "0.3.6"
 
-func discover(debugFlag bool, log *logger.Logger, dbName string, snmpTarget string, community string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
+// func discover(debugFlag bool, log *logger.Logger, dbName string, snmpTarget string, community string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
+// func discover(log *logger.Logger, dbName string, snmpTarget string, community string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
+func discover(log *logger.Logger, snmpTarget string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
 
 	//	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.")
 	log.Info("func discover version %s", DISCOVERYVERSION+" started.")
@@ -53,16 +55,19 @@ func discover(debugFlag bool, log *logger.Logger, dbName string, snmpTarget stri
 	defer params.Conn.Close()
 
 	// Initialize the database
-	database = initDB(debugFlag, log, database)
+	//	database = initDB(debugFlag, log, database)
+	database = initDB(log, database)
 
-	getRouterInfo(debugFlag, log, snmpTarget, community, maxHopsStr, params, router, database)
+	//	getRouterInfo(debugFlag, log, snmpTarget, community, maxHopsStr, params, router, database)
+	getRouterInfo(log, snmpTarget, params, router, database)
 
 	log.Debug("func discovery version %s", DISCOVERYVERSION+" ended.")
 
 	return database
 }
 
-func getInterfaces(debugFlag bool, log *logger.Logger, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
+// func getInterfaces(debugFlag bool, log *logger.Logger, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
+func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
 
 	// get Number of Interfaces
 	ifNumberArray := []string{ifNumberOID + ".0"}
@@ -195,7 +200,8 @@ func getInterfaces(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 			log.Debug("ifPhysAddress= %s", interfaceTable.ifEntry.ifPhysAddress)
 
 			//			writeMacToDB(debugFlag, router, interfaceTable, database)
-			writeMacToDB(debugFlag, log, router, interfaceTable, database)
+			//			writeMacToDB(debugFlag, log, router, interfaceTable, database)
+			writeMacToDB(log, router, interfaceTable, database)
 
 			i++
 		}
@@ -380,7 +386,8 @@ func getInterfaces(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 
 }
 
-func initDB(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
+// func initDB(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
+func initDB(log *logger.Logger, database *sql.DB) *sql.DB {
 
 	/*
 	* TODO:
@@ -499,7 +506,8 @@ func getGPS(sysName string) []string {
 	return txts
 }
 
-func writeMacToDB(debugFlag bool, log *logger.Logger, router Router, interfaceTable ifTable, database *sql.DB) {
+// func writeMacToDB(debugFlag bool, log *logger.Logger, router Router, interfaceTable ifTable, database *sql.DB) {
+func writeMacToDB(log *logger.Logger, router Router, interfaceTable ifTable, database *sql.DB) {
 
 	statement, err := database.Prepare("INSERT INTO RouterMac (RouterID, MacAddr) VALUES (?, ?)")
 	if err != nil {
@@ -528,7 +536,8 @@ func writeMacToDB(debugFlag bool, log *logger.Logger, router Router, interfaceTa
 	defer statement.Close()
 }
 
-func getIPAddresses(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
+// func getIPAddresses(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
+func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
 	// get ipAddrTable
 	walkPDU, err := params.WalkAll(ipAdEntAddrOID)
 	if err != nil {
@@ -586,6 +595,9 @@ func getIPAddresses(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router
 	}
 
 	walkPDU, err = params.WalkAll(ipAdEntNetMask)
+	if err != nil {
+		log.Debug("WalkAll failed. Err= %s", err)
+	}
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntNetMask = walkPDU[i].Value.(string)
 		//		if debugFlag {
@@ -594,6 +606,9 @@ func getIPAddresses(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router
 		log.Debug("ipAdEntNetMask= %s", ipTable.ipAddrEntry.ipAdEntNetMask)
 	}
 	walkPDU, err = params.WalkAll(ipAdEntBcastAddr)
+	if err != nil {
+		log.Debug("WalkAll failed. Err= %s", err)
+	}
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntBcastAddr = walkPDU[i].Value.(int)
 		//		if debugFlag {
@@ -602,6 +617,9 @@ func getIPAddresses(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router
 		log.Debug("ipAdEntBcastAddr= %d", ipTable.ipAddrEntry.ipAdEntBcastAddr)
 	}
 	walkPDU, err = params.WalkAll(ipAdEntReasmMaxSize)
+	if err != nil {
+		log.Debug("WalkAll failed. Err= %s", err)
+	}
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntReasmMaxSize = walkPDU[i].Value.(int)
 		//		if debugFlag {
@@ -611,7 +629,8 @@ func getIPAddresses(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router
 	}
 }
 
-func getIPRouteTable(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
+// func getIPRouteTable(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
+func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
 
 	// get ipRouteTable
 	ipRouteDestPDU, err := params.WalkAll(ipRouteDestOID)
@@ -679,7 +698,8 @@ func getIPRouteTable(debugFlag bool, log *logger.Logger, params *g.GoSNMP, route
 
 }
 
-func getRouterInfo(debugFlag bool, log *logger.Logger, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
+// func getRouterInfo(debugFlag bool, log *logger.Logger, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
+func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, router Router, database *sql.DB) {
 	oids := []string{
 		sysNameOID + ".0",     // sysName
 		sysDescrOID + ".0",    // sysDescr
@@ -798,10 +818,13 @@ func getRouterInfo(debugFlag bool, log *logger.Logger, snmpTarget string, commun
 	//	if !routerIsInDB {
 	if !routerIsInDB && routerSupportsSNMP {
 		//		getInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
-		getInterfaces(debugFlag, log, snmpTarget, community, maxHopsStr, params, router, database)
+		//		getInterfaces(debugFlag, log, snmpTarget, community, maxHopsStr, params, router, database)
+		getInterfaces(log, params, router, database)
 
-		getIPAddresses(debugFlag, log, params, router, database)
+		//		getIPAddresses(debugFlag, log, params, router, database)
+		getIPAddresses(log, params, router, database)
 
-		getIPRouteTable(debugFlag, log, params, router, database)
+		//		getIPRouteTable(debugFlag, log, params, router, database)
+		getIPRouteTable(log, params, router, database)
 	}
 }

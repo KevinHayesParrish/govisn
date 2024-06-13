@@ -9,7 +9,8 @@ import (
 )
 
 // Get Router Coordinates from routerArray
-func getRouterCoordinatesName(debug bool, routers []Router, routerName string) (float32, float32, float32) {
+// func getRouterCoordinatesName(debug bool, routers []Router, routerName string) (float32, float32, float32) {
+func getRouterCoordinatesName(routers []Router, routerName string) (float32, float32, float32) {
 	log.Debug("getRouterCoordinatesName starting")
 	var x float32
 	var y float32

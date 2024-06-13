@@ -12,7 +12,8 @@ import (
 )
 
 // Get Router Coordinates from routerArray
-func getRouterCoordinatesIP(debugFlag bool, database *sql.DB, ToRouterIPIn string) (float32, float32, float32) {
+// func getRouterCoordinatesIP(debugFlag bool, database *sql.DB, ToRouterIPIn string) (float32, float32, float32) {
+func getRouterCoordinatesIP(database *sql.DB, ToRouterIPIn string) (float32, float32, float32) {
 	var log *logger.Logger
 	log.Debug("getRouterCoordiantesIP starting")
 

@@ -18,10 +18,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-//buildLinksVersion is the file version sequence number
-const buildLinksVersion = "0.0.4"
+// buildLinksVersion is the file version sequence number
+const buildLinksVersion = "0.0.5"
 
-func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
+// func buildLinks(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
+func buildLinks(log *logger.Logger, database *sql.DB) *sql.DB {
 	//	fmt.Println("func buildLinks version", buildLinksVersion, "started")
 	log.Debug("func buildLinks version %s", buildLinksVersion+" started")
 
