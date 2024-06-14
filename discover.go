@@ -464,18 +464,15 @@ func initDB(log *logger.Logger, database *sql.DB) *sql.DB {
 func getRtrName(ipAddr string) []string {
 	names, err := net.LookupAddr(ipAddr)
 	if err != nil {
-		//		fmt.Println("No reverse lookup found for", ipAddr)
 		log.Warn("No reverse lookup found for %s", ipAddr)
-		names[0] = ipAddr
-		return names
 	}
-	if len(names) == 0 {
-		//		fmt.Println("No FQDN records for", ipAddr)
-		log.Warn("No FQDN records for %s", ipAddr)
-		names[0] = ipAddr
+
+	if len(names) > 0 {
 		return names
+	} else {
+		unkown := []string{"Unknown"}
+		return unkown
 	}
-	return names
 }
 
 func getHostIP(routerName string) []string {
@@ -711,11 +708,12 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 
 	// get FQDN with IP Address
 	fqdn := getRtrName(snmpTarget)
+	log.Debug("Return from getRtrName=%s", fqdn)
 
 	var routerSupportsSNMP bool
 	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 	if err != nil {
-		if strings.Contains(err.Error(), "Request timeout") {
+		if strings.Contains(err.Error(), "timeout") {
 			log.Warn("Get() err %s", err.Error()+
 				"\nRouter "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
 
