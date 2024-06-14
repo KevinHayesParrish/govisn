@@ -126,6 +126,7 @@ func main() {
 		Community: *community,
 		Version:   g.Version2c,
 		Timeout:   time.Duration(2) * time.Second,
+		Retries:   1,
 		Logger:    g.Default.Logger,
 		MaxOids:   6,
 	}
