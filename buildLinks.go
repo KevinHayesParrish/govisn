@@ -66,7 +66,7 @@ func buildLinks(log *logger.Logger, database *sql.DB) *sql.DB {
 
 		// Find FromRouterIP by DNS lookup by name
 		fromIPs := getHostIP(Name)
-		link.FromRouterIP = fromIPs[0]
+		//		link.FromRouterIP = fromIPs[0]
 		if len(fromIPs) < 1 {
 			//			fmt.Println("No Router IP Address the link from Router", Name)
 			log.Warn("No Router IP Address the link from Router %s", Name)
