@@ -18,7 +18,7 @@
             "mode": "debug",
             "program": "/Users/kevin/dev/go/govisn",
             "env": {},
-            "args": ["-di", "192.168.1.1", "-f", "/Temp/govisn/home.db", "-co", "idontknow'", "de"]
+            "args": ["-di", "192.168.1.1", "-f", "/Temp/govisn/home.db", "-co", "idontknow'", "-de"]
 //            "args": ["'-vi -f /Temp/govisn/home.db -de -co idontknow'"]
         }
     ]
