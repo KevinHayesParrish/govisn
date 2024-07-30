@@ -93,7 +93,7 @@ will be queried and their information added to the database.
 
 ### Execution Examples  
 1. Scan a subnet, create a database, then visualize the Layer 3 network.  
-      govisn -s 192.168.1.0/2 -f test.db -vi -co public
+      govisn -s 192.168.1.0/24 -f test.db -vi -co public
 
 2. Discover the network using a seed address and Max Hops, then create the database.
       govisn -di 192.168.1.1 -co public -f test.db
