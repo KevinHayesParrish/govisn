@@ -28,7 +28,7 @@ const SCANNETVERSION = "0.0.2"
 // func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, params *g.GoSNMP) []ScannedRouter {
 func scanNet(log *logger.Logger, cidr string, community string, params *g.GoSNMP) []ScannedRouter {
 
-	log.Info("func scanNet version %s ", SCANNETVERSION+"started.")
+	log.Info("func scanNet version %s ", SCANNETVERSION+" started.")
 	log.Debug(" seed=%s", seed+" community="+community)
 
 	var scannedRouters []ScannedRouter
