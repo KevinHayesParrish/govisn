@@ -61,7 +61,7 @@ func discover(log *logger.Logger, snmpTarget string, params *g.GoSNMP, maxHopsSt
 	//	getRouterInfo(debugFlag, log, snmpTarget, community, maxHopsStr, params, router, database)
 	getRouterInfo(log, snmpTarget, params, router, database)
 
-	log.Debug("func discovery version %s", DISCOVERYVERSION+" ended.")
+	log.Debug("func discover version %s", DISCOVERYVERSION+" ended.")
 
 	return database
 }
