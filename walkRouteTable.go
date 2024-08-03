@@ -94,7 +94,7 @@ func walkRouteTable(log *logger.Logger, seed string, community string, params *g
 
 func walkRouteTableMap(log *logger.Logger, seed string, community string, params *g.GoSNMP) map[string]string {
 
-	log.Info("\nfunc walkRouteTableMap version %s", WALKROUTETABLEVERSION+" started.")
+	log.Info("func walkRouteTableMap version %s", WALKROUTETABLEVERSION+" started.")
 	log.Debug("seed=%s", seed)
 	log.Debug("community=%s", community)
 	log.Debug("params.snmpTarget=%s", params.Target)
