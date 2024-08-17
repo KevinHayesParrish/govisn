@@ -88,6 +88,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 	// Retrieve the Routers table
 	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers")
 	if queryErr != nil {
+		databaseForRead.Close()
 		log.Fatal("databaseForRead Query error %v", queryErr)
 	}
 	log.Debug("Successful Routers table Select")
@@ -95,6 +96,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 	// Retrieve the Links table
 	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP FROM Links")
 	if queryErr != nil {
+		databaseForRead.Close()
 		log.Fatal("databaseForRead Query error %v", queryErr)
 	}
 	log.Debug("Successful Links table Select")
@@ -185,7 +187,8 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 	texfile := gobinDir + "/data/images/earth_clouds_big.jpg"
 	globeTex, err := texture.NewTexture2DFromImage(texfile)
 	if err != nil {
-		log.Fatal("Error loading texture.\n Insure govisn /data/images is copied to GOBIN")
+		databaseForRead.Close()
+		log.Fatal("Error loading texture.\n Insure govisn /data/images is copied to GOBIN \n GOBIN env variable must be set.")
 	}
 	globeTex.SetFlipY(false)
 
@@ -255,7 +258,8 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
 		font, err := text.NewFont(fontfile)
 		if err != nil {
-			log.Fatal("Error loading font %s" + err.Error() + "\n Insure govisn /data/fonts is copied to GOBIN")
+			databaseForRead.Close()
+			log.Fatal("Error loading font %s" + err.Error() + "\n Insure govisn /data/fonts is copied to GOBIN \n GOBIN env variable must be set.")
 		}
 
 		font.SetLineSpacing(1.0)
@@ -278,6 +282,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 		queryErr = routerRows.Err()
 		if queryErr != nil {
+			databaseForRead.Close()
 			log.Fatal(queryErr.Error())
 		}
 
@@ -293,6 +298,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 	for linkRows.Next() {
 		err := linkRows.Scan(&LinkID, &FromRouterName, &FromRouterIP, &ToRouterName, &ToRouterIP)
 		if err != nil {
+			databaseForRead.Close()
 			log.Fatal(err.Error())
 		}
 
@@ -317,6 +323,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 		routerGpsRows, err := databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = $1", FromRouterName)
 		if err != nil {
+			databaseForRead.Close()
 			log.Fatal("databaseForRead Query error %s", err.Error())
 		}
 		log.Debug("Successful Query for FromRouter GPS Coordinates")
@@ -340,6 +347,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 		routerGpsRows, err = databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = $1", ToRouterName)
 		if err != nil {
+			databaseForRead.Close()
 			log.Fatal("databaseForRead Query error %v", err)
 		}
 		log.Debug("Successful Query for ToRouter GPS Coordinates")
@@ -445,6 +453,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 		err = linkRows.Err()
 		if err != nil {
+			databaseForRead.Close()
 			log.Fatal(err.Error())
 		}
 	}
@@ -668,7 +677,7 @@ func (t *Raycast) onMouse(scene *core.Node, cam *camera.Camera, gv *gvapp, app *
 	fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
 	font, err := text.NewFont(fontfile)
 	if err != nil {
-		log.Fatal("Error loading font.\n Insure govisn /data/fonts is copied to GOBIN")
+		log.Fatal("Error loading font.\n Insure govisn /data/fonts is copied to GOBIN. \n GOBIN env variable must be set.")
 	}
 
 	font.SetLineSpacing(1.0)
@@ -761,6 +770,7 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
 	//	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers WHERE RouterID = ?", router3DName)
 	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = ?", router3DName)
 	if queryErr != nil {
+		databaseForRead.Close()
 		log.Fatal("databaseForRead Query Router error %v", queryErr)
 	}
 	log.Debug("Successful Routers table Select")
@@ -782,6 +792,7 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
 	// Retrieve MAC Addresses from the database
 	macRows, queryErr := databaseForRead.Query("SELECT RouterID, MacAddr FROM RouterMac WHERE RouterID = ?", router.System.RouterID)
 	if queryErr != nil {
+		databaseForRead.Close()
 		log.Fatal("databaseForRead Query MAC error %v", queryErr)
 	}
 	i := 0
@@ -797,6 +808,7 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
 	// Retrieve IP Addresses from the database
 	ipRows, queryErr := databaseForRead.Query("SELECT RouterID, IpAddr FROM RouterIp WHERE RouterID = ?", router.System.RouterID)
 	if queryErr != nil {
+		databaseForRead.Close()
 		log.Fatal("databaseForRead Query IP error %v", queryErr)
 	}
 	j := 0
@@ -898,6 +910,7 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 
 	linkRows, err := databaseForRead.Query("SELECT LinkID, FromRouterID, FromRouterName, FromRouterIfIndex, ToRouterName FROM Links")
 	if err != nil {
+		databaseForRead.Close()
 		log.Fatal("databaseForRead Query Router error %v", err)
 	}
 	log.Debug("Successful Links table Query")
@@ -923,6 +936,7 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 		params.Target = snmpTarget
 		err := params.Connect()
 		if err != nil {
+			databaseForRead.Close()
 			log.Fatal("Connect() err: %v", err)
 		}
 		defer params.Conn.Close()
@@ -932,7 +946,6 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 			if strings.Contains(err.Error(), "Request timeout") {
 				log.Warn("Router %s", snmpTarget+" SNMP Timeout. Continuing.")
 			} else {
-				//				log.Fatal("Get() err %v", err)
 				log.Warn("SNMP Get() error: %v", err)
 			}
 		}
@@ -948,6 +961,7 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 			// SNMP Get Router Interface Outbound (ifOutOctets 2)
 			result, err = params.Get(oids) // Get() accepts up to g.MAX_OIDS
 			if err != nil {
+				databaseForRead.Close()
 				log.Fatal("Get() err %v", err)
 			}
 			ifOutOctets2 := result.Variables[0].Value.(uint)
@@ -1000,6 +1014,7 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 			// Convert INode to IGraphic
 			ig, ok := link.(graphic.IGraphic)
 			if !ok {
+				databaseForRead.Close()
 				log.Fatal("Error when converting link INode to IGraphic")
 			}
 			// Get graphic object
@@ -1065,7 +1080,8 @@ func addTitle(log *logger.Logger, gv *gvapp) *gvapp {
 	//	fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
 	//	font, err := text.NewFont(fontfile)
 	//	if err != nil {
-	//		log.Fatal("Error loading font %s" + err.Error() + "\n Insure govisn /data/fonts is copied to GOBIN")
+	//		databaseForRead.Close()
+	//		log.Fatal("Error loading font %s" + err.Error() + "\n Insure govisn /data/fonts is copied to GOBIN \n GOBIN env variable must be set.")
 	//	}
 
 	//	font.SetLineSpacing(1.0)
