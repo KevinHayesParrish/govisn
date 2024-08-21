@@ -46,6 +46,20 @@
                 "idontknow",
                 "-de"
             ]
+        },
+        {
+            "name": "debug govisn visualize net",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${fileDirname}",
+            "env": {},
+            "args": [
+                "-vi",
+                "-f",
+                "parrish.home.db",
+                "-de"
+            ]
         }
     ]
 }

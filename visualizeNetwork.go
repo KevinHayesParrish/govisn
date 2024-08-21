@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io"
 	"strings"
 
 	//"log"
@@ -749,9 +750,11 @@ func (t *Raycast) onMouse(scene *core.Node, cam *camera.Camera, gv *gvapp, app *
 func Dump3dScene(gv *gvapp) {
 	//	fmt.Println("Dumping 3D Scene")
 	log.Debug("Dumping 3D Scene")
-	//	var decoder collada.Decoder
-	//	var out io.Writer
+	//var decoder collada.Decoder
+	var out io.Writer
 	//decoder.Dump(out, 4)
+	var scene = gv.scene
+	scene.Dump(out, 4)
 }
 
 // RetrieveRouter is called when an object in the 3D scene is mouse clicked. It retrieve's the
