@@ -709,7 +709,7 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 	var routerSupportsSNMP bool
 	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
 	if err != nil {
-		if strings.Contains(err.Error(), "timeout") {
+		if strings.Contains(err.Error(), "timeout") || strings.Contains(err.Error(), "refused") {
 			log.Warn("Get() err %s", err.Error()+
 				"\nRouter "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
 
