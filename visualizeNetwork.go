@@ -752,6 +752,8 @@ func Dump3dScene(gv *gvapp) {
 	//var decoder collada.Decoder
 	//var out io.Writer
 	//decoder.Dump(out, 4)
+	//var scene = gv.scene
+	//scene.Dump(out, 4)
 }
 
 // RetrieveRouter is called when an object in the 3D scene is mouse clicked. It retrieve's the
