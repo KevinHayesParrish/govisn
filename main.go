@@ -157,7 +157,7 @@ func main() {
 			return
 		}
 
-		// Open database. buildLinks joins Router and RouteTable tables.
+		// Open database.
 		database, err = sql.Open("sqlite3", dbName)
 		if err != nil {
 			log.Fatal("sql.Open() err: %v", err)
