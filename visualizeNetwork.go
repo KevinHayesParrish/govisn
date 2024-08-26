@@ -829,7 +829,8 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
 }
 
 // calcLinkVBOs calculates the vertices of the polygon representing the network link.
-func calcLinkVBOs(debugFlag bool, camPos math32.Vector3, posA math32.Vector3, posB math32.Vector3, scalar float32) (
+// func calcLinkVBOs(debugFlag bool, camPos math32.Vector3, posA math32.Vector3, posB math32.Vector3, scalar float32) (
+/* func calcLinkVBOs(camPos math32.Vector3, posA math32.Vector3, posB math32.Vector3, scalar float32) (
 	vertices math32.ArrayF32,
 	normals math32.ArrayF32,
 	indices math32.ArrayU32) {
@@ -880,8 +881,9 @@ func calcLinkVBOs(debugFlag bool, camPos math32.Vector3, posA math32.Vector3, po
 
 	return vertices, normals, indices
 }
+*/
 
-func calcDistance(debugFlag bool, posA *math32.Vector3, posB *math32.Vector3) (distance float64) {
+/* func calcDistance(debugFlag bool, posA *math32.Vector3, posB *math32.Vector3) (distance float64) {
 	x2 := posB.Component(0)
 	x1 := posA.Component(0)
 	y2 := posB.Component(1)
@@ -893,6 +895,7 @@ func calcDistance(debugFlag bool, posA *math32.Vector3, posB *math32.Vector3) (d
 	log.Debug("distance= %f", distance)
 	return distance
 }
+*/
 
 // updateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
 //
