@@ -81,7 +81,8 @@ type Raycast struct {
 }
 
 // func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *sql.DB {
-func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *sql.DB {
+// func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *sql.DB {
+func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP) *sql.DB {
 	//	const VISUALIZENETWORKVERSION = "0.3.1"
 	log.Debug("visualizeNetwork %s", VISUALIZENETWORKVERSION+" started")
 
@@ -485,7 +486,8 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 		//		if NetPollingEnabled {
 		if updateLinksOK {
-			gv = updateLinks(log, gv, databaseForRead, snmpTarget, community, params)
+			//gv = updateLinks(log, gv, databaseForRead, snmpTarget, community, params)
+			gv = updateLinks(log, gv, databaseForRead, snmpTarget, params)
 			//			NetPollingEnabled = false
 			updateLinksOK = false
 		}
@@ -900,7 +902,9 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
 // updateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
 //
 //	lineWidth and color to reflect the amount of traffic flowing over each link.
-func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *gvapp {
+//
+// func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *gvapp {
+func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP) *gvapp {
 	log.Info("Updating Links")
 	// TODO
 	//	1) Add RouterID to Links DB table - DONE

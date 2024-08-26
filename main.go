@@ -303,7 +303,9 @@ func main() {
 			MaxOids:   6,
 		}
 		//		databaseForRead = visualizeNetwork(*debugFlag, log, databaseForRead, snmpTarget, *community, params)
-		databaseForRead = visualizeNetwork(log, databaseForRead, snmpTarget, *community, params)
+		//databaseForRead = visualizeNetwork(log, databaseForRead, snmpTarget, *community, params)
+		//databaseForRead = visualizeNetwork(log, databaseForRead, snmpTarget, params)
+		_ = visualizeNetwork(log, databaseForRead, snmpTarget, params)
 	}
 	log.Info("GoVisn version %s", GOVISNVERSION+" ending.")
 }
