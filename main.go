@@ -41,7 +41,7 @@ var dbName = "govisnDiscoveredNet.db"
 var DbName = flag.String("f", "govisnDiscoveredNet.db", "Name of the discovered network database -or-\nName of the XML input file, if combined with -l option.")
 
 // testArangodb is the startup option to test accessing an ArangoDB database
-var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
+//var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 
 // discoverFlag is the option to discover a network
 var discoverFlag = flag.String("di", "", "Discover a network using a seed IP Address")
@@ -92,9 +92,10 @@ func main() {
 	if *sampleNetworkDB {
 		createsampledb()
 	}
-	if *testArangoDb {
-		testarango()
-	}
+	/* 	if *testArangoDb {
+	   		testarango()
+	   	}
+	*/
 	if *DbName != "govisnDiscoveredNet.db" {
 		dbName = *DbName
 	}
