@@ -158,7 +158,8 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 	// Build Menus
 	//	buildMenus(debugFlag, gv, a, databaseForRead)
-	buildMenus(gv, a, databaseForRead)
+	//buildMenus(gv, a, databaseForRead)
+	buildMenus(gv, a)
 
 	var RouterID int
 	var Name string
@@ -540,7 +541,8 @@ var NetPollingEnabled bool = false
 
 // buildmenus creates the Gui menus and menuitems for the application
 // func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
-func buildMenus(gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
+// func buildMenus(gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
+func buildMenus(gv *gvapp, a *app.Application) *app.Application {
 	log.Debug("Starting func buildMenus")
 
 	// Event handler for menu clicks
