@@ -32,7 +32,8 @@ var log *logger.Logger
 // The flag package provides a default help printer via -h switch
 var versionFlag = flag.Bool("v", false, "Print the version number.")
 var debugFlag = flag.Bool("de", false, "Print Debug statements.")
-var sampleNetworkDB = flag.Bool("cr", false, "Create a sample database.")
+
+// var sampleNetworkDB = flag.Bool("cr", false, "Create a sample database.")
 var loadDBFlag = flag.Bool("l", false, "Load a database from an XML document.")
 
 var dbName = "govisnDiscoveredNet.db"
@@ -89,9 +90,10 @@ func main() {
 	log.Info("GoVision version %s", GOVISNVERSION+
 		" started")
 
-	if *sampleNetworkDB {
-		createsampledb()
-	}
+	/* 	if *sampleNetworkDB {
+	   		createsampledb()
+	   	}
+	*/
 	/* 	if *testArangoDb {
 	   		testarango()
 	   	}
