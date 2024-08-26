@@ -1065,6 +1065,7 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 }
 
 func getRouterFromScene(log *logger.Logger, sceneChildren []core.INode, LinkID int) core.INode {
+	log.Debug("getRouterFromScene Started.")
 	var link core.INode
 	for i := 0; i < len(sceneChildren); i++ {
 		if sceneChildren[i].Name() == strconv.Itoa(LinkID) {
@@ -1113,6 +1114,7 @@ func addTitle(log *logger.Logger, gv *gvapp) *gvapp {
 	//	mesh3.SetPosition(10.0, 10.0, 0.0)
 	//	gv.scene.Add(title)
 
+	log.Debug("addTitle Started.")
 	titleLines := []string{
 		"                  GoVisn version " + GOVISNVERSION,
 		"\nNetwork Visualization in 3D from " + *DbName,
