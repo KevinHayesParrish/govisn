@@ -27,7 +27,7 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 	// Retrieve the Routers table
 	routerRows, queryErr := databaseForRead.Query("SELECT Name, Description, Location, GpsLat, GpsLong, GpsAlt FROM Routers")
 	if queryErr != nil {
-		log.Fatal("databaseForRead Query error %v", queryErr)
+		log.Fatal("databaseForRead Query error %v; %v does not contain Router table entries.", queryErr, DbName)
 	}
 	log.Debug("Successful Routers table Select")
 
