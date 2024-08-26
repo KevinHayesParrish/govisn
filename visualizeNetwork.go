@@ -44,7 +44,7 @@ import (
 )
 
 // VISUALIZENETWORKVERSION is the version number of the visualizeNetwork func
-const VISUALIZENETWORKVERSION = "0.3.2"
+const VISUALIZENETWORKVERSION = "0.3.3"
 
 // App contains the application state
 type App struct {

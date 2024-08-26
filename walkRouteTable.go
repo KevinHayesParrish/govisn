@@ -17,7 +17,7 @@ import (
 //var scannedRouters []ScannedRouter
 
 // WALKROUTETABLEVERSION is the file version number
-const WALKROUTETABLEVERSION = "0.1.0"
+const WALKROUTETABLEVERSION = "0.1.1"
 
 /*
 func walkRouteTable(log *logger.Logger, seed string, community string, params *g.GoSNMP) []ScannedRouter {
