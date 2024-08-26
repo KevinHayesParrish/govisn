@@ -60,6 +60,21 @@
                 "${userHome}/tmp/govisn.db",
                 "-de"
             ]
+        },
+        {
+            "name": "debug govisn Export KML",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${fileDirname}",
+            "env": {},
+            "args": [
+                "-k",
+                "${userHome}/tmp/govisn.kml",
+                "-f",
+                "${userHome}/tmp/govisn.db",
+                "-de"
+            ]
         }
     ]
 }
