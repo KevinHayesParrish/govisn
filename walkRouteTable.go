@@ -14,7 +14,7 @@ import (
 	g "github.com/gosnmp/gosnmp"
 )
 
-var scannedRouters []ScannedRouter
+//var scannedRouters []ScannedRouter
 
 // WALKROUTETABLEVERSION is the file version number
 const WALKROUTETABLEVERSION = "0.1.0"
