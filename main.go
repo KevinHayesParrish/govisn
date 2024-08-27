@@ -67,6 +67,14 @@ const globeRadius float64 = 63.7
 // walkedHops is the number of hops walked away from the seed
 var walkedHops = 0
 
+/*
+ * main function
+ * Parse startup aurguments
+ * Discover the network
+ * Build the links between routers
+ * Export the network to a KML file, if startup option is set
+ *
+ */
 func main() {
 
 	// Create logger
