@@ -153,7 +153,9 @@ func main() {
 			log.Fatal("sql.Open() err: %v", err)
 		}
 
-		// Discover the network
+		/*
+		 * Discover the router's neighbors from its route table
+		 */
 		params.Target = seed
 		log.Debug("params=%v", params)
 		scannedRouterMap := walkRouteTableMap(log, seed, *community, params)
@@ -174,6 +176,9 @@ func main() {
 			log.Fatal("sql.Open() err: %v", err)
 		}
 
+		/*
+		 * Discover the network
+		 */
 		for _, IPAddress := range scannedRouterMap {
 
 			// Discover the router's information and add to database
