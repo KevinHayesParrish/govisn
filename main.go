@@ -25,7 +25,7 @@ import (
  */
 
 // GOVISNVERSION is the file version number
-const GOVISNVERSION = "0.12.4"
+const GOVISNVERSION = "0.12.5"
 
 var log *logger.Logger
 
