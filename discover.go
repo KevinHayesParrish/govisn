@@ -756,7 +756,15 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 	router.System.GPS.Altitude = "0.0"  // initialze with float data to allow for missing GPS on DB
 
 	if len(fqdn) > 0 {
-		gpsDNS := getGPS(fqdn[0])
+		//gpsDNS := getGPS(fqdn[0])
+		/*
+		 * Use router's hostname for DNS query, instead of fqdn[0].
+		 * This provides a consistent IP Address, fqdn[0] can be
+		 * an interface address relating to a different DNS name than
+		 * hostname.
+		 */
+		gpsDNS := getGPS(router.System.Name)
+
 		for n := 0; n < len(gpsDNS); n++ {
 			s := gpsDNS[n]
 			// Split TXT record into prefix and value
