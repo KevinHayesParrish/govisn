@@ -67,6 +67,14 @@ const globeRadius float64 = 63.7
 // walkedHops is the number of hops walked away from the seed
 var walkedHops = 0
 
+const constX = math.Pi / 180
+
+// Rad converts degrees to radians
+func Rad(d float64) float64 { return d * constX }
+
+// Deg converts radians to degrees
+func Deg(r float64) float64 { return r / constX }
+
 /*
  * main function
  * Parse startup aurguments
@@ -325,11 +333,3 @@ func main() {
 	}
 	log.Info("GoVisn version %s", GOVISN_VERSION+" ending.")
 }
-
-const constX = math.Pi / 180
-
-// Rad converts degrees to radians
-func Rad(d float64) float64 { return d * constX }
-
-// Deg converts radians to degrees
-func Deg(r float64) float64 { return r / constX }
