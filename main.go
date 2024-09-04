@@ -24,8 +24,8 @@ import (
 * TODO:
  */
 
-// GOVISNVERSION is the file version number
-const GOVISNVERSION = "0.12.5"
+// GOVISN_VERSION is the file version number
+const GOVISN_VERSION = "0.12.5"
 
 var log *logger.Logger
 
@@ -84,7 +84,7 @@ func main() {
 
 	flag.Parse() // Scan the arguments list
 	if *versionFlag {
-		fmt.Println("GoVision version", GOVISNVERSION)
+		fmt.Println("GoVision version", GOVISN_VERSION)
 		return
 	}
 
@@ -95,7 +95,7 @@ func main() {
 	}
 	log.Debug("Log Level set to DEBUG")
 
-	log.Info("GoVision version %s", GOVISNVERSION+
+	log.Info("GoVision version %s", GOVISN_VERSION+
 		" started")
 
 	/* 	if *sampleNetworkDB {
@@ -323,7 +323,7 @@ func main() {
 		//databaseForRead = visualizeNetwork(log, databaseForRead, snmpTarget, params)
 		_ = visualizeNetwork(log, databaseForRead, snmpTarget, params)
 	}
-	log.Info("GoVisn version %s", GOVISNVERSION+" ending.")
+	log.Info("GoVisn version %s", GOVISN_VERSION+" ending.")
 }
 
 const constX = math.Pi / 180
