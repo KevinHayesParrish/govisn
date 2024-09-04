@@ -24,15 +24,15 @@ import (
  	* Add code to walk route table to discover all routers
 */
 
-// DISCOVERYVERSION is the file version number
-const DISCOVERYVERSION = "0.3.6"
+// DISCOVERY_VERSION is the file version number
+const DISCOVERY_VERSION = "0.3.6"
 
 // func discover(debugFlag bool, log *logger.Logger, dbName string, snmpTarget string, community string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
 // func discover(log *logger.Logger, dbName string, snmpTarget string, community string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
 func discover(log *logger.Logger, snmpTarget string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
 
 	//	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.")
-	log.Info("func discover version %s", DISCOVERYVERSION+" started.")
+	log.Info("func discover version %s", DISCOVERY_VERSION+" started.")
 
 	// Discover network, constrained by input parm maximum hops away from snmpTarget node
 	maxHops, _ := strconv.Atoi(maxHopsStr)
@@ -62,7 +62,7 @@ func discover(log *logger.Logger, snmpTarget string, params *g.GoSNMP, maxHopsSt
 	//	getRouterInfo(debugFlag, log, snmpTarget, community, maxHopsStr, params, router, database)
 	getRouterInfo(log, snmpTarget, params, router, database)
 
-	log.Debug("func discover version %s", DISCOVERYVERSION+" ended.")
+	log.Debug("func discover version %s", DISCOVERY_VERSION+" ended.")
 
 	return database
 }
