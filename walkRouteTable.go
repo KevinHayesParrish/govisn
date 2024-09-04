@@ -16,15 +16,15 @@ import (
 
 //var scannedRouters []ScannedRouter
 
-// WALKROUTETABLEVERSION is the file version number
-const WALKROUTETABLEVERSION = "0.1.2"
+// WALK_ROUTE_TABLE_VERSION is the file version number
+const WALK_ROUTE_TABLE_VERSION = "0.1.2"
 
 /*
  * func walkRouteTableMap walks the router's ipRouteTable and returns a map of the results.
  */
 func walkRouteTableMap(log *logger.Logger, seed string, community string, params *g.GoSNMP) map[string]string {
 
-	log.Info("func walkRouteTableMap version %s", WALKROUTETABLEVERSION+" started.")
+	log.Info("func walkRouteTableMap version %s", WALK_ROUTE_TABLE_VERSION+" started.")
 	log.Debug("seed=%s", seed)
 	log.Debug("community=%s", community)
 	log.Debug("params.snmpTarget=%s", params.Target)
@@ -92,6 +92,6 @@ func walkRouteTableMap(log *logger.Logger, seed string, community string, params
 	}
 
 	params.Conn.Close()
-	log.Info("\nfunc walkRouteTableMap version %s ", WALKROUTETABLEVERSION+" ended.")
+	log.Info("\nfunc walkRouteTableMap version %s ", WALK_ROUTE_TABLE_VERSION+" ended.")
 	return scannedRouterMap
 }
