@@ -1116,7 +1116,7 @@ func addTitle(log *logger.Logger, gv *gvapp) *gvapp {
 
 	log.Debug("addTitle Started.")
 	titleLines := []string{
-		"                  GoVisn version " + GOVISNVERSION,
+		"                  GoVisn version " + GOVISN_VERSION,
 		"\nNetwork Visualization in 3D from " + *DbName,
 		//		"Copyright 2020 Kevin Hayes Parrish",
 		//		"All rights reserved.",
