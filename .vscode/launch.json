@@ -75,6 +75,17 @@
                 "${userHome}/tmp/govisn.db",
                 "-de"
             ]
+        },
+        {
+            "name": "debug govisn -v",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${fileDirname}",
+            "env": {},
+            "args": [
+                "-v"
+            ]
         }
     ]
 }
