@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"math"
 	"strconv"
-	"strings"
 	"time"
 
 	//	"github.com/g3n/g3nd/material"
@@ -192,6 +191,8 @@ func main() {
 		if err != nil {
 			log.Fatal("sql.Open() err: %v", err)
 		}
+		//Initialize the database
+		database = initDB(log, database)
 
 		// /*
 		//  * Discover the router's neighbors from its route table
@@ -250,6 +251,8 @@ func main() {
 		discoveredRouters := make(map[string]bool)
 		toDiscover := []string{seed}
 
+		var router Router
+
 		for len(toDiscover) > 0 {
 			currentRouter := toDiscover[0]
 			toDiscover = toDiscover[1:]
@@ -259,35 +262,52 @@ func main() {
 			}
 
 			// Connect to the router
-			client, err := connectToSNMP(currentRouter, *community)
+			params, err := connectToSNMP(
+				currentRouter,
+				*community,
+			)
 			if err != nil {
 				log.Warn("Error connecting to %s: %v", currentRouter, err)
 				continue
 			}
-			defer client.Conn.Close()
+			defer params.Conn.Close()
+
+			// Get the Router's info
+			getRouterInfo(
+				log,
+				params.Target,
+				params,
+				router,
+				database,
+			)
 
 			// Discover routes
-			routes, err := discoverRoutes(client, ipRouteNextHopOID)
+			routes, err := discoverRoutes(params, ipRouteNextHopOID)
 			if err != nil {
 				log.Warn("Error discovering routes from %s: %v", currentRouter, err)
 				continue
 			}
 
 			// Print discovered routes
-			fmt.Printf("Routes from %s:\n", currentRouter)
+			//fmt.Printf("Routes from %s:\n", currentRouter)
+			log.Debug("Routes from %s", currentRouter)
 			for _, route := range routes {
-				fmt.Println(route)
+				//fmt.Println(route)
+				log.Debug(route)
 				// Here, parse the route to find new router IP addresses if applicable
 				// For simplicity, assume the route value contains IP addresses of other routers
 				// In a real scenario, you need to parse the route information accordingly
-				if strings.HasPrefix(route, "192.168") && !discoveredRouters[route] {
-					toDiscover = append(toDiscover, route)
-				}
+				//if strings.HasPrefix(route, "192.168") && !discoveredRouters[route] {
+				toDiscover = append(toDiscover, route)
+				//}
 			}
 
 			// Mark the current router as discovered
 			discoveredRouters[currentRouter] = true
 		}
+
+		// Build Links
+		database = buildLinks(log, database)
 
 		defer database.Close()
 
