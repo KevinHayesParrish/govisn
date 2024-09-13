@@ -12,7 +12,7 @@
             "program": "${file}"
         },
         {
-            "name": "debug govisn -di -f -co -de",
+            "name": "debug govisn Discover Net",
             "type": "go",
             "request": "launch",
             "mode": "debug",
@@ -31,7 +31,7 @@
             ]
         },
         {
-            "name": "debug govisn -s -f -co -de",
+            "name": "debug govisn Scan Net",
             "type": "go",
             "request": "launch",
             "mode": "debug",
@@ -48,7 +48,7 @@
             ]
         },
         {
-            "name": "debug govisn visualize net",
+            "name": "debug govisn Visualize Net",
             "type": "go",
             "request": "launch",
             "mode": "debug",
