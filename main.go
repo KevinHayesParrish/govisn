@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 
 	//	"github.com/g3n/g3nd/material"
@@ -25,7 +26,7 @@ import (
  */
 
 // GOVISN_VERSION is the file version number
-const GOVISN_VERSION = "0.12.5"
+const GOVISN_VERSION = "0.20.0"
 
 var log *logger.Logger
 
@@ -74,6 +75,37 @@ func Rad(d float64) float64 { return d * constX }
 
 // Deg converts radians to degrees
 func Deg(r float64) float64 { return r / constX }
+
+// Function to connect to an SNMP agent
+func connectToSNMP(target string, community string) (*g.GoSNMP, error) {
+	client := &g.GoSNMP{
+		Target:    target,
+		Port:      uint16(161),
+		Community: community,
+		Version:   g.Version2c,
+		//		Timeout:   10,
+		Timeout: time.Duration(2) * time.Second,
+	}
+	err := client.Connect()
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// Function to discover routes from a router
+func discoverRoutes(client *g.GoSNMP, oid string) (map[string]string, error) {
+	routes := make(map[string]string)
+	err := client.Walk(oid, func(pdu g.SnmpPDU) error {
+		// Example processing, customize based on OID structure
+		routes[pdu.Name] = fmt.Sprintf("%v", pdu.Value)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return routes, nil
+}
 
 /*
  * main function
@@ -145,7 +177,7 @@ func main() {
 		Community: *community,
 		Version:   g.Version2c,
 		Timeout:   time.Duration(2) * time.Second,
-		Retries:   1,
+		Retries:   2,
 		Logger:    g.Default.Logger,
 		MaxOids:   6,
 	}
@@ -161,58 +193,103 @@ func main() {
 			log.Fatal("sql.Open() err: %v", err)
 		}
 
-		/*
-		 * Discover the router's neighbors from its route table
-		 */
-		params.Target = seed
-		log.Debug("params=%v", params)
-		scannedRouterMap := walkRouteTableMap(log, seed, *community, params)
-		//		log.Debug("routerList discovered by walkRouteTable = %s", routerList)
-		log.Debug("scannedRouterMap = %v", scannedRouterMap)
+		// /*
+		//  * Discover the router's neighbors from its route table
+		//  */
+		// params.Target = seed
+		// log.Debug("params=%v", params)
+		// scannedRouterMap := walkRouteTableMap(log, seed, *community, params)
+		// //		log.Debug("routerList discovered by walkRouteTable = %s", routerList)
+		// log.Debug("scannedRouterMap = %v", scannedRouterMap)
 
-		// Close database. Completed initialization and update of all tables, except Links.
-		database.Close()
+		// // Close database. Completed initialization and update of all tables, except Links.
+		// database.Close()
 
-		if len(scannedRouterMap) < 1 {
-			log.Warn("No routers discovered. Ending execution.")
-			return
-		}
+		// if len(scannedRouterMap) < 1 {
+		// 	log.Warn("No routers discovered. Ending execution.")
+		// 	return
+		// }
 
-		// Open database.
-		database, err = sql.Open("sqlite3", dbName)
-		if err != nil {
-			log.Fatal("sql.Open() err: %v", err)
-		}
+		// // Open database.
+		// database, err = sql.Open("sqlite3", dbName)
+		// if err != nil {
+		// 	log.Fatal("sql.Open() err: %v", err)
+		// }
 
-		/*
-		 * Discover the network
-		 */
-		for _, IPAddress := range scannedRouterMap {
+		// /*
+		//  * Discover the network
+		//  */
+		// for _, IPAddress := range scannedRouterMap {
 
-			// Discover the router's information and add to database
-			params.Target = IPAddress
-			//			database = discover(*debugFlag, log, dbName, IPAddress, *community, params, *maxHops, database)
-			//			database = discover(log, dbName, IPAddress, *community, params, *maxHops, database)
-			database = discover(log, IPAddress, params, *maxHops, database)
+		// 	// Discover the router's information and add to database
+		// 	params.Target = IPAddress
+		// 	//			database = discover(*debugFlag, log, dbName, IPAddress, *community, params, *maxHops, database)
+		// 	//			database = discover(log, dbName, IPAddress, *community, params, *maxHops, database)
+		// 	database = discover(log, IPAddress, params, *maxHops, database)
 
-			// Close database. Completed initialization and update of all tables, except Links.
-			database.Close()
+		// 	// Close database. Completed initialization and update of all tables, except Links.
+		// 	database.Close()
 
-			// Open database. buildLinks joins Router and RouteTable tables.
-			database, err = sql.Open("sqlite3", dbName)
-			if err != nil {
-				log.Fatal("sql.Open() err %v", err)
+		// 	// Open database. buildLinks joins Router and RouteTable tables.
+		// 	database, err = sql.Open("sqlite3", dbName)
+		// 	if err != nil {
+		// 		log.Fatal("sql.Open() err %v", err)
+		// 	}
+
+		// 	// Build Links
+		// 	//			database = buildLinks(*debugFlag, log, database)
+		// 	database = buildLinks(log, database)
+
+		// }
+		// // Build Links
+		// //		database = buildLinks(*debugFlag, log, database)
+		// database = buildLinks(log, database)
+		// database.Close()
+
+		// Discover network starting from the initial router
+		discoveredRouters := make(map[string]bool)
+		toDiscover := []string{seed}
+
+		for len(toDiscover) > 0 {
+			currentRouter := toDiscover[0]
+			toDiscover = toDiscover[1:]
+
+			if discoveredRouters[currentRouter] {
+				continue
 			}
 
-			// Build Links
-			//			database = buildLinks(*debugFlag, log, database)
-			database = buildLinks(log, database)
+			// Connect to the router
+			client, err := connectToSNMP(currentRouter, *community)
+			if err != nil {
+				log.Warn("Error connecting to %s: %v", currentRouter, err)
+				continue
+			}
+			defer client.Conn.Close()
 
+			// Discover routes
+			routes, err := discoverRoutes(client, ipRouteNextHopOID)
+			if err != nil {
+				log.Warn("Error discovering routes from %s: %v", currentRouter, err)
+				continue
+			}
+
+			// Print discovered routes
+			fmt.Printf("Routes from %s:\n", currentRouter)
+			for _, route := range routes {
+				fmt.Println(route)
+				// Here, parse the route to find new router IP addresses if applicable
+				// For simplicity, assume the route value contains IP addresses of other routers
+				// In a real scenario, you need to parse the route information accordingly
+				if strings.HasPrefix(route, "192.168") && !discoveredRouters[route] {
+					toDiscover = append(toDiscover, route)
+				}
+			}
+
+			// Mark the current router as discovered
+			discoveredRouters[currentRouter] = true
 		}
-		// Build Links
-		//		database = buildLinks(*debugFlag, log, database)
-		database = buildLinks(log, database)
-		database.Close()
+
+		defer database.Close()
 
 	}
 
