@@ -62,7 +62,7 @@ func discover(log *logger.Logger, snmpTarget string, params *g.GoSNMP, maxHopsSt
 func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
 
 	// get Number of Interfaces
-	ifNumberArray := []string{ifNumberOID + ".0"}
+	ifNumberArray := []string{IF_NUMBER_OID + ".0"}
 	getPDU, getError := params.Get(ifNumberArray)
 	if getError != nil {
 		database.Close()
@@ -74,7 +74,7 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 	log.Debug("nbrOfInterfaces= %v", nbrOfInterfaces)
 
 	// get ifTable
-	walkPDU, walkError := params.WalkAll(ifTableOID)
+	walkPDU, walkError := params.WalkAll(IF_TABLE_OID)
 	if walkError != nil {
 		database.Close()
 		log.Fatal("Get() err: %v", walkError)
@@ -439,12 +439,12 @@ func writeMacToDB(log *logger.Logger, router Router, interfaceTable ifTable, dat
 func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
 
 	// get ipAddrTable
-	walkPDU, err := params.WalkAll(ipAdEntAddrOID)
+	walkPDU, err := params.WalkAll(IP_AD_ENT_ADDR_OID)
 	if err != nil {
 		database.Close()
 		log.Fatal("Get(walkPDU) err: %v", err)
 	}
-	ifIndexPDU, err := params.WalkAll(ipAdEntIfIndex)
+	ifIndexPDU, err := params.WalkAll(IP_AD_ENT_IF_INDEX)
 	if err != nil {
 		database.Close()
 		log.Fatal("Get(ifIndexPDU) err: %v", err)
@@ -486,7 +486,7 @@ func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, databas
 
 	}
 
-	walkPDU, err = params.WalkAll(ipAdEntNetMask)
+	walkPDU, err = params.WalkAll(IP_AD_ENT_NET_MASK)
 	if err != nil {
 		log.Debug("WalkAll failed. Err= %s", err)
 	}
@@ -496,7 +496,7 @@ func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, databas
 		log.Debug("ipAdEntNetMask= %s", ipTable.ipAddrEntry.ipAdEntNetMask)
 	}
 
-	walkPDU, err = params.WalkAll(ipAdEntBcastAddr)
+	walkPDU, err = params.WalkAll(IP_AD_ENT_BCAST_ADDR)
 	if err != nil {
 		log.Debug("WalkAll failed. Err= %s", err)
 	}
@@ -506,7 +506,7 @@ func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, databas
 		log.Debug("ipAdEntBcastAddr= %d", ipTable.ipAddrEntry.ipAdEntBcastAddr)
 	}
 
-	walkPDU, err = params.WalkAll(ipAdEntReasmMaxSize)
+	walkPDU, err = params.WalkAll(IP_AD_ENT_REASM_MAX_SIZE)
 	if err != nil {
 		log.Debug("WalkAll failed. Err= %s", err)
 	}
@@ -524,21 +524,21 @@ func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, databas
 func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
 
 	// get ipRouteTable
-	ipRouteDestPDU, err := params.WalkAll(ipRouteDestOID)
+	ipRouteDestPDU, err := params.WalkAll(IP_ROUTE_DEST_OID)
 	if err != nil {
 		database.Close()
 		log.Fatal("Get(ipRouteDestPDU) err")
 	}
 	log.Debug("\nipRouteDestPDU PDU= %v", ipRouteDestPDU)
 
-	ipRouteIfIndexPDU, err := params.WalkAll(ipRouteIfIndexOID)
+	ipRouteIfIndexPDU, err := params.WalkAll(IP_ROUTE_IF_INDEX_OID)
 	if err != nil {
 		database.Close()
 		log.Fatal("Get(ipRouteIfIndexPDU) err")
 	}
 	log.Debug("\nipRouteIfIndexPDU PDU= %v", ipRouteIfIndexPDU)
 
-	ipRouteNextHopPDU, err := params.WalkAll(ipRouteNextHopOID)
+	ipRouteNextHopPDU, err := params.WalkAll(IP_ROUTE_NEXT_HOP_OID)
 	if err != nil {
 		database.Close()
 		log.Fatal("Get(ipRouteNextHopPDU) err")
@@ -581,12 +581,12 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
  */
 func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, router Router, database *sql.DB) {
 	oids := []string{
-		sysNameOID + ".0",     // sysName
-		sysDescrOID + ".0",    // sysDescr
-		sysUpTimeOID + ".0",   // sysUpTime
-		sysContactOID + ".0",  // sysContact
-		sysLocationOID + ".0", // sysLocation
-		sysServicesOID + ".0", // sysServices
+		SYS_NAME_OID + ".0",     // sysName
+		SYS_DESCR_OID + ".0",    // sysDescr
+		SYS_UPTIME_OID + ".0",   // sysUpTime
+		SYS_CONTACT_OID + ".0",  // sysContact
+		SYS_LOCATION_OID + ".0", // sysLocation
+		SYS_SERVICES_OID + ".0", // sysServices
 	}
 
 	// get FQDN with IP Address

@@ -51,7 +51,7 @@ func walkRouteTableMap(log *logger.Logger, seed string, community string, params
 	scannedRouterMap[fqdn[0]] = seed
 
 	// Retrieve the route table and add each Next Hop address to the list of routers
-	ipRouteNextHopPDU, err := params.WalkAll(ipRouteNextHopOID)
+	ipRouteNextHopPDU, err := params.WalkAll(IP_ROUTE_NEXT_HOP_OID)
 
 	//	if err != nil {
 	//		log.Fatal("Get(ipRouteNextHopPDU) err")

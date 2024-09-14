@@ -209,7 +209,7 @@ func main() {
 			)
 
 			// Discover routes
-			routes, err := discoverRoutes(params, ipRouteNextHopOID)
+			routes, err := discoverRoutes(params, IP_ROUTE_NEXT_HOP_OID)
 			if err != nil {
 				log.Warn("Error discovering routes from %s: %v", currentRouter, err)
 				continue

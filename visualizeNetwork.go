@@ -943,8 +943,8 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 
 		// SNMP Get Router Interface Outbound traffic (ifOutOctets 1)
 		oids := []string{
-			ifOutOctets + "." + FromRouterIfIndex, // ifOutOctets
-			ifSpeed + "." + FromRouterIfIndex,     // ifSpeed
+			IF_OUT_OCTETS + "." + FromRouterIfIndex, // ifOutOctets
+			IF_SPEED + "." + FromRouterIfIndex,      // ifSpeed
 		}
 
 		snmpTarget = FromRouterName

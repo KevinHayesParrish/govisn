@@ -52,8 +52,8 @@ func scanNet(log *logger.Logger, cidr string, community string, params *g.GoSNMP
 	for i := 0; i < len(subnetIPAddrs); i++ {
 		// get sysName and sysServices
 		oids := []string{
-			sysNameOID + ".0",     // sysName
-			sysServicesOID + ".0", // sysServices
+			SYS_NAME_OID + ".0",     // sysName
+			SYS_SERVICES_OID + ".0", // sysServices
 		}
 
 		fqdn := getRtrName(subnetIPAddrs[i])
