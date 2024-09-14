@@ -16,13 +16,8 @@ import (
 	"github.com/g3n/engine/util/logger"
 	_ "github.com/mattn/go-sqlite3"
 
-	//g "github.com/soniah/gosnmp"
 	g "github.com/gosnmp/gosnmp"
 )
-
-/*
-* TODO:
- */
 
 // GOVISN_VERSION is the file version number
 const GOVISN_VERSION = "0.20.1"
@@ -33,16 +28,12 @@ var log *logger.Logger
 var versionFlag = flag.Bool("v", false, "Print the version number.")
 var debugFlag = flag.Bool("de", false, "Print Debug statements.")
 
-// var sampleNetworkDB = flag.Bool("cr", false, "Create a sample database.")
 var loadDBFlag = flag.Bool("l", false, "Load a database from an XML document.")
 
 var dbName = "govisnDiscoveredNet.db"
 
 // DbName is the name of the discovered network database file or name of XML input file
 var DbName = flag.String("f", "govisnDiscoveredNet.db", "Name of the discovered network database -or-\nName of the XML input file, if combined with -l option.")
-
-// testArangodb is the startup option to test accessing an ArangoDB database
-//var testArangoDb = flag.Bool("a", false, "Test opening an ArangoDB database")
 
 // discoverFlag is the option to discover a network
 var discoverFlag = flag.String("di", "", "Discover a network using a seed IP Address")
@@ -137,14 +128,6 @@ func main() {
 	log.Info("GoVision version %s", GOVISN_VERSION+
 		" started")
 
-	/* 	if *sampleNetworkDB {
-	   		createsampledb()
-	   	}
-	*/
-	/* 	if *testArangoDb {
-	   		testarango()
-	   	}
-	*/
 	if *DbName != "govisnDiscoveredNet.db" {
 		dbName = *DbName
 	}
@@ -194,59 +177,6 @@ func main() {
 		//Initialize the database
 		database = initDB(log, database)
 
-		// /*
-		//  * Discover the router's neighbors from its route table
-		//  */
-		// params.Target = seed
-		// log.Debug("params=%v", params)
-		// scannedRouterMap := walkRouteTableMap(log, seed, *community, params)
-		// //		log.Debug("routerList discovered by walkRouteTable = %s", routerList)
-		// log.Debug("scannedRouterMap = %v", scannedRouterMap)
-
-		// // Close database. Completed initialization and update of all tables, except Links.
-		// database.Close()
-
-		// if len(scannedRouterMap) < 1 {
-		// 	log.Warn("No routers discovered. Ending execution.")
-		// 	return
-		// }
-
-		// // Open database.
-		// database, err = sql.Open("sqlite3", dbName)
-		// if err != nil {
-		// 	log.Fatal("sql.Open() err: %v", err)
-		// }
-
-		// /*
-		//  * Discover the network
-		//  */
-		// for _, IPAddress := range scannedRouterMap {
-
-		// 	// Discover the router's information and add to database
-		// 	params.Target = IPAddress
-		// 	//			database = discover(*debugFlag, log, dbName, IPAddress, *community, params, *maxHops, database)
-		// 	//			database = discover(log, dbName, IPAddress, *community, params, *maxHops, database)
-		// 	database = discover(log, IPAddress, params, *maxHops, database)
-
-		// 	// Close database. Completed initialization and update of all tables, except Links.
-		// 	database.Close()
-
-		// 	// Open database. buildLinks joins Router and RouteTable tables.
-		// 	database, err = sql.Open("sqlite3", dbName)
-		// 	if err != nil {
-		// 		log.Fatal("sql.Open() err %v", err)
-		// 	}
-
-		// 	// Build Links
-		// 	//			database = buildLinks(*debugFlag, log, database)
-		// 	database = buildLinks(log, database)
-
-		// }
-		// // Build Links
-		// //		database = buildLinks(*debugFlag, log, database)
-		// database = buildLinks(log, database)
-		// database.Close()
-
 		// Discover network starting from the initial router
 		discoveredRouters := make(map[string]bool)
 		toDiscover := []string{seed}
@@ -289,15 +219,10 @@ func main() {
 			}
 
 			// Print discovered routes
-			//fmt.Printf("Routes from %s:\n", currentRouter)
 			log.Debug("Routes from %s", currentRouter)
 			for _, route := range routes {
-				//fmt.Println(route)
 				log.Debug(route)
-				// Here, parse the route to find new router IP addresses if applicable
-				// For simplicity, assume the route value contains IP addresses of other routers
-				// In a real scenario, you need to parse the route information accordingly
-				//if strings.HasPrefix(route, "192.168") && !discoveredRouters[route] {
+				// Parse the route to find new router IP addresses if applicable
 				toDiscover = append(toDiscover, route)
 				//}
 			}
@@ -313,9 +238,6 @@ func main() {
 
 	}
 
-	//	snmpPort := "161"
-	//	snmpTarget := seed
-
 	var scannedRouters []ScannedRouter
 
 	if *scanNetFlag != "" {
@@ -327,8 +249,6 @@ func main() {
 		}
 		defer database.Close()
 
-		//		snmpPort := "161"
-		//		snmpTarget := seed
 		if len(snmpTarget) <= 0 {
 			log.Fatal("environment variable not set: GOSNMP_TARGET")
 		} else {
@@ -351,12 +271,7 @@ func main() {
 		}
 
 		// Scan the requested network for Router hosts
-		//		scannedRouters = scanNet(*debugFlag, seed, *community, *params)
-		//		scannedRouters = scanNet(*debugFlag, log, seed, *community, params)
 		scannedRouters = scanNet(log, seed, *community, params)
-		//		if *debugFlag {
-		//			fmt.Println("scnnedRouters=", scannedRouters)
-		//		}
 		log.Debug("scannedRouters= %v", scannedRouters)
 
 		// Discover router information from list of scanned routers.
@@ -369,8 +284,6 @@ func main() {
 
 			// Discover the router's information and add to database
 			params.Target = scannedRouters[i].IPAddress
-			//			database = discover(*debugFlag, log, dbName, scannedRouters[i].IPAddress, *community, params, *maxHops, database)
-			//			database = discover(log, dbName, scannedRouters[i].IPAddress, *community, params, *maxHops, database)
 			database = discover(log, scannedRouters[i].IPAddress, params, *maxHops, database)
 
 			// Close database. Completed initialization and update of all tables, except Links.
@@ -383,7 +296,6 @@ func main() {
 			}
 
 			// Build Links
-			//			database = buildLinks(*debugFlag, log, database)
 			database = buildLinks(log, database)
 
 		}
@@ -423,9 +335,6 @@ func main() {
 			Logger:    g.Default.Logger,
 			MaxOids:   6,
 		}
-		//		databaseForRead = visualizeNetwork(*debugFlag, log, databaseForRead, snmpTarget, *community, params)
-		//databaseForRead = visualizeNetwork(log, databaseForRead, snmpTarget, *community, params)
-		//databaseForRead = visualizeNetwork(log, databaseForRead, snmpTarget, params)
 		_ = visualizeNetwork(log, databaseForRead, snmpTarget, params)
 	}
 	log.Info("GoVisn version %s", GOVISN_VERSION+" ending.")
