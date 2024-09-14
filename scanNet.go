@@ -7,28 +7,23 @@ package main
 import (
 	"strconv"
 
-	//"log"
 	"strings"
 
 	"github.com/g3n/engine/util/logger"
 	_ "github.com/mattn/go-sqlite3"
 
-	//g "github.com/soniah/gosnmp"
 	g "github.com/gosnmp/gosnmp"
 )
 
+// SCAN_NET_VERSION is the file version number
+const SCAN_NET_VERSION = "0.0.4"
+
 /*
- * TODO:
- 	*
-*/
-
-// SCANNETVERSION is the file version number
-const SCANNETVERSION = "0.0.3"
-
-// func scanNet(debugFlag bool, log *logger.Logger, cidr string, community string, params *g.GoSNMP) []ScannedRouter {
+ * func scanNet accepts a seed cidr subnet address and discovers the network by iterating through IP Addresses.
+ */
 func scanNet(log *logger.Logger, cidr string, community string, params *g.GoSNMP) []ScannedRouter {
 
-	log.Info("func scanNet version %s ", SCANNETVERSION+" started.")
+	log.Info("func scanNet version %s ", SCAN_NET_VERSION+" started.")
 	log.Debug(" seed=%s", seed+" community="+community)
 
 	var scannedRouters []ScannedRouter
@@ -38,7 +33,6 @@ func scanNet(log *logger.Logger, cidr string, community string, params *g.GoSNMP
 	 * Add scanning loop.
 	 * SNMP Get for each IP address
 	 * If Router System.Services is => IP services, then add Router FQDN and IP Address to scannedRouters
-
 	 */
 
 	// get all the addresses within the cidr subnet, given the input parameter.
@@ -86,6 +80,6 @@ func scanNet(log *logger.Logger, cidr string, community string, params *g.GoSNMP
 	}
 
 	log.Debug("Returning, scannedRouters= %v", scannedRouters)
-	log.Info("func scanNet %s", SCANNETVERSION+" ended.")
+	log.Info("func scanNet %s", SCAN_NET_VERSION+" ended.")
 	return scannedRouters
 }

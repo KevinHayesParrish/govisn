@@ -28,6 +28,8 @@ const WALK_ROUTE_TABLE_VERSION = "0.1.2"
  */
 func walkRouteTableMap(log *logger.Logger, seed string, community string, params *g.GoSNMP) map[string]string {
 
+	var walkedHops = 0
+
 	log.Info("func walkRouteTableMap version %s", WALK_ROUTE_TABLE_VERSION+" started.")
 	log.Debug("seed=%s", seed)
 	log.Debug("community=%s", community)
