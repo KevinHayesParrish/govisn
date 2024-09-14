@@ -116,10 +116,10 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 	gv.scene.SetName("GoVisnScene")
 
 	// Create perspective camera
-	gv.camPos = math32.Vector3{X: 0, Y: 0, Z: (float32)(globeRadius * 2.0)}
+	gv.camPos = math32.Vector3{X: 0, Y: 0, Z: (float32)(GLOBE_RADIUS * 2.0)}
 	gv.cam = camera.New(1) // perspective camera with defaults
 	gv.cam.SetName("camera")
-	gv.cam.SetPosition(0, 0, (float32)(globeRadius*2.0))
+	gv.cam.SetPosition(0, 0, (float32)(GLOBE_RADIUS*2.0))
 
 	// Setup orbit control for the camera
 	gv.orbit = camera.NewOrbitControl(gv.cam)
@@ -199,7 +199,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 	globeTex.SetFlipY(false)
 
 	// Create a sphere representing the globe
-	globe3D := geometry.NewSphere(globeRadius, 16, 16)
+	globe3D := geometry.NewSphere(GLOBE_RADIUS, 16, 16)
 	//globeMat := material.NewStandard(&math32.Color{R: 1.0, G: 1.0, B: 1.0}) // White 255, 255, 255
 	globeMat := material.NewStandard(math32.NewColor("grey"))
 	//globeMat.AddTexture(globeTex)
@@ -235,7 +235,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 		routers = append(routers, router)
 
-		rtr3D := geometry.NewCylinder(routerRadius, routerRadius, 16, 2, true, true)
+		rtr3D := geometry.NewCylinder(ROUTER_RADIUS, ROUTER_RADIUS, 16, 2, true, true)
 		mat := material.NewStandard(math32.NewColor("DarkBlue"))
 		cylinderMesh := graphic.NewMesh(rtr3D, mat)
 		cylinderMesh.SetName(router.System.Name)
@@ -526,15 +526,15 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 	}
 
 	xRadianLong := Rad(GpsLongFloat64)
-	x = (float32)(globeRadius * math.Sin(xRadianLat) * math.Cos(xRadianLong))
+	x = (float32)(GLOBE_RADIUS * math.Sin(xRadianLat) * math.Cos(xRadianLong))
 
 	yRadianLat := Rad(GpsLatFloat64)
 	yRadianLong := Rad(GpsLongFloat64)
-	y = (float32)(globeRadius * math.Sin(yRadianLat) * math.Sin(yRadianLong))
+	y = (float32)(GLOBE_RADIUS * math.Sin(yRadianLat) * math.Sin(yRadianLong))
 
 	GpsAltFloat64, parseErr := strconv.ParseFloat(GpsAlt, 64)
 	GpsAltFloat64 = GpsAltFloat64 / 100000.0
-	z = (float32)(globeRadius*(math.Cos(yRadianLat)) + GpsAltFloat64)
+	z = (float32)(GLOBE_RADIUS*(math.Cos(yRadianLat)) + GpsAltFloat64)
 
 	return x, y, z
 }

@@ -49,22 +49,19 @@ var visualizeFlag = flag.Bool("vi", false, "Visualize the Network.")
 // scanNetFlag is the startup option to scan the network for SNMP capable routers.
 var scanNetFlag = flag.String("s", "", "Scan the CIDR network for SNMP capable routers.\nCIDR format = x.x.x.x/n. ex: 192.168.1.0/24\nOnce the network is scanned, the list of found routers\nwill be queried and their information added to the database.")
 
-// routerRadius is the radius of the 3D object representing a network router
-const routerRadius float64 = 0.5
+// ROUTER_RADIUS is the radius of the 3D object representing a network router
+const ROUTER_RADIUS float64 = 0.5
 
-// globeRadius is the radius of the 3D object representing the earth
-const globeRadius float64 = 63.7
+// GLOBE_RADIUS is the radius of the 3D object representing the earth
+const GLOBE_RADIUS float64 = 63.7
 
-// walkedHops is the number of hops walked away from the seed
-var walkedHops = 0
-
-const constX = math.Pi / 180
+const CONST_X = math.Pi / 180
 
 // Rad converts degrees to radians
-func Rad(d float64) float64 { return d * constX }
+func Rad(d float64) float64 { return d * CONST_X }
 
 // Deg converts radians to degrees
-func Deg(r float64) float64 { return r / constX }
+func Deg(r float64) float64 { return r / CONST_X }
 
 // Function to connect to an SNMP agent
 func connectToSNMP(target string, community string) (*g.GoSNMP, error) {
