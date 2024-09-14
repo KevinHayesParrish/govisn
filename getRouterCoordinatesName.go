@@ -8,8 +8,10 @@ import (
 	"strconv"
 )
 
-// Get Router Coordinates from routerArray
-// func getRouterCoordinatesName(debug bool, routers []Router, routerName string) (float32, float32, float32) {
+/*
+ * func getRouterCoordinatesName retrieves Router Coordinates from the database
+ * using the router's name.
+ */
 func getRouterCoordinatesName(routers []Router, routerName string) (float32, float32, float32) {
 	log.Debug("getRouterCoordinatesName starting")
 	var x float32

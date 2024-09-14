@@ -14,11 +14,11 @@ import (
 	"github.com/g3n/engine/util/logger"
 )
 
-// EXPORTKMLVERSION is the version number of this function's source code file.
-const EXPORTKMLVERSION = "0.1.0"
+// EXPORT_KML_VERSION is the version number of this function's source code file.
+const EXPORT_KML_VERSION = "0.1.1"
 
 func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
-	log.Info("exportKML version %s ", EXPORTKMLVERSION+" started")
+	log.Info("exportKML version %s started", EXPORT_KML_VERSION)
 	log.Debug("kmlFilename = %s", kmlFilename)
 	log.Debug("DbName = %s", DbName)
 
@@ -145,6 +145,5 @@ func exportKML(log *logger.Logger, kmlFilename string, DbName string) {
 		log.Fatal(err.Error())
 	}
 
-	log.Info("exportKML version %s ", EXPORTKMLVERSION+" ending")
-	//	return
+	log.Info("exportKML version %s ending", EXPORT_KML_VERSION)
 }

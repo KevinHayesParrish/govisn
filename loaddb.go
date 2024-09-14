@@ -9,21 +9,24 @@ import (
 	"encoding/xml"
 	"fmt"
 	"hash/crc32"
-	"io/ioutil"
+	"io"
 	"os"
 	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-//loaddbVersion is the file version number
-const loadbVersion = "0.2.4"
+// LOAD_DB_VERSION is the file version number
+const LOAD_DB_VERSION = "0.2.5"
 
-// The V15NDiscoveredNetwork struct contains the discovered network, and it's sub-structs;
-// essentially, the XML input file.
+/*
+ * The V15NDiscoveredNetwork struct contains the discovered network, and it's sub-structs;
+ * essentially, the XML input file.
+ */
 type V15NDiscoveredNetwork struct {
 	XMLName xml.Name `xml:"V15N_Discovered_Network"`
 	Text    string   `xml:",chardata"`
+
 	// The Router struct, this contains
 	// the router's Name, Descriptions, UpTime
 	// Contact, Location and GPS Coordinates.
@@ -67,26 +70,28 @@ type V15NDiscoveredNetwork struct {
 	} `xml:"Router"`
 }
 
-func loaddb(debug bool, networkXML string) {
-	fmt.Println("loaddb version:", loadbVersion)
-	fmt.Println("Loading database from XML document", networkXML) // FOR TESTING ONLY
+func loaddb(networkXML string) {
+	/*
+	 * TODO
+	 *    replace Println with log.DEBUG, etc.
+	 */
 
-	if debug {
-		fmt.Println("Debug option selected")
-	}
+	log.Info("func loaddb version %s started.", LOAD_DB_VERSION)
+	log.Info("Loading database from XML document %s", networkXML)
+
+	log.Debug("Debug option selected")
 
 	// Open our xmlFile
 	xmlFile, err := os.Open(networkXML)
-	// if os.Open returns an error then handle it
 	if err != nil {
-		fmt.Println(err)
+		log.Warn("Open XML file error %v", err.Error())
 	}
-	fmt.Println("Successfully Opened", networkXML)
+	log.Info("Successfully Opened %s", networkXML)
 	// defer the closing of our xmlFile so that we can parse it later on
 	defer xmlFile.Close()
 
 	// read our opened xmlFile as a byte array.
-	xmlFileBytes, err := ioutil.ReadAll(xmlFile)
+	xmlFileBytes, err := io.ReadAll(xmlFile)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -97,14 +102,12 @@ func loaddb(debug bool, networkXML string) {
 	// Unmarshal our byteArray which contains our discovered network
 	err = xml.Unmarshal(xmlFileBytes, &network)
 	if err != nil {
-		fmt.Println(err)
-		//		return
-		panic(err)
+		log.Fatal(err.Error())
 	}
 
 	// Open the database
 	databaseName := *DbName + ".db"
-	fmt.Println("dabaseName=", databaseName) //TESTING ONLY
+	log.Debug("databaseName=%s", databaseName)
 	database, _ := sql.Open("sqlite3", databaseName)
 
 	// Create Routers DB table
@@ -115,18 +118,12 @@ func loaddb(debug bool, networkXML string) {
 	for i := 0; i < len(network.Router); i++ {
 		statement, _ = database.Prepare("INSERT INTO Routers (RouterID, SystemName, SystemDesc, UpTime, Contact, Location, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
-		if debug {
-			fmt.Println("Router Name: ", network.Router[i].System.Name)
-			fmt.Println("Description=", network.Router[i].System.Description)
-			fmt.Println("Up_Time=", network.Router[i].System.UpTime)
-			fmt.Println("GPS=", network.Router[i].System.GPS)
-			fmt.Println("Addresses=", network.Router[i].Addresses)
-			fmt.Println("Neighbors=", network.Router[i].Neighbors)
-		}
-		fmt.Println("Router Name: ", network.Router[i].System.Name)       // TESTING ONLY
-		fmt.Println("Description=", network.Router[i].System.Description) // TESTING ONLY
-		fmt.Println("Up_Time=", network.Router[i].System.UpTime)          // TESTING ONLY
-		fmt.Println("GPS=", network.Router[i].System.GPS)                 // TESTING ONLY
+		log.Debug("Router Name: %s", network.Router[i].System.Name)
+		log.Debug("Description: %s", network.Router[i].System.Description)
+		log.Debug("Up_Time: %s", network.Router[i].System.UpTime)
+		log.Debug("GPS: %s", network.Router[i].System.GPS)
+		log.Debug("Addresses: %s", network.Router[i].Addresses)
+		log.Debug("Neighbors: %s", network.Router[i].Neighbors)
 
 		SystemName := network.Router[i].System.Name
 		RouterIDUint32 := crc32.ChecksumIEEE([]byte(SystemName))
@@ -165,15 +162,13 @@ func loaddb(debug bool, networkXML string) {
 		//	Create Links DB table
 		statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER PRIMARY KEY, RouterName TEXT, DestinationName TEXT, DestinationIP TEXT, NextHopName TEXT, NextHopIP TEXT)")
 		if err != nil {
-			fmt.Println("Error creating Links table.")
-			panic(err)
+			log.Fatal("Error creating Links table.\n%v", err.Error())
 		}
 		statement.Exec()
 
 		statement, err = database.Prepare("INSERT INTO Links (LinkID, RouterName, DestinationName, DestinationIP, NextHopName, NextHopIP) VALUES (?, ?, ?, ?, ?, ?)")
 		if err != nil {
-			fmt.Println("Error inserting row into Links table.")
-			panic(err)
+			log.Fatal("Error inserting row into Links table.\n%v", err.Error())
 		}
 
 		// Add Link records to Links table
@@ -182,9 +177,7 @@ func loaddb(debug bool, networkXML string) {
 		var DestinationName string
 		var NextHopName string
 
-		if debug {
-			fmt.Println("Adding link records to Links table.")
-		}
+		log.Debug("Adding link records to Links table.")
 		for l := 0; l < len(network.Router[i].Neighbors.Neighbor); l++ {
 			// Don't add link row for loopback interface
 			if network.Router[i].Neighbors.Neighbor[l].DestinationAddress == "127.0.0.0" {
@@ -212,37 +205,28 @@ func loaddb(debug bool, networkXML string) {
 			destToNextHopLinkUint32 := crc32.ChecksumIEEE([]byte(destToNextHopLinkStr))
 
 			// Lookup DestinationName
-			if debug {
-				fmt.Println("\nCalling getRouterNameUsingIP with Destination", dest)
-			}
-			DestinationName = getRouterNameUsingIP(debug, dest, network)
-			if debug {
-				fmt.Println(" Returned DestinationName", DestinationName)
-			}
+			log.Debug("\nCalling getRouterNameUsingIP with Desitination %s", dest)
+
+			DestinationName = getRouterNameUsingIP(dest, network)
+			log.Debug("Returned DestinationName %s", DestinationName)
+
 			if DestinationName == "Not Found" {
 				DestinationName = "Unknown"
-				if debug {
-					fmt.Println("router name with destination IP of", dest, " Not Found.")
-				}
+				log.Debug("router name with destination IP of %s Not Found.", dest)
 			}
 			// Lookup NextHopName
-			if debug {
-				fmt.Println("\nCalling getRouterNameUsingIP with NextHop", nextHop)
-			}
-			NextHopName = getRouterNameUsingIP(debug, nextHop, network)
-			if debug {
-				fmt.Println(" Returned NextHopName", NextHopName)
-			}
+			log.Debug("\nCalling getRouterNameUsingIP with NextHop %s", nextHop)
+
+			NextHopName = getRouterNameUsingIP(nextHop, network)
+			log.Debug(" Returned NextHopName %s", NextHopName)
+
 			if NextHopName == "Not Found" {
 				NextHopName = "Unknown"
-				if debug {
-					fmt.Println("router name with Next Hop IP of", nextHop, " Not Found.")
-				}
+				log.Debug("router name with Next Hop IP of %s Not Found.", nextHop)
 			}
 
-			if debug {
-				fmt.Println("Adding link row with fields =", SystemName, DestinationName, dest, NextHopName, nextHop)
-			}
+			log.Debug("Adding link row with fields: %s, %s, %s, %s, %s", SystemName, DestinationName, dest, NextHopName, nextHop)
+
 			statement.Exec(strconv.Itoa(int(destToNextHopLinkUint32)), SystemName, DestinationName, dest, NextHopName, nextHop)
 
 			// add direction link from nextHop to dest to the database
@@ -253,29 +237,28 @@ func loaddb(debug bool, networkXML string) {
 
 }
 
-func getRouterNameUsingIP(debug bool, ipAddress string, network V15NDiscoveredNetwork) string {
+func getRouterNameUsingIP(ipAddress string, network V15NDiscoveredNetwork) string {
 	var routerName string
-	//	var network V15NDiscoveredNetwork
 	routerName = "Not Found"
 
-	if debug {
-		fmt.Println("getRouterNameUsingIP")
-		fmt.Println(" network.Router length is", len(network.Router))
-	}
+	log.Debug("func getRouterNameUsingIP started")
+	log.Debug(" network.Router length is %d", len(network.Router))
 
 	for i := 0; i < len(network.Router); i++ {
-		if debug {
-			fmt.Println(" network.Router[i].System.Name=", network.Router[i].System.Name)
-			fmt.Println(" i=", i)
-			fmt.Println(" len(network.Router[i].Addresses.NetworkAddresses.IPAddress=", len(network.Router[i].Addresses.NetworkAddresses.IPAddress))
-		}
+		log.Debug(" network.Router[i].System.Name= %s", network.Router[i].System.Name)
+		log.Debug(
+			" i= %d", i,
+		)
+		log.Debug(
+			" network.Router[i].Addresses.NetworkAddresses.IPAddress= %d",
+			len(network.Router[i].Addresses.NetworkAddresses.IPAddress),
+		)
 
 		for j := 0; j < len(network.Router[i].Addresses.NetworkAddresses.IPAddress); j++ {
-			if debug {
-				fmt.Println(" j=", j)
-				fmt.Println(" ipAddress=", ipAddress)
-				fmt.Println(" network.Router[i].Addresses.NetworkAddresses.IPAddress[j]=", network.Router[i].Addresses.NetworkAddresses.IPAddress[j])
-			}
+			log.Debug(" j=%d", j)
+			log.Debug(" ipAddress=%s", ipAddress)
+			log.Debug(" network.Router[i].Addresses.NetworkAddresses.IPAddress[j]=%s", network.Router[i].Addresses.NetworkAddresses.IPAddress[j])
+
 			if network.Router[i].Addresses.NetworkAddresses.IPAddress[j] == ipAddress {
 				routerName = network.Router[i].System.Name
 				break
@@ -283,9 +266,7 @@ func getRouterNameUsingIP(debug bool, ipAddress string, network V15NDiscoveredNe
 		}
 	}
 	// router name not found in network
-	if debug {
-		fmt.Println(" Returning routerName of", routerName)
-		fmt.Println()
-	}
+	log.Info(" Returning routerName of %s", routerName)
+
 	return routerName
 }

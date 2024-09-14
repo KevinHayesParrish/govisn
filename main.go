@@ -25,7 +25,7 @@ import (
  */
 
 // GOVISN_VERSION is the file version number
-const GOVISN_VERSION = "0.20.0"
+const GOVISN_VERSION = "0.20.1"
 
 var log *logger.Logger
 
@@ -149,7 +149,7 @@ func main() {
 		dbName = *DbName
 	}
 	if *loadDBFlag {
-		loaddb(*debugFlag, dbName)
+		loaddb(dbName)
 		return
 	}
 

@@ -9,37 +9,28 @@ import (
 	"fmt"
 	"hash/crc32"
 
-	//"log"
 	"net"
 	"strconv"
 	"strings"
 
 	"github.com/g3n/engine/util/logger"
-	//g "github.com/soniah/gosnmp"
 	g "github.com/gosnmp/gosnmp"
 )
 
-/*
- * TODO:
- 	* Add code to walk route table to discover all routers
-*/
-
 // DISCOVERY_VERSION is the file version number
-const DISCOVERY_VERSION = "0.3.6"
+const DISCOVERY_VERSION = "0.3.7"
 
-// func discover(debugFlag bool, log *logger.Logger, dbName string, snmpTarget string, community string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
-// func discover(log *logger.Logger, dbName string, snmpTarget string, community string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
+/*
+ * func discover  discovers the network, constrained by input parm maximum hops away from snmpTarget node.
+ * It returns the database.
+ */
 func discover(log *logger.Logger, snmpTarget string, params *g.GoSNMP, maxHopsStr string, database *sql.DB) *sql.DB {
 
-	//	fmt.Println("\nfunc discover version", DISCOVERYVERSION, "started.")
-	log.Info("func discover version %s", DISCOVERY_VERSION+" started.")
+	log.Info("func discover version %s started.", DISCOVERY_VERSION)
 
 	// Discover network, constrained by input parm maximum hops away from snmpTarget node
 	maxHops, _ := strconv.Atoi(maxHopsStr)
 	for i := 0; i <= maxHops; i++ {
-		//		if debugFlag {
-		//			fmt.Println("Discover iteration")
-		//		}
 		log.Debug("Discover iteration")
 	}
 
@@ -56,10 +47,8 @@ func discover(log *logger.Logger, snmpTarget string, params *g.GoSNMP, maxHopsSt
 	defer params.Conn.Close()
 
 	// Initialize the database
-	//	database = initDB(debugFlag, log, database)
 	database = initDB(log, database)
 
-	//	getRouterInfo(debugFlag, log, snmpTarget, community, maxHopsStr, params, router, database)
 	getRouterInfo(log, snmpTarget, params, router, database)
 
 	log.Debug("func discover version %s", DISCOVERY_VERSION+" ended.")
@@ -67,7 +56,9 @@ func discover(log *logger.Logger, snmpTarget string, params *g.GoSNMP, maxHopsSt
 	return database
 }
 
-// func getInterfaces(debugFlag bool, log *logger.Logger, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
+/*
+ * func getInterfaces uses SNMP to retrieve the router's interfaces.
+ */
 func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
 
 	// get Number of Interfaces
@@ -77,15 +68,9 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 		database.Close()
 		log.Fatal("Get() err: %s", getError.Error())
 	}
-	//	if debugFlag {
-	//		fmt.Println("ifNumber walkPDU=", getPDU)
-	//	}
 	log.Debug("ifNumber walkPDU= %v", getPDU)
 
 	nbrOfInterfaces := getPDU.Variables[0].Value.(int)
-	//	if debugFlag {
-	//		fmt.Println("nbrOfInterfaces =", nbrOfInterfaces)
-	//	}
 	log.Debug("nbrOfInterfaces= %v", nbrOfInterfaces)
 
 	// get ifTable
@@ -94,16 +79,10 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 		database.Close()
 		log.Fatal("Get() err: %v", walkError)
 	}
-	//	if debugFlag {
-	//		fmt.Println("\nifTable PDU=", walkPDU)
-	//	}
 	log.Debug("\nifTable PDU= %v", walkPDU)
 
 	var interfaceTable ifTable
 
-	//	if debugFlag {
-	//		fmt.Println("len(walkPDU)=", len(walkPDU))
-	//	}
 	log.Debug("len(walkPDU)= %d", len(walkPDU))
 
 	for i := 0; i < len(walkPDU); i++ { // skip ifIndex array within walkPDU
@@ -111,9 +90,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifIndexOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifIndexType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifIndex = walkPDU[i].Value.(int)
-			//			if debugFlag {
-			//				fmt.Println("ifIndex=", interfaceTable.ifEntry.ifIndex)
-			//			}
 			log.Debug("ifIndex= %d", interfaceTable.ifEntry.ifIndex)
 			i++
 		}
@@ -121,9 +97,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifDescrOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifDescrType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifDescr = string(walkPDU[i].Value.([]uint8))
-			//			if debugFlag {
-			//				fmt.Println("ifDescr=", interfaceTable.ifEntry.ifDescr)
-			//			}
 			log.Debug("ifDescr= %s", interfaceTable.ifEntry.ifDescr)
 			i++
 		}
@@ -139,9 +112,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			default:
 				interfaceTable.ifEntry.ifType = "other"
 			}
-			//			if debugFlag {
-			//				fmt.Println("ifType=", interfaceTable.ifEntry.ifType)
-			//			}
 			log.Debug("ifType= %s", interfaceTable.ifEntry.ifType)
 			i++
 		}
@@ -149,9 +119,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifMtuOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifMtuType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifMtu = walkPDU[i].Value.(int)
-			//			if debugFlag {
-			//				fmt.Println("ifMtu=", interfaceTable.ifEntry.ifMtu) // TESTING ONLY
-			//			}
 			log.Debug("ifMtu= %d", interfaceTable.ifEntry.ifMtu)
 			i++
 		}
@@ -159,9 +126,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifSpeedOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifSpeedType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifSpeed = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifSpeed=", interfaceTable.ifEntry.ifSpeed)
-			//			}
 			log.Debug("ifSpeed= %v", interfaceTable.ifEntry.ifSpeed)
 			i++
 		}
@@ -195,13 +159,8 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 				interfaceTable.ifEntry.ifPhysAddress = "Null0"
 			}
 
-			//			if debugFlag {
-			//				fmt.Println("ifPhysAddress=", interfaceTable.ifEntry.ifPhysAddress)
-			//			}
 			log.Debug("ifPhysAddress= %s", interfaceTable.ifEntry.ifPhysAddress)
 
-			//			writeMacToDB(debugFlag, router, interfaceTable, database)
-			//			writeMacToDB(debugFlag, log, router, interfaceTable, database)
 			writeMacToDB(log, router, interfaceTable, database)
 
 			i++
@@ -218,9 +177,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			case 3:
 				interfaceTable.ifEntry.ifAdminStatus = "testing(3)"
 			}
-			//			if debugFlag {
-			//				fmt.Println("ifAdminStatus=", interfaceTable.ifEntry.ifAdminStatus)
-			//			}
 			log.Debug("ifAdminStatus= %s", interfaceTable.ifEntry.ifAdminStatus)
 			i++
 		}
@@ -236,9 +192,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			case 3:
 				interfaceTable.ifEntry.ifOperStatus = "testing(3)"
 			}
-			//			if debugFlag {
-			//				fmt.Println("ifOperStatus=", interfaceTable.ifEntry.ifOperStatus)
-			//			}
 			log.Debug("ifOperStatus= %s", interfaceTable.ifEntry.ifOperStatus)
 			i++
 		}
@@ -246,9 +199,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifLastChangeOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifLastChangeType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifLastChange = walkPDU[i].Value.(uint32)
-			//			if debugFlag {
-			//				fmt.Println("ifLastChange=", interfaceTable.ifEntry.ifLastChange)
-			//			}
 			log.Debug("ifLastChange= %d", interfaceTable.ifEntry.ifLastChange)
 			i++
 		}
@@ -256,9 +206,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifInOctetsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInOctetsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInOctets = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifInOctets=", interfaceTable.ifEntry.ifInOctets)
-			//			}
 			log.Debug("ifInOctets= %d", interfaceTable.ifEntry.ifInOctets)
 			i++
 		}
@@ -266,9 +213,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifInUcastPktsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInUcastPktsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInUcastPkts = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifInucastPkts=", interfaceTable.ifEntry.ifInUcastPkts)
-			//			}
 			log.Debug("ifInucastPkts= %d", interfaceTable.ifEntry.ifInUcastPkts)
 			i++
 		}
@@ -276,9 +220,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifInNUcastPktsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInNUcastPktsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInNUcastPkts = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifINUcastPkts=", interfaceTable.ifEntry.ifInUcastPkts)
-			//			}
 			log.Debug("ifINUcastPkts= %d", interfaceTable.ifEntry.ifInUcastPkts)
 			i++
 		}
@@ -286,9 +227,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifInDiscardsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInDiscardsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInDiscards = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifDiscards=", interfaceTable.ifEntry.ifInDiscards)
-			//			}
 			log.Debug("ifDiscards= %d", interfaceTable.ifEntry.ifInDiscards)
 			i++
 		}
@@ -296,9 +234,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifInErrorsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInErrorsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInErrors = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifInErrors=", interfaceTable.ifEntry.ifInErrors)
-			//			}
 			log.Debug("ifInErrors= %d", interfaceTable.ifEntry.ifInErrors)
 			i++
 		}
@@ -306,9 +241,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifInUnknownProtosOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifInUnknownProtosType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifInUnknownProtos = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifInUnknownProtos=", interfaceTable.ifEntry.ifInUnknownProtos)
-			//			}
 			log.Debug("ifInUnknownProtos= %d", interfaceTable.ifEntry.ifInUnknownProtos)
 			i++
 		}
@@ -316,9 +248,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifOutOctetsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutOctetsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutOctets = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifOutOctets=", interfaceTable.ifEntry.ifOutOctets)
-			//			}
 			log.Debug("ifOutOctets= %d", interfaceTable.ifEntry.ifOutOctets)
 			i++
 		}
@@ -326,9 +255,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifOutUcastPktsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutUcastPktsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutUcastPkts = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifOutUcastPkts=", interfaceTable.ifEntry.ifOutUcastPkts)
-			//			}
 			log.Debug("ifOutUcastPkts= %d", interfaceTable.ifEntry.ifOutUcastPkts)
 			i++
 		}
@@ -336,9 +262,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifOutNUcastPktsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutNUcastPktsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutNUcastPkts = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifOutNUcastPkts=", interfaceTable.ifEntry.ifOutNUcastPkts)
-			//			}
 			log.Debug("ifOutNUcastPkts= %d", interfaceTable.ifEntry.ifOutNUcastPkts)
 			i++
 		}
@@ -346,9 +269,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifOutDiscardsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutDiscardsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutDiscards = walkPDU[i].Value.(uint)
-			//			if debugFlag
-			//				fmt.Println("ifOutDiscards=", interfaceTable.ifEntry.ifOutDiscards)
-			//			}
 			log.Debug("ifOutDiscards= %d", interfaceTable.ifEntry.ifOutDiscards)
 			i++
 		}
@@ -356,9 +276,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifOutErrorsOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutErrorsType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutErrors = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifOutErrors=", interfaceTable.ifEntry.ifOutErrors)
-			//			}
 			log.Debug("ifOutErrors= %d", interfaceTable.ifEntry.ifOutErrors)
 			i++
 		}
@@ -366,9 +283,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifOutQLenOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifOutQLenType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifOutQLen = walkPDU[i].Value.(uint)
-			//			if debugFlag {
-			//				fmt.Println("ifOutQLen=", interfaceTable.ifEntry.ifOutQLen)
-			//			}
 			log.Debug("ifOutQLen= %d", interfaceTable.ifEntry.ifOutQLen)
 			i++
 		}
@@ -376,9 +290,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 			interfaceTable.ifEntry.ifSpecificOID = walkPDU[i].Name
 			interfaceTable.ifEntry.ifSpecificType = byte(walkPDU[i].Type)
 			interfaceTable.ifEntry.ifSpecific = walkPDU[i].Value.(string)
-			//			if debugFlag {
-			//				fmt.Println("ifSpecific=", interfaceTable.ifEntry.ifSpecific)
-			//			}
 			log.Debug("ifSpecific= %s", interfaceTable.ifEntry.ifSpecific)
 			i++
 		}
@@ -387,17 +298,12 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 
 }
 
-// func initDB(debugFlag bool, log *logger.Logger, database *sql.DB) *sql.DB {
+/*
+ * func initDB initializes the database with its tables.
+ */
 func initDB(log *logger.Logger, database *sql.DB) *sql.DB {
 
-	/*
-	* TODO:
-	 */
-
-	initDbVersion := "0.0.3"
-	//	if debugFlag {
-	//		fmt.Println("initDB version:", initDbVersion)
-	//	}
+	initDbVersion := "0.0.4"
 	log.Debug("initDB version %s", initDbVersion)
 
 	/*
@@ -414,7 +320,6 @@ func initDB(log *logger.Logger, database *sql.DB) *sql.DB {
 	/*
 	 *	Add RouteTable table to DB
 	 */
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, NextHop TEXT)")
 	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, IPRouteIfIndex TEXT, NextHop TEXT)")
 	if err != nil {
 		database.Close()
@@ -426,7 +331,6 @@ func initDB(log *logger.Logger, database *sql.DB) *sql.DB {
 	/*
 	 *	Add RouterIP table to DB
 	 */
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT)")
 	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT, IfIndex TEXT)")
 	if err != nil {
 		database.Close()
@@ -449,8 +353,6 @@ func initDB(log *logger.Logger, database *sql.DB) *sql.DB {
 	/*
 	 *	Add Links table to DB
 	 */
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterName TEXT, FromRouterIP TEXT, ToRouterName TEXT, ToRouterIP TEXT)")
-	//	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterID INTEGER, FromRouterName TEXT, FromRouterIP TEXT, ToRouterID INTEGER, ToRouterName TEXT, ToRouterIP TEXT)")
 	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterID INTEGER, FromRouterName TEXT, FromRouterIP TEXT, FromRouterIfIndex Text, ToRouterID INTEGER, ToRouterName TEXT, ToRouterIP TEXT)")
 	if err != nil {
 		database.Close()
@@ -479,11 +381,9 @@ func getRtrName(ipAddr string) []string {
 func getHostIP(routerName string) []string {
 	addrs, err := net.LookupHost(routerName)
 	if err != nil {
-		//		fmt.Println("No Hostname lookup found for", routerName)
 		log.Warn("No Hostname lookup found for %s", routerName)
 	}
 	if len(addrs) == 0 {
-		//		fmt.Println("No Hostname records for", routerName)
 		log.Warn("No Hostname records for %s", routerName)
 		return addrs
 	}
@@ -493,8 +393,6 @@ func getHostIP(routerName string) []string {
 func getGPS(sysName string) []string {
 	txts, err := net.LookupTXT(sysName)
 	if err != nil {
-		//		panic(err)
-		//		fmt.Println("No TXT records for", sysName)
 		log.Debug("No TXT records for %s", sysName)
 	}
 	if len(txts) == 0 {
@@ -504,7 +402,9 @@ func getGPS(sysName string) []string {
 	return txts
 }
 
-// func writeMacToDB(debugFlag bool, log *logger.Logger, router Router, interfaceTable ifTable, database *sql.DB) {
+/*
+ * func writeMactoDB writes the router's MAC address information to the RouterMac table
+ */
 func writeMacToDB(log *logger.Logger, router Router, interfaceTable ifTable, database *sql.DB) {
 
 	statement, err := database.Prepare("INSERT INTO RouterMac (RouterID, MacAddr) VALUES (?, ?)")
@@ -532,8 +432,12 @@ func writeMacToDB(log *logger.Logger, router Router, interfaceTable ifTable, dat
 	defer statement.Close()
 }
 
-// func getIPAddresses(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
+/*
+ * func getIPAddresses uses SNMP to retrieve the router's IP Address information
+ * and writes it to the database
+ */
 func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
+
 	// get ipAddrTable
 	walkPDU, err := params.WalkAll(ipAdEntAddrOID)
 	if err != nil {
@@ -545,10 +449,7 @@ func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, databas
 		database.Close()
 		log.Fatal("Get(ifIndexPDU) err: %v", err)
 	}
-	//	if debugFlag {
-	//		fmt.Println("\nipAdEntAddr PDU=", walkPDU)
-	//		fmt.Println("\nifIndex PDU=", ifIndexPDU)
-	//	}
+
 	log.Debug("\nipAdEntAddr PDU= %v", walkPDU)
 	log.Debug("\nifIndex PDU= %v", ifIndexPDU)
 
@@ -557,13 +458,10 @@ func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, databas
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntAddr = walkPDU[i].Value.(string)
 		ipTable.ipAddrEntry.ipAdEntIfIndex = ifIndexPDU[i].Value.(int)
-		//		if debugFlag {
-		//			fmt.Println("ipAdEntAddr=", ipTable.ipAddrEntry.ipAdEntAddr)
-		//		}
+
 		log.Debug("ipAdEntAddr= %s", ipTable.ipAddrEntry.ipAdEntAddr)
 
 		// Add row to RouterIp table
-		//		statement, err := database.Prepare("INSERT INTO RouterIp (RouterID, IpAddr) VALUES (?, ?)")
 		statement, err := database.Prepare("INSERT INTO RouterIp (RouterID, IpAddr, IfIndex) VALUES (?, ?, ?)")
 		if err != nil {
 			database.Close()
@@ -592,38 +490,37 @@ func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, databas
 	if err != nil {
 		log.Debug("WalkAll failed. Err= %s", err)
 	}
+
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntNetMask = walkPDU[i].Value.(string)
-		//		if debugFlag {
-		//			fmt.Println("ipAdEntNetMask=", ipTable.ipAddrEntry.ipAdEntNetMask)
-		//		}
 		log.Debug("ipAdEntNetMask= %s", ipTable.ipAddrEntry.ipAdEntNetMask)
 	}
+
 	walkPDU, err = params.WalkAll(ipAdEntBcastAddr)
 	if err != nil {
 		log.Debug("WalkAll failed. Err= %s", err)
 	}
+
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntBcastAddr = walkPDU[i].Value.(int)
-		//		if debugFlag {
-		//			fmt.Println("ipAdEntBcastAddr=", ipTable.ipAddrEntry.ipAdEntBcastAddr)
-		//		}
 		log.Debug("ipAdEntBcastAddr= %d", ipTable.ipAddrEntry.ipAdEntBcastAddr)
 	}
+
 	walkPDU, err = params.WalkAll(ipAdEntReasmMaxSize)
 	if err != nil {
 		log.Debug("WalkAll failed. Err= %s", err)
 	}
+
 	for i := 0; i < (len(walkPDU)); i++ {
 		ipTable.ipAddrEntry.ipAdEntReasmMaxSize = walkPDU[i].Value.(int)
-		//		if debugFlag {
-		//			fmt.Println("ipAdEntReasmMaxSize=", ipTable.ipAddrEntry.ipAdEntReasmMaxSize)
-		//		}
 		log.Debug("ipAdEntReasmMaxSize= %d", ipTable.ipAddrEntry.ipAdEntReasmMaxSize)
 	}
 }
 
-// func getIPRouteTable(debugFlag bool, log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
+/*
+ * fun getIPRouteTable uses SNMP to retrieve the router's route table information
+ * and writes it to the database
+ */
 func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
 
 	// get ipRouteTable
@@ -632,9 +529,6 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 		database.Close()
 		log.Fatal("Get(ipRouteDestPDU) err")
 	}
-	//	if debugFlag {
-	//		fmt.Println("\nipRouteDestPDU PDU=", ipRouteDestPDU)
-	//	}
 	log.Debug("\nipRouteDestPDU PDU= %v", ipRouteDestPDU)
 
 	ipRouteIfIndexPDU, err := params.WalkAll(ipRouteIfIndexOID)
@@ -642,9 +536,6 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 		database.Close()
 		log.Fatal("Get(ipRouteIfIndexPDU) err")
 	}
-	//	if debugFlag {
-	//		fmt.Println("\nipRouteIfIndexPDU PDU=", ipRouteIfIndexPDU)
-	//	}
 	log.Debug("\nipRouteIfIndexPDU PDU= %v", ipRouteIfIndexPDU)
 
 	ipRouteNextHopPDU, err := params.WalkAll(ipRouteNextHopOID)
@@ -652,9 +543,6 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 		database.Close()
 		log.Fatal("Get(ipRouteNextHopPDU) err")
 	}
-	//	if debugFlag {
-	//		fmt.Println("\nipRouteNextHopPDU PDU=", ipRouteNextHopPDU)
-	//	}
 	log.Debug("\nipRouteNextHopPDU PDU= %v", ipRouteNextHopPDU)
 
 	// Parse Dest and NextHop PDUs, adding row to ipRouteTable for each PDU element.
@@ -664,11 +552,7 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 		ipRouteTab.ipRouteEntry.ipRouteDest = ipRouteDestPDU[i].Value.(string)
 		ipRouteTab.ipRouteEntry.ipRouteIfIndex = ipRouteIfIndexPDU[i].Value.(int)
 		ipRouteTab.ipRouteEntry.ipRouteNextHop = ipRouteNextHopPDU[i].Value.(string)
-		//		if debugFlag {
-		//			fmt.Println("ipRouteDest=", ipRouteTab.ipRouteEntry.ipRouteDest)
-		//			fmt.Println("ipRouteIfIndex=", ipRouteTab.ipRouteEntry.ipRouteIfIndex)
-		//			fmt.Println("ipRouteNextHop=", ipRouteTab.ipRouteEntry.ipRouteNextHop)
-		//		}
+
 		log.Debug("ipRouteDest= %s", ipRouteTab.ipRouteEntry.ipRouteDest)
 		log.Debug("ipRouteIfIndex= %d", ipRouteTab.ipRouteEntry.ipRouteIfIndex)
 		log.Debug("ipRouteNextHop= %s", ipRouteTab.ipRouteEntry.ipRouteNextHop)
@@ -691,7 +575,10 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 
 }
 
-// func getRouterInfo(debugFlag bool, log *logger.Logger, snmpTarget string, community string, maxHopsStr string, params *g.GoSNMP, router Router, database *sql.DB) {
+/*
+ * func getRouterInfo uses SNMP to retrieve the router's system information
+ * and writes it to the database.
+ */
 func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, router Router, database *sql.DB) {
 	oids := []string{
 		sysNameOID + ".0",     // sysName
@@ -756,13 +643,13 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 	router.System.GPS.Altitude = "0.0"  // initialze with float data to allow for missing GPS on DB
 
 	if len(fqdn) > 0 {
-		//gpsDNS := getGPS(fqdn[0])
 		/*
 		 * Use router's hostname for DNS query, instead of fqdn[0].
 		 * This provides a consistent IP Address, fqdn[0] can be
 		 * an interface address relating to a different DNS name than
 		 * hostname.
 		 */
+		//gpsDNS := getGPS(fqdn[0])
 		gpsDNS := getGPS(router.System.Name)
 
 		for n := 0; n < len(gpsDNS); n++ {
@@ -818,16 +705,11 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 	}
 	defer statement.Close()
 
-	//	if !routerIsInDB {
 	if !routerIsInDB && routerSupportsSNMP {
-		//		getInterfaces(debugFlag, snmpTarget, community, maxHopsStr, params, router, database)
-		//		getInterfaces(debugFlag, log, snmpTarget, community, maxHopsStr, params, router, database)
 		getInterfaces(log, params, router, database)
 
-		//		getIPAddresses(debugFlag, log, params, router, database)
 		getIPAddresses(log, params, router, database)
 
-		//		getIPRouteTable(debugFlag, log, params, router, database)
 		getIPRouteTable(log, params, router, database)
 	}
 }
