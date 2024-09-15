@@ -9,22 +9,20 @@ import (
 	"fmt"
 	"strings"
 
-	//"log"
 	"math"
 	"os"
 	"runtime"
 	"strconv"
 	"time"
 
-	//logger "github.com/alouca/gologger"
 	"github.com/g3n/engine/app"
 	"github.com/g3n/engine/camera"
 	"github.com/g3n/engine/renderer"
 	"github.com/g3n/engine/util"
+	"github.com/g3n/engine/util/helper"
 	"github.com/g3n/engine/util/logger"
 	"github.com/g3n/engine/util/stats"
 
-	//g "github.com/soniah/gosnmp"
 	g "github.com/gosnmp/gosnmp"
 
 	"github.com/g3n/engine/geometry"
@@ -40,15 +38,13 @@ import (
 	"github.com/g3n/engine/text"
 	"github.com/g3n/engine/texture"
 
-	//	"github.com/g3n/engine/util/application"
-
 	"github.com/g3n/engine/experimental/collision"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// VISUALIZENETWORKVERSION is the version number of the visualizeNetwork func
-const VISUALIZENETWORKVERSION = "0.3.3"
+// VISUALIZE_NETWORK_VERSION is the version number of the visualizeNetwork func
+const VISUALIZE_NETWORK_VERSION = "0.3.3"
 
 // App contains the application state
 type App struct {
@@ -84,11 +80,11 @@ type Raycast struct {
 	rayCast *collision.Raycaster
 }
 
-// func visualizeNetwork(debugFlag bool, log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *sql.DB {
-// func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *sql.DB {
+/*
+ * func visualizeNetwork uses G3N to create and display a 3D model of the discovered network.
+ */
 func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP) *sql.DB {
-	//	const VISUALIZENETWORKVERSION = "0.3.1"
-	log.Debug("visualizeNetwork %s", VISUALIZENETWORKVERSION+" started")
+	log.Debug("visualizeNetwork %s", VISUALIZE_NETWORK_VERSION+" started")
 
 	// Retrieve the Routers table
 	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers")
@@ -152,9 +148,11 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 	//	gv.scene.Add(dirLight)
 
 	// Add an axis helper to the scene
-	//axes := helper.NewAxes(1)
-	//axes.SetName("helperAxes")
-	//gv.scene.Add(axes)
+	if *debugFlag {
+		axes := helper.NewAxes(1)
+		axes.SetName("helperAxes")
+		gv.scene.Add(axes)
+	}
 
 	// Set background color to black
 	a.Gls().ClearColor(0.0, 0.0, 0.0, 0.0)
@@ -162,8 +160,6 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 	gv = addTitle(log, gv)
 
 	// Build Menus
-	//	buildMenus(debugFlag, gv, a, databaseForRead)
-	//buildMenus(gv, a, databaseForRead)
 	buildMenus(gv, a)
 
 	var RouterID int
@@ -200,9 +196,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 	// Create a sphere representing the globe
 	globe3D := geometry.NewSphere(GLOBE_RADIUS, 16, 16)
-	//globeMat := material.NewStandard(&math32.Color{R: 1.0, G: 1.0, B: 1.0}) // White 255, 255, 255
 	globeMat := material.NewStandard(math32.NewColor("grey"))
-	//globeMat.AddTexture(globeTex)
 	globeMat.SetTransparent(true)
 	globeMat.SetOpacity(.30)
 
@@ -244,11 +238,9 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		// Set coordinates and altitude
 		x, y, z = calcCoordinates(GpsLat, GpsLong, GpsAlt)
 
-		//		log.Debug("x = %s", strconv.FormatFloat(float64(x), 'f', 5, 32)+"y = %s"+strconv.FormatFloat(float64(y), 'f', 5, 32)+"z = %s"+strconv.FormatFloat(float64(z), 'f', 5, 32))
 		log.Debug("x = %s", strconv.FormatFloat(float64(x), 'f', 5, 32)+"y = "+strconv.FormatFloat(float64(y), 'f', 5, 32)+"z = "+strconv.FormatFloat(float64(z), 'f', 5, 32))
 		log.Debug("router = %v", routers[routerArrayIndex])
 		log.Debug("router.System.GPS = %s", routers[routerArrayIndex].System.GPS)
-		//		log.Debug("RouterID= %s", strconv.Itoa(RouterID)+"Name= %s"+Name)
 		log.Debug("RouterID= %s", strconv.Itoa(RouterID)+"Name= "+Name)
 
 		// Add Router object to 3D scene.
@@ -344,7 +336,6 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		FromRouterX = linksFromRouterGpsLat
 		FromRouterY = linksFromRouterGpsLong
 		FromRouterZ = linksFromRouterGpsAlt
-		//		log.Debug("returned from getRouterCoordinatesName func: FromRouterX= %s", FromRouterX+" FromRouterY= %s"+FromRouterY+" FromRouterZ= %s"+FromRouterZ)
 		log.Debug("returned from getRouterCoordinatesName func: FromRouterX= %s", FromRouterX+" FromRouterY= "+FromRouterY+" FromRouterZ= "+FromRouterZ)
 
 		//  Query database for FromRouter GPS coordinates
@@ -392,7 +383,6 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
 
-		//mat := material.NewStandard(math32.NewColor("White"))
 		mat := material.NewStandard(math32.NewColor("grey"))
 
 		// Check Runtime environment.
@@ -497,7 +487,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		}
 	})
 
-	log.Debug("visualizeNetwork %s", VISUALIZENETWORKVERSION+" func ending.")
+	log.Debug("func visualizeNetwork %s ending.", VISUALIZE_NETWORK_VERSION)
 
 	return databaseForRead
 
@@ -513,7 +503,7 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 	}
 	if parseErr != nil {
 		fmt.Println("Error parsing GpsLat =", GpsLat)
-		log.Fatal(parseErr.Error())
+		log.Fatal("Error parsing GpsLat =%s\n%v", GpsLat, parseErr.Error())
 	}
 	xRadianLat := Rad(GpsLatFloat64)
 
@@ -533,6 +523,10 @@ func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, flo
 	y = (float32)(GLOBE_RADIUS * math.Sin(yRadianLat) * math.Sin(yRadianLong))
 
 	GpsAltFloat64, parseErr := strconv.ParseFloat(GpsAlt, 64)
+	if parseErr != nil {
+		log.Debug(parseErr.Error())
+	}
+
 	GpsAltFloat64 = GpsAltFloat64 / 100000.0
 	z = (float32)(GLOBE_RADIUS*(math.Cos(yRadianLat)) + GpsAltFloat64)
 
@@ -545,9 +539,9 @@ var FileExitSelected bool = false
 // NetPollingEnabled indicates the Network Traffic Polling state
 var NetPollingEnabled bool = false
 
-// buildmenus creates the Gui menus and menuitems for the application
-// func buildMenus(debugFlag bool, gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
-// func buildMenus(gv *gvapp, a *app.Application, databaseForRead *sql.DB) *app.Application {
+/*
+ * func buildmenus creates the Gui menus and menuitems for the application
+ */
 func buildMenus(gv *gvapp, a *app.Application) *app.Application {
 	log.Debug("Starting func buildMenus")
 
@@ -625,8 +619,9 @@ func buildMenus(gv *gvapp, a *app.Application) *app.Application {
 	return (a)
 }
 
-// Initialize the raycaster
-// func (t *Raycast) Initialize(debugFlag bool, scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB) {
+/*
+ * func Initialize initializes the raycaster
+ */
 func (t *Raycast) Initialize(scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB) {
 	log.Debug("Initializing the raycaster")
 
@@ -642,8 +637,9 @@ func (t *Raycast) Initialize(scene *core.Node, cam *camera.Camera, gv *gvapp, ap
 	})
 }
 
-// onMouse is executed when an object in the 3D scene is selected with a mouse click
-// func (t *Raycast) onMouse(debugFlag bool, scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB, ev interface{}) {
+/*
+ * func onMouse is executed when an object in the 3D scene is selected with a mouse click
+ */
 func (t *Raycast) onMouse(scene *core.Node, cam *camera.Camera, gv *gvapp, app *app.Application, databaseForRead *sql.DB, ev interface{}) {
 	// Convert mouse coordinates to normalized device coordinates
 	mev := ev.(*window.MouseEvent)
@@ -677,7 +673,6 @@ func (t *Raycast) onMouse(scene *core.Node, cam *camera.Camera, gv *gvapp, app *
 	}
 
 	// Retrieve Router info from database
-	//	router := RetrieveRouter(debugFlag, router3DName, databaseForRead, app)
 	router := RetrieveRouter(router3DName, databaseForRead, app)
 	log.Debug("router= %v", router)
 
@@ -753,7 +748,9 @@ func (t *Raycast) onMouse(scene *core.Node, cam *camera.Camera, gv *gvapp, app *
 
 }
 
-// Dump3dScene writes the Collada file representing the 3D Scene
+/*
+ * func Dump3dScene writes the Collada file representing the 3D Scene
+ */
 func Dump3dScene(gv *gvapp) {
 	//	fmt.Println("Dumping 3D Scene")
 	log.Debug("Dumping 3D Scene")
@@ -764,11 +761,10 @@ func Dump3dScene(gv *gvapp) {
 	//scene.Dump(out, 4)
 }
 
-// RetrieveRouter is called when an object in the 3D scene is mouse clicked. It retrieve's the
-//
-//	routers information from the database and opens a new window to display it.
-//
-// func RetrieveRouter(debugFlag bool, router3DName string, databaseForRead *sql.DB, app *app.Application) Router {
+/*
+ * func RetrieveRouter is called when an object in the 3D scene is mouse clicked. It retrieves the
+ *	router's information from the database and opens a new window to display it.
+ */
 func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Application) Router {
 	var router Router
 	var RouterID, Services int
@@ -777,12 +773,12 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
 
 	var UpTime uint32
 	// Retrive Router from the database
-	//	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers WHERE RouterID = ?", router3DName)
 	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = ?", router3DName)
 	if queryErr != nil {
 		databaseForRead.Close()
 		log.Fatal("databaseForRead Query Router error %v", queryErr)
 	}
+
 	log.Debug("Successful Routers table Select")
 	for routerRows.Next() {
 		routerRows.Scan(&RouterID, &Name, &UpTime, &Contact, &Location, &Services, &GpsLat, &GpsLong, &GpsAlt)
@@ -835,7 +831,6 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
 }
 
 // calcLinkVBOs calculates the vertices of the polygon representing the network link.
-// func calcLinkVBOs(debugFlag bool, camPos math32.Vector3, posA math32.Vector3, posB math32.Vector3, scalar float32) (
 /* func calcLinkVBOs(camPos math32.Vector3, posA math32.Vector3, posB math32.Vector3, scalar float32) (
 	vertices math32.ArrayF32,
 	normals math32.ArrayF32,
@@ -903,11 +898,10 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
 }
 */
 
-// updateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
-//
-//	lineWidth and color to reflect the amount of traffic flowing over each link.
-//
-// func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, community string, params *g.GoSNMP) *gvapp {
+/*
+ * updateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
+ *	lineWidth and color to reflect the amount of traffic flowing over each link.
+ */
 func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP) *gvapp {
 	log.Info("Updating Links")
 	// TODO
@@ -916,6 +910,7 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 	//		2.1) query the From Routers applicable interfaces outbound traffic - DONE
 	//		2.2) calculate bitsPerSec on the interface - DONE
 	//	3) Update the link lineWidth and color to indicate the calculated link Utilization
+
 	var LinkID int
 	var FromRouterID, FromRouterName, FromRouterIfIndex, ToRouterName string
 
