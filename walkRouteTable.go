@@ -5,20 +5,14 @@
 package main
 
 import (
-
-	//"log"
-
 	"strconv"
 	"strings"
 
 	"github.com/g3n/engine/util/logger"
 	_ "github.com/mattn/go-sqlite3"
 
-	//g "github.com/soniah/gosnmp"
 	g "github.com/gosnmp/gosnmp"
 )
-
-//var scannedRouters []ScannedRouter
 
 // WALK_ROUTE_TABLE_VERSION is the file version number
 const WALK_ROUTE_TABLE_VERSION = "0.1.2"
@@ -54,16 +48,10 @@ func walkRouteTableMap(log *logger.Logger, seed string, community string, params
 
 	// Retrieve the route table and add each Next Hop address to the list of routers
 	ipRouteNextHopPDU, err := params.WalkAll(IP_ROUTE_NEXT_HOP_OID)
-
-	//	if err != nil {
-	//		log.Fatal("Get(ipRouteNextHopPDU) err")
-	//	}
 	if err != nil {
 		if strings.Contains(err.Error(), "request timeout") || strings.Contains(err.Error(), "connection refused") {
 			log.Warn("walkRouteTable: " + seed + " not answering SNMP get. Continue walking route table.")
 			return scannedRouterMap
-			//		} else {
-			//			log.Fatal("Get() err: %v", err)
 		}
 		log.Fatal("Get() err: %v", err)
 	}
