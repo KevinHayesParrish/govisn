@@ -15,7 +15,7 @@ import (
 )
 
 // WALK_ROUTE_TABLE_VERSION is the file version number
-const WALK_ROUTE_TABLE_VERSION = "0.1.2"
+const WALK_ROUTE_TABLE_VERSION = "0.1.3"
 
 /*
  * func walkRouteTableMap walks the router's ipRouteTable and returns a map of the results.
