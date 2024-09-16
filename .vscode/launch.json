@@ -56,6 +56,8 @@
             "env": {},
             "args": [
                 "-vi",
+                "-co",
+                "idontknow",
                 "-f",
                 "${userHome}/tmp/govisn.db",
                 "-de"
