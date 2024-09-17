@@ -454,9 +454,10 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		}
 	}
 
-	// Creating a 60 second timer for auto link update feature
-	linkUpdateTimer := time.NewTimer(60 * time.Second)
-	updateLinksOK := false
+	// Creating a 30 second timer for auto link update feature
+	linkUpdateTimer := time.NewTimer(30 * time.Second)
+	updateLinksOK := false // default
+	//updateLinksOK := true // TESTING ONLY
 
 	// Run the application
 	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
@@ -473,8 +474,8 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 				updateLinksOK = true
 			}
 
-			// Reset the linkUpdateTimer to 60 seconds
-			linkUpdateTimer.Reset(60 * time.Second)
+			// Reset the linkUpdateTimer to 30 seconds
+			linkUpdateTimer.Reset(30 * time.Second)
 			log.Info("linkUpdateTimer Reset")
 		}()
 
@@ -900,7 +901,7 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
 
 /*
  * updateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
- *	lineWidth and color to reflect the amount of traffic flowing over each link.
+ *	lineWidth and color to visually reflect the amount of traffic flowing over each link.
  */
 func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP) *gvapp {
 	log.Info("Updating Links")
@@ -962,99 +963,105 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 		if result == nil {
 			log.Warn("No Router Interface found for Link definition. Error in LinkID: %d", LinkID)
 		} else {
-			ifOutOctets1 := result.Variables[0].Value.(uint)
-			ifSpeed1 := result.Variables[1].Value.(uint)
-
-			// Sleep for 1 second
-			time.Sleep(1 * time.Second)
-
-			// SNMP Get Router Interface Outbound (ifOutOctets 2)
-			result, err = params.Get(oids) // Get() accepts up to g.MAX_OIDS
-			if err != nil {
-				databaseForRead.Close()
-				log.Fatal("Get() err %v", err)
-			}
-			ifOutOctets2 := result.Variables[0].Value.(uint)
-
-			// Calculate differnce of ifOutOctets 2 and ifOutOctets 1) and multiply by 8.
-			// This is the approx. number of bits per second.
-			bitsPerSec := (ifOutOctets2 - ifOutOctets1) * 8
-			log.Debug("LinkID %s", strconv.Itoa(LinkID)+" (From "+FromRouterName+"To "+ToRouterName+"): bps= "+strconv.FormatInt(int64(bitsPerSec), 10))
-
-			// set linkColor and linkWidth, depending on linkUtilization
-			var linkUtil = float32(bitsPerSec / ifSpeed1)
-			var linkColor = math32.ColorName("white")
-			var linkWidth float32 = 1.0
-
-			//linkUtil = 0.76 // **** TESTING ONLY. REMOVE WHEN TESTING COMPLETED ****
-
-			if linkUtil < 0.75 {
-				linkColor = math32.ColorName("lime") // Lime Green
-				linkWidth = 1.0
-			} else if linkUtil >= 0.75 && linkUtil < 0.90 {
-				linkColor = math32.ColorName("yellow") // Yellow
-				linkWidth = 2.5
-			} else if linkUtil >= 0.90 && linkUtil <= 1.0 {
-				linkColor = math32.ColorName("red") // Red
-				linkWidth = 5.0
-			}
-			log.Debug("linkColor = %v", linkColor)
-			log.Debug("linkWidth = %f", linkWidth)
-
-			//
-			// Update Link lineWidth and color, depending on link utilization
-			//
-
-			// Find 3D line object
-			sceneChildren := gv.scene.Children()
-			log.Debug("scene.Name %s", gv.scene.Name())
-			log.Debug("sceneChildren: %v", sceneChildren)
-
-			// loop: parse scene Children getting each node
-			link := getRouterFromScene(log, sceneChildren, LinkID)
-			log.Debug("link found: %v", link)
-			if link == nil {
-				log.Warn("updateLinks: link not found in 3D scene.")
-				continue
-			}
-
-			//
-			// Set line object color
-			//
-			// Convert INode to IGraphic
-			ig, ok := link.(graphic.IGraphic)
-			if !ok {
-				databaseForRead.Close()
-				log.Fatal("Error when converting link INode to IGraphic")
-			}
-			// Get graphic object
-			gr := ig.GetGraphic()
-			imat := gr.GetMaterial(0)
-
-			type matI interface {
-				EmissiveColor() math32.Color
-				SetEmissiveColor(*math32.Color)
-				//AmientColor() math32.Color
-				//SetAmbientColor(*math32.Color)
-				SetLineWidth(float32)
-			}
-			v := imat.(matI)
-			//v.SetEmissiveColor(&math32.Color{R: 0, G: 1, B: 0})
-			v.SetEmissiveColor(&linkColor)
-			//v.SetAmbientColor(&linkColor)
-
-			// Set line object width
-			// Check Runtime environment.
-			// OpenGL Implementation on MacOS will only accept Line width of 1.0
-			if runtime.GOOS == "darwin" {
-				v.SetLineWidth(1.0)
-				log.Info("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept lineWidth of 1.0 ***")
+			i, _ := strconv.Atoi(IF_OUT_OCTETS)
+			if result.Variables[i].Value == nil {
+				log.Warn("%s's FromRouterIfIndex %s has no instance, continue", FromRouterName, FromRouterIfIndex)
 			} else {
-				v.SetLineWidth(linkWidth)
-			}
+				j, _ := strconv.Atoi(IF_SPEED)
+				ifOutOctets1 := result.Variables[i].Value.(uint)
+				ifSpeed1 := result.Variables[j].Value.(uint)
 
-			gr.SetChanged(true)
-			gr.Render(gv.Application.Gls())
+				// Sleep for 1 second
+				time.Sleep(1 * time.Second)
+
+				// SNMP Get Router Interface Outbound (ifOutOctets 2)
+				result, err = params.Get(oids) // Get() accepts up to g.MAX_OIDS
+				if err != nil {
+					databaseForRead.Close()
+					log.Fatal("Get() err %v", err)
+				}
+				ifOutOctets2 := result.Variables[0].Value.(uint)
+
+				// Calculate differnce of ifOutOctets 2 and ifOutOctets 1) and multiply by 8.
+				// This is the approx. number of bits per second.
+				bitsPerSec := (ifOutOctets2 - ifOutOctets1) * 8
+				log.Debug("LinkID %s", strconv.Itoa(LinkID)+" (From "+FromRouterName+"To "+ToRouterName+"): bps= "+strconv.FormatInt(int64(bitsPerSec), 10))
+
+				// set linkColor and linkWidth, depending on linkUtilization
+				var linkUtil = float32(bitsPerSec / ifSpeed1)
+				var linkColor = math32.ColorName("white")
+				var linkWidth float32 = 1.0
+
+				//linkUtil = 0.76 // **** TESTING ONLY. REMOVE WHEN TESTING COMPLETED ****
+
+				if linkUtil < 0.75 {
+					linkColor = math32.ColorName("lime") // Lime Green
+					linkWidth = 1.0
+				} else if linkUtil >= 0.75 && linkUtil < 0.90 {
+					linkColor = math32.ColorName("yellow") // Yellow
+					linkWidth = 5.0
+				} else if linkUtil >= 0.90 && linkUtil <= 1.0 {
+					linkColor = math32.ColorName("red") // Red
+					linkWidth = 10.0
+				}
+				log.Debug("linkColor = %v", linkColor)
+				log.Debug("linkWidth = %f", linkWidth)
+
+				//
+				// Update Link lineWidth and color, depending on link utilization
+				//
+
+				// Find 3D line object
+				sceneChildren := gv.scene.Children()
+				log.Debug("scene.Name %s", gv.scene.Name())
+				log.Debug("sceneChildren: %v", sceneChildren)
+
+				// loop: parse scene Children getting each node
+				link := getRouterFromScene(log, sceneChildren, LinkID)
+				log.Debug("link found: %v", link)
+				if link == nil {
+					log.Warn("updateLinks: link not found in 3D scene.")
+					continue
+				}
+
+				//
+				// Set line object color
+				//
+				// Convert INode to IGraphic
+				ig, ok := link.(graphic.IGraphic)
+				if !ok {
+					databaseForRead.Close()
+					log.Fatal("Error when converting link INode to IGraphic")
+				}
+				// Get graphic object
+				gr := ig.GetGraphic()
+				imat := gr.GetMaterial(0)
+
+				type matI interface {
+					EmissiveColor() math32.Color
+					SetEmissiveColor(*math32.Color)
+					//AmientColor() math32.Color
+					//SetAmbientColor(*math32.Color)
+					SetLineWidth(float32)
+				}
+				v := imat.(matI)
+				//v.SetEmissiveColor(&math32.Color{R: 0, G: 1, B: 0})
+				v.SetEmissiveColor(&linkColor)
+				//v.SetAmbientColor(&linkColor)
+
+				// Set line object width
+				// Check Runtime environment.
+				// OpenGL Implementation on MacOS will only accept Line width of 1.0
+				if runtime.GOOS == "darwin" {
+					v.SetLineWidth(1.0)
+					log.Info("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept lineWidth of 1.0 ***")
+				} else {
+					v.SetLineWidth(linkWidth)
+				}
+
+				gr.SetChanged(true)
+				gr.Render(gv.Application.Gls())
+			}
 		}
 	}
 
