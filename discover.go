@@ -598,7 +598,7 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 	if err != nil {
 		if strings.Contains(err.Error(), "timeout") || strings.Contains(err.Error(), "refused") {
 			log.Warn("Get() err %s", err.Error()+
-				"\nRouter "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
+				"\n Router "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
 
 			router.System.Name = fqdn[0]
 			router.System.Description = ""
