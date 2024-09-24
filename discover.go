@@ -373,8 +373,9 @@ func getRtrName(ipAddr string) []string {
 	if len(names) > 0 {
 		return names
 	} else {
-		unkown := []string{"Unknown"}
-		return unkown
+		//unknown := []string{"Unknown"}
+		unknown := []string{ipAddr}
+		return unknown
 	}
 }
 
@@ -564,7 +565,17 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 			log.Fatal("RouterTable Prepare Insert Exec err")
 		}
 
-		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
+		ifPhysAddress1, err := getIfPhysAddress(log, params.Target, params)
+		var RouterID uint32
+		if err != nil {
+			log.Warn("Router %s has no ifPhysAddress.1", params.Target)
+			RouterID = crc32.ChecksumIEEE([]byte(router.System.Name))
+		} else {
+			RouterID = crc32.ChecksumIEEE([]byte(ifPhysAddress1))
+		}
+
+		//RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
+
 		_, err = statement.Exec(RouterID, ipRouteTab.ipRouteEntry.ipRouteDest, ipRouteTab.ipRouteEntry.ipRouteIfIndex, ipRouteTab.ipRouteEntry.ipRouteNextHop)
 		if err != nil {
 			database.Close()
@@ -682,7 +693,17 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 	defer statement.Close()
 
 	Name := router.System.Name
-	RouterIDUint32 := crc32.ChecksumIEEE([]byte(Name))
+
+	ifPhysAddress1, err := getIfPhysAddress(log, snmpTarget, params)
+	var RouterIDUint32 uint32
+	if err != nil {
+		log.Warn("Router %s has no ifPhysAddress.1", snmpTarget)
+		RouterIDUint32 = crc32.ChecksumIEEE([]byte(Name))
+	} else {
+		RouterIDUint32 = crc32.ChecksumIEEE([]byte(ifPhysAddress1))
+	}
+
+	//RouterIDUint32 := crc32.ChecksumIEEE([]byte(Name))
 	Description := router.System.Description
 	UpTime := router.System.UpTime
 	Contact := router.System.Contact
@@ -712,4 +733,28 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 
 		getIPRouteTable(log, params, router, database)
 	}
+}
+
+func getIfPhysAddress(log *logger.Logger, snmpTarget string, params *g.GoSNMP) (string, error) {
+	log.Debug("getIfPhysAddress for %s", snmpTarget)
+
+	oids := []string{
+		IF_PHYS_ADDRESS_OID + ".1",
+	}
+	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
+	if err != nil {
+		if strings.Contains(err.Error(), "timeout") || strings.Contains(err.Error(), "refused") {
+			log.Warn("Get() err %s", err.Error()+
+				"\n Router "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
+
+			return "", err
+		} else {
+			log.Fatal("Router %s has no ifPhysAddress.1", snmpTarget)
+		}
+	}
+
+	ifPhysAddress1 := string(result.Variables[0].Value.([]byte))
+
+	return ifPhysAddress1, err
+
 }
