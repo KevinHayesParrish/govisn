@@ -454,8 +454,8 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		}
 	}
 
-	// Creating a 30 second timer for auto link update feature
-	linkUpdateTimer := time.NewTimer(30 * time.Second)
+	// Creating a 60 second timer for auto link update feature
+	linkUpdateTimer := time.NewTimer(60 * time.Second)
 	updateLinksOK := false // default
 	//updateLinksOK := true // TESTING ONLY
 
@@ -474,8 +474,8 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 				updateLinksOK = true
 			}
 
-			// Reset the linkUpdateTimer to 30 seconds
-			linkUpdateTimer.Reset(30 * time.Second)
+			// Reset the linkUpdateTimer to 60 seconds
+			linkUpdateTimer.Reset(60 * time.Second)
 			log.Info("linkUpdateTimer Reset")
 		}()
 
