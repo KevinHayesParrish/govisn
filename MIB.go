@@ -28,7 +28,7 @@ const (
 	IP_ROUTE_NEXT_HOP_OID    string = "1.3.6.1.2.1.4.21.1.7"
 	IF_SPEED                 string = "1.3.6.1.2.1.2.2.1.5"
 	IF_OUT_OCTETS            string = "1.3.6.1.2.1.2.2.1.16"
-	IFPHYSADDRESS            string = ".1.3.6.1.2.1.2.2.1.6"
+	IFPHYSADDRESS_OID        string = ".1.3.6.1.2.1.2.2.1.6"
 )
 
 // Asn1BER is the type of the SNMP PDU
