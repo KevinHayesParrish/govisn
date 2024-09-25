@@ -99,7 +99,8 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP FROM Links")
 	if queryErr != nil {
 		databaseForRead.Close()
-		log.Fatal("databaseForRead Query error %v", queryErr)
+		log.Error("databaseForRead Query error %v", queryErr)
+		os.Exit(1)
 	}
 	log.Debug("Successful Links table Select")
 
