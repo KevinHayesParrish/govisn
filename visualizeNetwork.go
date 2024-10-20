@@ -360,8 +360,10 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		ToRouterY = linksToRouterGpsLong
 		ToRouterZ = linksToRouterGpsAlt
 
-		log.Debug("router %s", Name+" GPS coordinates = %s, %s, %s"+GpsLat+GpsLong+GpsAlt)
-		log.Debug("returned from getRouterCoordinatesIP func: ToRouterX= %s", ToRouterX+"ToRouterY= %s"+ToRouterY+"ToRouterZ= %s"+ToRouterZ)
+		//		log.Debug("router %s", Name+" GPS coordinates = %s, %s, %s"+GpsLat+GpsLong+GpsAlt)
+		log.Debug("router %s, GPS coordinates = %s, %s, %s", Name, GpsLat, GpsLong, GpsAlt)
+		//		log.Debug("returned from getRouterCoordinatesIP func: ToRouterX= %s", ToRouterX+"ToRouterY= %s"+ToRouterY+"ToRouterZ= %s"+ToRouterZ)
+		log.Debug("returned from getRouterCoordinatesIP func: ToRouterX= %s, ToRouterY= %s, ToRouterZ= %s", ToRouterX, ToRouterY, ToRouterZ)
 
 		// Add link object to the 3D scene
 		fromX, fromY, fromZ := calcCoordinates(FromRouterX, FromRouterY, FromRouterZ)
@@ -729,6 +731,7 @@ func (t *Raycast) onMouse(scene *core.Node, cam *camera.Camera, gv *gvapp, app *
 	// Convert INode to IGraphic
 	ig, ok := obj.(graphic.IGraphic)
 	if !ok {
+		log.Debug("INode to IGraphic convertion failure")
 		return
 	}
 	// Get graphic object
