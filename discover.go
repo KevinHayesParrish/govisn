@@ -18,7 +18,7 @@ import (
 )
 
 // DISCOVERY_VERSION is the file version number
-const DISCOVERY_VERSION = "0.3.7"
+const DISCOVERY_VERSION = "0.3.8"
 
 /*
  * func discover  discovers the network, constrained by input parm maximum hops away from snmpTarget node.
@@ -49,7 +49,7 @@ func discover(log *logger.Logger, snmpTarget string, params *g.GoSNMP, maxHopsSt
 	// Initialize the database
 	database = initDB(log, database)
 
-	getRouterInfo(log, snmpTarget, params, router, database)
+	router = getRouterInfo(log, snmpTarget, params, router, database)
 
 	log.Debug("func discover version %s", DISCOVERY_VERSION+" ended.")
 
@@ -415,8 +415,9 @@ func writeMacToDB(log *logger.Logger, router Router, interfaceTable ifTable, dat
 	}
 	defer statement.Close()
 
-	RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
-	_, err = statement.Exec(strconv.Itoa(int(RouterID)), interfaceTable.ifEntry.ifPhysAddress)
+	// RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
+	// _, err = statement.Exec(strconv.Itoa(int(RouterID)), interfaceTable.ifEntry.ifPhysAddress)
+	_, err = statement.Exec(router.System.RouterID, interfaceTable.ifEntry.ifPhysAddress)
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			// Continue executing if this is a duplicate MAC Address. This assume this router is being processed again.
@@ -468,8 +469,9 @@ func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, databas
 			database.Close()
 			log.Fatal("RouterIp Prepare Insert Exec err: %v", err)
 		}
-		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
-		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr, ipTable.ipAddrEntry.ipAdEntIfIndex)
+		//RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
+		//		_, err = statement.Exec(RouterID, ipTable.ipAddrEntry.ipAdEntAddr, ipTable.ipAddrEntry.ipAdEntIfIndex)
+		_, err = statement.Exec(router.System.RouterID, ipTable.ipAddrEntry.ipAdEntAddr, ipTable.ipAddrEntry.ipAdEntIfIndex)
 		if err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 				// Continue executing if this is a duplicate IP Address. This assume this router is being processed again.
@@ -590,7 +592,9 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
  * func getRouterInfo uses SNMP to retrieve the router's system information
  * and writes it to the database.
  */
-func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, router Router, database *sql.DB) {
+func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, router Router, database *sql.DB) Router {
+	log.Debug("Starting discover.getRouterInfo.")
+
 	oids := []string{
 		SYS_NAME_OID + ".0",     // sysName
 		SYS_DESCR_OID + ".0",    // sysDescr
@@ -699,11 +703,13 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 	if err != nil {
 		log.Warn("Router %s has no ifPhysAddress.1", snmpTarget)
 		RouterIDUint32 = crc32.ChecksumIEEE([]byte(Name))
+		log.Debug("Calculated RouterID using %s as: %d", Name, RouterIDUint32)
 	} else {
 		RouterIDUint32 = crc32.ChecksumIEEE([]byte(ifPhysAddress1))
+		log.Debug("Calculated RouterID using %s as: %d", ifPhysAddress1, RouterIDUint32)
 	}
 
-	//RouterIDUint32 := crc32.ChecksumIEEE([]byte(Name))
+	router.System.RouterID = int(RouterIDUint32)
 	Description := router.System.Description
 	UpTime := router.System.UpTime
 	Contact := router.System.Contact
@@ -714,7 +720,8 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 	GpsAlt := router.System.GPS.Altitude
 
 	routerIsInDB := false
-	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) // Add router
+	//	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) // Add router
+	_, err = statement.Exec(strconv.Itoa(router.System.RouterID), Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) // Add router
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			log.Warn("Router %s", Name+" already exists in database. Continuing discovery.")
@@ -733,6 +740,9 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 
 		getIPRouteTable(log, params, router, database)
 	}
+
+	log.Debug("Ended discover.getRouterInfo.")
+	return router
 }
 
 func getIfPhysAddress(log *logger.Logger, snmpTarget string, params *g.GoSNMP) (string, error) {
