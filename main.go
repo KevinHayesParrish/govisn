@@ -20,7 +20,7 @@ import (
 )
 
 // GOVISN_VERSION is the file version number
-const GOVISN_VERSION = "0.21.2"
+const GOVISN_VERSION = "0.21.3"
 
 var log *logger.Logger
 
@@ -200,7 +200,7 @@ func main() {
 			defer params.Conn.Close()
 
 			// Get the Router's info
-			getRouterInfo(
+			router = getRouterInfo(
 				log,
 				params.Target,
 				params,
