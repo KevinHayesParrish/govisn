@@ -20,7 +20,15 @@ import (
 )
 
 // GOVISN_VERSION is the file version number
-const GOVISN_VERSION = "0.21.3"
+const GOVISN_VERSION = "0.21.4"
+
+// ROUTER_RADIUS is the radius of the 3D object representing a network router
+const ROUTER_RADIUS float64 = 0.5
+
+// GLOBE_RADIUS is the radius of the 3D object representing the earth
+const GLOBE_RADIUS float64 = 63.7
+
+const CONST_X = math.Pi / 180
 
 var log *logger.Logger
 
@@ -48,14 +56,6 @@ var visualizeFlag = flag.Bool("vi", false, "Visualize the Network.")
 
 // scanNetFlag is the startup option to scan the network for SNMP capable routers.
 var scanNetFlag = flag.String("s", "", "Scan the CIDR network for SNMP capable routers.\nCIDR format = x.x.x.x/n. ex: 192.168.1.0/24\nOnce the network is scanned, the list of found routers\nwill be queried and their information added to the database.")
-
-// ROUTER_RADIUS is the radius of the 3D object representing a network router
-const ROUTER_RADIUS float64 = 0.5
-
-// GLOBE_RADIUS is the radius of the 3D object representing the earth
-const GLOBE_RADIUS float64 = 63.7
-
-const CONST_X = math.Pi / 180
 
 // Rad converts degrees to radians
 func Rad(d float64) float64 { return d * CONST_X }
