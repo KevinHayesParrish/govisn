@@ -18,7 +18,7 @@ import (
 )
 
 // DISCOVERY_VERSION is the file version number
-const DISCOVERY_VERSION = "0.3.8"
+const DISCOVERY_VERSION = "0.3.9"
 
 /*
  * func discover  discovers the network, constrained by input parm maximum hops away from snmpTarget node.
