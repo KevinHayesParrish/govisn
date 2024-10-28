@@ -122,21 +122,6 @@ func initDB(log *logger.Logger, database *sql.DB) *sql.DB {
 	return database
 }
 
-func getRtrName(ipAddr string) []string {
-	names, err := net.LookupAddr(ipAddr)
-	if err != nil {
-		log.Warn("No reverse lookup found for %s", ipAddr)
-	}
-
-	if len(names) > 0 {
-		return names
-	} else {
-		//unknown := []string{"Unknown"}
-		unknown := []string{ipAddr}
-		return unknown
-	}
-}
-
 /*
  * func getRouterInfo uses SNMP to retrieve the router's system information
  * and writes it to the database.
@@ -292,6 +277,21 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 
 	log.Debug("Ended discover.getRouterInfo.")
 	return router
+}
+
+func getRtrName(ipAddr string) []string {
+	names, err := net.LookupAddr(ipAddr)
+	if err != nil {
+		log.Warn("No reverse lookup found for %s", ipAddr)
+	}
+
+	if len(names) > 0 {
+		return names
+	} else {
+		//unknown := []string{"Unknown"}
+		unknown := []string{ipAddr}
+		return unknown
+	}
 }
 
 /*
@@ -646,30 +646,6 @@ func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, databas
 	}
 }
 
-func getIfPhysAddress(log *logger.Logger, snmpTarget string, params *g.GoSNMP) (string, error) {
-	log.Debug("getIfPhysAddress for %s", snmpTarget)
-
-	oids := []string{
-		IF_PHYS_ADDRESS_OID + ".1",
-	}
-	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
-	if err != nil {
-		if strings.Contains(err.Error(), "timeout") || strings.Contains(err.Error(), "refused") {
-			log.Warn("Get() err %s", err.Error()+
-				"\n Router "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
-
-			return "", err
-		} else {
-			log.Fatal("Router %s has no ifPhysAddress.1", snmpTarget)
-		}
-	}
-
-	ifPhysAddress1 := string(result.Variables[0].Value.([]byte))
-
-	return ifPhysAddress1, err
-
-}
-
 /*
  * fun getIPRouteTable uses SNMP to retrieve the router's route table information
  * and writes it to the database
@@ -735,6 +711,30 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 		}
 		defer statement.Close()
 	}
+
+}
+
+func getIfPhysAddress(log *logger.Logger, snmpTarget string, params *g.GoSNMP) (string, error) {
+	log.Debug("getIfPhysAddress for %s", snmpTarget)
+
+	oids := []string{
+		IF_PHYS_ADDRESS_OID + ".1",
+	}
+	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
+	if err != nil {
+		if strings.Contains(err.Error(), "timeout") || strings.Contains(err.Error(), "refused") {
+			log.Warn("Get() err %s", err.Error()+
+				"\n Router "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
+
+			return "", err
+		} else {
+			log.Fatal("Router %s has no ifPhysAddress.1", snmpTarget)
+		}
+	}
+
+	ifPhysAddress1 := string(result.Variables[0].Value.([]byte))
+
+	return ifPhysAddress1, err
 
 }
 
