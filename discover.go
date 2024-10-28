@@ -57,6 +57,244 @@ func discover(log *logger.Logger, snmpTarget string, params *g.GoSNMP, maxHopsSt
 }
 
 /*
+ * func initDB initializes the database with its tables.
+ */
+func initDB(log *logger.Logger, database *sql.DB) *sql.DB {
+
+	initDbVersion := "0.0.4"
+	log.Debug("initDB version %s", initDbVersion)
+
+	/*
+	 *	Add Routers table to DB
+	 */
+	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY UNIQUE, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, Services INTEGER, GpsLat REAL, GpsLong REAL, GpsAlt REAL)")
+	if err != nil {
+		database.Close()
+		log.Fatal("Router Table Create err: %v", err)
+	}
+	defer statement.Close()
+	statement.Exec()
+
+	/*
+	 *	Add RouteTable table to DB
+	 */
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, IPRouteIfIndex TEXT, NextHop TEXT)")
+	if err != nil {
+		database.Close()
+		log.Fatal("RouteTable Create err: %v", err)
+	}
+	defer statement.Close()
+	statement.Exec()
+
+	/*
+	 *	Add RouterIP table to DB
+	 */
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT, IfIndex TEXT)")
+	if err != nil {
+		database.Close()
+		log.Fatal("RouterIP Create err: %v", err)
+	}
+	defer statement.Close()
+	statement.Exec()
+
+	/*
+	 *	Add RouterMac table to DB
+	 */
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
+	if err != nil {
+		database.Close()
+		log.Fatal("RouterMac Create err: %v", err)
+	}
+	defer statement.Close()
+	statement.Exec()
+
+	/*
+	 *	Add Links table to DB
+	 */
+	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterID INTEGER, FromRouterName TEXT, FromRouterIP TEXT, FromRouterIfIndex Text, ToRouterID INTEGER, ToRouterName TEXT, ToRouterIP TEXT)")
+	if err != nil {
+		database.Close()
+		log.Fatal("Links Create err: %v", err)
+	}
+	defer statement.Close()
+	statement.Exec()
+
+	return database
+}
+
+func getRtrName(ipAddr string) []string {
+	names, err := net.LookupAddr(ipAddr)
+	if err != nil {
+		log.Warn("No reverse lookup found for %s", ipAddr)
+	}
+
+	if len(names) > 0 {
+		return names
+	} else {
+		//unknown := []string{"Unknown"}
+		unknown := []string{ipAddr}
+		return unknown
+	}
+}
+
+/*
+ * func getRouterInfo uses SNMP to retrieve the router's system information
+ * and writes it to the database.
+ */
+func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, router Router, database *sql.DB) Router {
+	log.Debug("Starting discover.getRouterInfo.")
+
+	oids := []string{
+		SYS_NAME_OID + ".0",     // sysName
+		SYS_DESCR_OID + ".0",    // sysDescr
+		SYS_UPTIME_OID + ".0",   // sysUpTime
+		SYS_CONTACT_OID + ".0",  // sysContact
+		SYS_LOCATION_OID + ".0", // sysLocation
+		SYS_SERVICES_OID + ".0", // sysServices
+	}
+
+	// get FQDN with IP Address
+	fqdn := getRtrName(snmpTarget)
+	log.Debug("Return from getRtrName=%s", fqdn)
+
+	var routerSupportsSNMP bool
+	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
+	if err != nil {
+		if strings.Contains(err.Error(), "timeout") || strings.Contains(err.Error(), "refused") {
+			log.Warn("Get() err %s", err.Error()+
+				"\n Router "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
+
+			router.System.Name = fqdn[0]
+			router.System.Description = ""
+			router.System.UpTime = 0
+			router.System.Contact = ""
+			router.System.Location = ""
+			router.System.Services = 0
+			routerSupportsSNMP = false
+		} else {
+			database.Close()
+			log.Fatal("Get() err %s", err.Error())
+		}
+	} else {
+		routerSupportsSNMP = true
+		//router.System.Name = fqdn[0]
+		router.System.Name = string(result.Variables[0].Value.([]byte))
+		router.System.Description = string(result.Variables[1].Value.([]byte))
+		router.System.UpTime = result.Variables[2].Value.(uint32)
+		router.System.Contact = string(result.Variables[3].Value.([]byte))
+		router.System.Location = string(result.Variables[4].Value.([]byte))
+		router.System.Services = result.Variables[5].Value.(int)
+
+	}
+
+	// get FQDN with IP Address
+	//fqdn := getRtrName(snmpTarget)
+
+	//	router.System.Name = fqdn[0]
+	//	router.System.Description = string(result.Variables[1].Value.([]byte))
+	//	router.System.UpTime = result.Variables[2].Value.(uint32)
+	//	router.System.Contact = string(result.Variables[3].Value.([]byte))
+	//	router.System.Location = string(result.Variables[4].Value.([]byte))
+	//	router.System.Services = result.Variables[5].Value.(int)
+
+	/*
+		// Retrieve GPS data from DNS
+	*/
+
+	// get GPS data from DNS
+	router.System.GPS.Latitude = "0.0"  // initialze with float data to allow for missing GPS on DB
+	router.System.GPS.Longitude = "0.0" // initialze with float data to allow for missing GPS on DB
+	router.System.GPS.Altitude = "0.0"  // initialze with float data to allow for missing GPS on DB
+
+	if len(fqdn) > 0 {
+		/*
+		 * Use router's hostname for DNS query, instead of fqdn[0].
+		 * This provides a consistent IP Address, fqdn[0] can be
+		 * an interface address relating to a different DNS name than
+		 * hostname.
+		 */
+		//gpsDNS := getGPS(fqdn[0])
+		gpsDNS := getGPS(router.System.Name)
+
+		for n := 0; n < len(gpsDNS); n++ {
+			s := gpsDNS[n]
+			// Split TXT record into prefix and value
+			sr := strings.Split(s, "=")
+			if sr[0] == "Long" {
+				router.System.GPS.Longitude = sr[1]
+			}
+			if sr[0] == "Lat" {
+				router.System.GPS.Latitude = sr[1]
+			}
+			if sr[0] == "Alt" {
+				router.System.GPS.Altitude = sr[1]
+			}
+		}
+	}
+
+	log.Debug("router.System.Name= %s", router.System.Name)
+	log.Debug("router.System.Description= %s", router.System.Description)
+	log.Debug("router.System.UpTime= %d", router.System.UpTime)
+	log.Debug("router.System.Contact= %s", router.System.Contact)
+	log.Debug("router.System.Location= %s", router.System.Location)
+	log.Debug("router.System.Services= %d", router.System.Services)
+	log.Debug("router.System.GPS= %v", router.System.GPS)
+
+	// Write Router row to database
+	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	statement.Exec()
+	defer statement.Close()
+
+	Name := router.System.Name
+
+	ifPhysAddress1, err := getIfPhysAddress(log, snmpTarget, params)
+	var RouterIDUint32 uint32
+	if err != nil {
+		log.Warn("Router %s has no ifPhysAddress.1", snmpTarget)
+		RouterIDUint32 = crc32.ChecksumIEEE([]byte(Name))
+		log.Debug("Calculated RouterID using %s as: %d", Name, RouterIDUint32)
+	} else {
+		RouterIDUint32 = crc32.ChecksumIEEE([]byte(ifPhysAddress1))
+		log.Debug("Calculated RouterID using %s as: %d", ifPhysAddress1, RouterIDUint32)
+	}
+
+	router.System.RouterID = int(RouterIDUint32)
+	Description := router.System.Description
+	UpTime := router.System.UpTime
+	Contact := router.System.Contact
+	Location := router.System.Location
+	Services := router.System.Services
+	GpsLat := router.System.GPS.Latitude
+	GpsLong := router.System.GPS.Longitude
+	GpsAlt := router.System.GPS.Altitude
+
+	routerIsInDB := false
+	//	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) // Add router
+	_, err = statement.Exec(strconv.Itoa(router.System.RouterID), Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) // Add router
+	if err != nil {
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			log.Warn("Router %s", Name+" already exists in database. Continuing discovery.")
+			routerIsInDB = true
+		} else {
+			database.Close()
+			log.Fatal("RouterMac Insert Exec err: %v", err)
+		}
+	}
+	defer statement.Close()
+
+	if !routerIsInDB && routerSupportsSNMP {
+		getInterfaces(log, params, router, database)
+
+		getIPAddresses(log, params, router, database)
+
+		getIPRouteTable(log, params, router, database)
+	}
+
+	log.Debug("Ended discover.getRouterInfo.")
+	return router
+}
+
+/*
  * func getInterfaces uses SNMP to retrieve the router's interfaces.
  */
 func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
@@ -298,87 +536,6 @@ func getInterfaces(log *logger.Logger, params *g.GoSNMP, router Router, database
 
 }
 
-/*
- * func initDB initializes the database with its tables.
- */
-func initDB(log *logger.Logger, database *sql.DB) *sql.DB {
-
-	initDbVersion := "0.0.4"
-	log.Debug("initDB version %s", initDbVersion)
-
-	/*
-	 *	Add Routers table to DB
-	 */
-	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS Routers (RouterID INTEGER NOT NULL PRIMARY KEY UNIQUE, Name TEXT, Description TEXT, UpTime TEXT, Contact TEXT, Location TEXT, Services INTEGER, GpsLat REAL, GpsLong REAL, GpsAlt REAL)")
-	if err != nil {
-		database.Close()
-		log.Fatal("Router Table Create err: %v", err)
-	}
-	defer statement.Close()
-	statement.Exec()
-
-	/*
-	 *	Add RouteTable table to DB
-	 */
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouteTable (RouterID INTEGER, DestAddr TEXT, IPRouteIfIndex TEXT, NextHop TEXT)")
-	if err != nil {
-		database.Close()
-		log.Fatal("RouteTable Create err: %v", err)
-	}
-	defer statement.Close()
-	statement.Exec()
-
-	/*
-	 *	Add RouterIP table to DB
-	 */
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterIp (RouterID INTEGER NOT NULL, IpAddr TEXT, IfIndex TEXT)")
-	if err != nil {
-		database.Close()
-		log.Fatal("RouterIP Create err: %v", err)
-	}
-	defer statement.Close()
-	statement.Exec()
-
-	/*
-	 *	Add RouterMac table to DB
-	 */
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS RouterMac (RouterID INTEGER NOT NULL, MacAddr TEXT)")
-	if err != nil {
-		database.Close()
-		log.Fatal("RouterMac Create err: %v", err)
-	}
-	defer statement.Close()
-	statement.Exec()
-
-	/*
-	 *	Add Links table to DB
-	 */
-	statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS Links (LinkID INTEGER NOT NULL UNIQUE, FromRouterID INTEGER, FromRouterName TEXT, FromRouterIP TEXT, FromRouterIfIndex Text, ToRouterID INTEGER, ToRouterName TEXT, ToRouterIP TEXT)")
-	if err != nil {
-		database.Close()
-		log.Fatal("Links Create err: %v", err)
-	}
-	defer statement.Close()
-	statement.Exec()
-
-	return database
-}
-
-func getRtrName(ipAddr string) []string {
-	names, err := net.LookupAddr(ipAddr)
-	if err != nil {
-		log.Warn("No reverse lookup found for %s", ipAddr)
-	}
-
-	if len(names) > 0 {
-		return names
-	} else {
-		//unknown := []string{"Unknown"}
-		unknown := []string{ipAddr}
-		return unknown
-	}
-}
-
 func getHostIP(routerName string) []string {
 	addrs, err := net.LookupHost(routerName)
 	if err != nil {
@@ -401,37 +558,6 @@ func getGPS(sysName string) []string {
 		log.Debug("No DNS TXT records for %s", sysName)
 	}
 	return txts
-}
-
-/*
- * func writeMactoDB writes the router's MAC address information to the RouterMac table
- */
-func writeMacToDB(log *logger.Logger, router Router, interfaceTable ifTable, database *sql.DB) {
-
-	statement, err := database.Prepare("INSERT INTO RouterMac (RouterID, MacAddr) VALUES (?, ?)")
-	if err != nil {
-		database.Close()
-		log.Fatal("RouterMac Insert Prepare err: %v", err)
-	}
-	defer statement.Close()
-
-	// RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
-	// _, err = statement.Exec(strconv.Itoa(int(RouterID)), interfaceTable.ifEntry.ifPhysAddress)
-	_, err = statement.Exec(router.System.RouterID, interfaceTable.ifEntry.ifPhysAddress)
-	if err != nil {
-		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-			// Continue executing if this is a duplicate MAC Address. This assume this router is being processed again.
-			// In case this is a duplicate MAC Address within the network, print error output to stdoutput.
-			//			fmt.Println("\n****\n Non-Unique MAC Address", interfaceTable.ifEntry.ifPhysAddress, "\n This may be because this router is being re-discovered.\n If not, then this is a serious network violation condition.\n****")
-			log.Warn("\n****\n Non-Unique MAC Address %s", interfaceTable.ifEntry.ifPhysAddress+
-				"\n This may be because this router is being re-discovered."+
-				"\n If not, then this is a serious network violation condition.\n****")
-		} else {
-			database.Close()
-			log.Fatal("RouterMac Insert Exec err: %v", err)
-		}
-	}
-	defer statement.Close()
 }
 
 /*
@@ -520,6 +646,30 @@ func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, databas
 	}
 }
 
+func getIfPhysAddress(log *logger.Logger, snmpTarget string, params *g.GoSNMP) (string, error) {
+	log.Debug("getIfPhysAddress for %s", snmpTarget)
+
+	oids := []string{
+		IF_PHYS_ADDRESS_OID + ".1",
+	}
+	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
+	if err != nil {
+		if strings.Contains(err.Error(), "timeout") || strings.Contains(err.Error(), "refused") {
+			log.Warn("Get() err %s", err.Error()+
+				"\n Router "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
+
+			return "", err
+		} else {
+			log.Fatal("Router %s has no ifPhysAddress.1", snmpTarget)
+		}
+	}
+
+	ifPhysAddress1 := string(result.Variables[0].Value.([]byte))
+
+	return ifPhysAddress1, err
+
+}
+
 /*
  * fun getIPRouteTable uses SNMP to retrieve the router's route table information
  * and writes it to the database
@@ -589,182 +739,32 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 }
 
 /*
- * func getRouterInfo uses SNMP to retrieve the router's system information
- * and writes it to the database.
+ * func writeMactoDB writes the router's MAC address information to the RouterMac table
  */
-func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, router Router, database *sql.DB) Router {
-	log.Debug("Starting discover.getRouterInfo.")
+func writeMacToDB(log *logger.Logger, router Router, interfaceTable ifTable, database *sql.DB) {
 
-	oids := []string{
-		SYS_NAME_OID + ".0",     // sysName
-		SYS_DESCR_OID + ".0",    // sysDescr
-		SYS_UPTIME_OID + ".0",   // sysUpTime
-		SYS_CONTACT_OID + ".0",  // sysContact
-		SYS_LOCATION_OID + ".0", // sysLocation
-		SYS_SERVICES_OID + ".0", // sysServices
-	}
-
-	// get FQDN with IP Address
-	fqdn := getRtrName(snmpTarget)
-	log.Debug("Return from getRtrName=%s", fqdn)
-
-	var routerSupportsSNMP bool
-	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
+	statement, err := database.Prepare("INSERT INTO RouterMac (RouterID, MacAddr) VALUES (?, ?)")
 	if err != nil {
-		if strings.Contains(err.Error(), "timeout") || strings.Contains(err.Error(), "refused") {
-			log.Warn("Get() err %s", err.Error()+
-				"\n Router "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
-
-			router.System.Name = fqdn[0]
-			router.System.Description = ""
-			router.System.UpTime = 0
-			router.System.Contact = ""
-			router.System.Location = ""
-			router.System.Services = 0
-			routerSupportsSNMP = false
-		} else {
-			database.Close()
-			log.Fatal("Get() err %s", err.Error())
-		}
-	} else {
-		routerSupportsSNMP = true
-		//router.System.Name = fqdn[0]
-		router.System.Name = string(result.Variables[0].Value.([]byte))
-		router.System.Description = string(result.Variables[1].Value.([]byte))
-		router.System.UpTime = result.Variables[2].Value.(uint32)
-		router.System.Contact = string(result.Variables[3].Value.([]byte))
-		router.System.Location = string(result.Variables[4].Value.([]byte))
-		router.System.Services = result.Variables[5].Value.(int)
-
+		database.Close()
+		log.Fatal("RouterMac Insert Prepare err: %v", err)
 	}
-
-	// get FQDN with IP Address
-	//fqdn := getRtrName(snmpTarget)
-
-	//	router.System.Name = fqdn[0]
-	//	router.System.Description = string(result.Variables[1].Value.([]byte))
-	//	router.System.UpTime = result.Variables[2].Value.(uint32)
-	//	router.System.Contact = string(result.Variables[3].Value.([]byte))
-	//	router.System.Location = string(result.Variables[4].Value.([]byte))
-	//	router.System.Services = result.Variables[5].Value.(int)
-
-	/*
-		// Retrieve GPS data from DNS
-	*/
-
-	// get GPS data from DNS
-	router.System.GPS.Latitude = "0.0"  // initialze with float data to allow for missing GPS on DB
-	router.System.GPS.Longitude = "0.0" // initialze with float data to allow for missing GPS on DB
-	router.System.GPS.Altitude = "0.0"  // initialze with float data to allow for missing GPS on DB
-
-	if len(fqdn) > 0 {
-		/*
-		 * Use router's hostname for DNS query, instead of fqdn[0].
-		 * This provides a consistent IP Address, fqdn[0] can be
-		 * an interface address relating to a different DNS name than
-		 * hostname.
-		 */
-		//gpsDNS := getGPS(fqdn[0])
-		gpsDNS := getGPS(router.System.Name)
-
-		for n := 0; n < len(gpsDNS); n++ {
-			s := gpsDNS[n]
-			// Split TXT record into prefix and value
-			sr := strings.Split(s, "=")
-			if sr[0] == "Long" {
-				router.System.GPS.Longitude = sr[1]
-			}
-			if sr[0] == "Lat" {
-				router.System.GPS.Latitude = sr[1]
-			}
-			if sr[0] == "Alt" {
-				router.System.GPS.Altitude = sr[1]
-			}
-		}
-	}
-
-	log.Debug("router.System.Name= %s", router.System.Name)
-	log.Debug("router.System.Description= %s", router.System.Description)
-	log.Debug("router.System.UpTime= %d", router.System.UpTime)
-	log.Debug("router.System.Contact= %s", router.System.Contact)
-	log.Debug("router.System.Location= %s", router.System.Location)
-	log.Debug("router.System.Services= %d", router.System.Services)
-	log.Debug("router.System.GPS= %v", router.System.GPS)
-
-	// Write Router row to database
-	statement, _ := database.Prepare("INSERT INTO Routers (RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-	statement.Exec()
 	defer statement.Close()
 
-	Name := router.System.Name
-
-	ifPhysAddress1, err := getIfPhysAddress(log, snmpTarget, params)
-	var RouterIDUint32 uint32
-	if err != nil {
-		log.Warn("Router %s has no ifPhysAddress.1", snmpTarget)
-		RouterIDUint32 = crc32.ChecksumIEEE([]byte(Name))
-		log.Debug("Calculated RouterID using %s as: %d", Name, RouterIDUint32)
-	} else {
-		RouterIDUint32 = crc32.ChecksumIEEE([]byte(ifPhysAddress1))
-		log.Debug("Calculated RouterID using %s as: %d", ifPhysAddress1, RouterIDUint32)
-	}
-
-	router.System.RouterID = int(RouterIDUint32)
-	Description := router.System.Description
-	UpTime := router.System.UpTime
-	Contact := router.System.Contact
-	Location := router.System.Location
-	Services := router.System.Services
-	GpsLat := router.System.GPS.Latitude
-	GpsLong := router.System.GPS.Longitude
-	GpsAlt := router.System.GPS.Altitude
-
-	routerIsInDB := false
-	//	_, err = statement.Exec(strconv.Itoa(int(RouterIDUint32)), Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) // Add router
-	_, err = statement.Exec(strconv.Itoa(router.System.RouterID), Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt) // Add router
+	// RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
+	// _, err = statement.Exec(strconv.Itoa(int(RouterID)), interfaceTable.ifEntry.ifPhysAddress)
+	_, err = statement.Exec(router.System.RouterID, interfaceTable.ifEntry.ifPhysAddress)
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-			log.Warn("Router %s", Name+" already exists in database. Continuing discovery.")
-			routerIsInDB = true
+			// Continue executing if this is a duplicate MAC Address. This assume this router is being processed again.
+			// In case this is a duplicate MAC Address within the network, print error output to stdoutput.
+			//			fmt.Println("\n****\n Non-Unique MAC Address", interfaceTable.ifEntry.ifPhysAddress, "\n This may be because this router is being re-discovered.\n If not, then this is a serious network violation condition.\n****")
+			log.Warn("\n****\n Non-Unique MAC Address %s", interfaceTable.ifEntry.ifPhysAddress+
+				"\n This may be because this router is being re-discovered."+
+				"\n If not, then this is a serious network violation condition.\n****")
 		} else {
 			database.Close()
 			log.Fatal("RouterMac Insert Exec err: %v", err)
 		}
 	}
 	defer statement.Close()
-
-	if !routerIsInDB && routerSupportsSNMP {
-		getInterfaces(log, params, router, database)
-
-		getIPAddresses(log, params, router, database)
-
-		getIPRouteTable(log, params, router, database)
-	}
-
-	log.Debug("Ended discover.getRouterInfo.")
-	return router
-}
-
-func getIfPhysAddress(log *logger.Logger, snmpTarget string, params *g.GoSNMP) (string, error) {
-	log.Debug("getIfPhysAddress for %s", snmpTarget)
-
-	oids := []string{
-		IF_PHYS_ADDRESS_OID + ".1",
-	}
-	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
-	if err != nil {
-		if strings.Contains(err.Error(), "timeout") || strings.Contains(err.Error(), "refused") {
-			log.Warn("Get() err %s", err.Error()+
-				"\n Router "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
-
-			return "", err
-		} else {
-			log.Fatal("Router %s has no ifPhysAddress.1", snmpTarget)
-		}
-	}
-
-	ifPhysAddress1 := string(result.Variables[0].Value.([]byte))
-
-	return ifPhysAddress1, err
-
 }
