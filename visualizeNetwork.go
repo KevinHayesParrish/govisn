@@ -44,7 +44,7 @@ import (
 )
 
 // VISUALIZE_NETWORK_VERSION is the version number of the visualizeNetwork func
-const VISUALIZE_NETWORK_VERSION = "0.3.3"
+const VISUALIZE_NETWORK_VERSION = "0.3.4"
 
 // App contains the application state
 type App struct {
@@ -78,424 +78,6 @@ type GuiMenu struct {
 // Raycast is the structure containing the Raycaster
 type Raycast struct {
 	rayCast *collision.Raycaster
-}
-
-/*
- * func visualizeNetwork uses G3N to create and display a 3D model of the discovered network.
- */
-func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP) *sql.DB {
-	log.Debug("visualizeNetwork %s", VISUALIZE_NETWORK_VERSION+" started")
-
-	// Retrieve the Routers table
-	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers")
-	if queryErr != nil {
-		databaseForRead.Close()
-		log.Error("databaseForRead Query error %v", queryErr)
-		os.Exit(1)
-	}
-	log.Debug("Successful Routers table Select")
-
-	// Retrieve the Links table
-	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP FROM Links")
-	if queryErr != nil {
-		databaseForRead.Close()
-		log.Error("databaseForRead Query error %v", queryErr)
-		os.Exit(1)
-	}
-	log.Debug("Successful Links table Select")
-
-	// Initialize the 3D space
-
-	// Create application and scene
-	gv := new(gvapp)
-	a := app.App()
-	gv.Application = a
-	gv.scene = core.NewNode()
-	gv.scene.SetName("GoVisnScene")
-
-	// Create perspective camera
-	gv.camPos = math32.Vector3{X: 0, Y: 0, Z: (float32)(GLOBE_RADIUS * 2.0)}
-	gv.cam = camera.New(1) // perspective camera with defaults
-	gv.cam.SetName("camera")
-	gv.cam.SetPosition(0, 0, (float32)(GLOBE_RADIUS*2.0))
-
-	// Setup orbit control for the camera
-	gv.orbit = camera.NewOrbitControl(gv.cam)
-
-	gv.scene.Add(gv.cam)
-
-	// Set up callback to update viewport and camera aspect ratio when the window is resized
-	onResize := func(evname string, ev interface{}) {
-		// Get framebuffer size and update viewport accordingly
-		width, height := a.GetSize()
-		a.Gls().Viewport(0, 0, int32(width), int32(height))
-		// Update the camera's aspect ratio
-		gv.cam.SetAspect(float32(width) / float32(height))
-	}
-	a.Subscribe(window.OnWindowSize, onResize)
-	onResize("", nil)
-
-	// Create and Add lights to the scene
-	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1.0)
-	ambientLight.SetName("ambient")
-	gv.scene.Add(ambientLight)
-
-	//	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
-	//  pointLight.SetName("pointLight")
-	//	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
-	//	gv.scene.Add(pointLight)
-
-	//	dirLight := light.NewDirectional(math32.NewColor("white"), 0.8)
-	//	dirLight.SetPosition((float32)(globeRadius+100), 0, 0)
-	//	gv.scene.Add(dirLight)
-
-	// Add an axis helper to the scene
-	if *debugFlag {
-		axes := helper.NewAxes(1)
-		axes.SetName("helperAxes")
-		gv.scene.Add(axes)
-	}
-
-	// Set background color to black
-	a.Gls().ClearColor(0.0, 0.0, 0.0, 0.0)
-
-	gv = addTitle(log, gv)
-
-	// Build Menus
-	buildMenus(gv, a)
-
-	var RouterID int
-	var Name string
-	var Description string
-	var UpTime uint32
-	var Contact string
-	var Location string
-	var Services int
-	var GpsLat string
-	var GpsLong string
-	var GpsAlt string
-	var link Link
-	var LinkID int
-	var FromRouterName, FromRouterIP, ToRouterName, ToRouterIP string
-	var x float32
-	var y float32 = 1.0
-	var z float32 = 1.0
-
-	// Setup Mouse clicking of objects within the 3D scene
-	var t Raycast
-	//	t.Initialize(debugFlag, gv.scene, gv.cam, gv, a, databaseForRead)
-	t.Initialize(gv.scene, gv.cam, gv, a, databaseForRead)
-
-	// Create Globe texture
-	gobinDir := os.Getenv("GOBIN")
-	texfile := gobinDir + "/data/images/earth_clouds_big.jpg"
-	globeTex, err := texture.NewTexture2DFromImage(texfile)
-	if err != nil {
-		databaseForRead.Close()
-		log.Fatal("Error loading texture.\n Insure govisn /data/images is copied to GOBIN \n GOBIN env variable must be set.")
-	}
-	globeTex.SetFlipY(false)
-
-	// Create a sphere representing the globe
-	globe3D := geometry.NewSphere(GLOBE_RADIUS, 16, 16)
-	globeMat := material.NewStandard(math32.NewColor("grey"))
-	globeMat.SetTransparent(true)
-	globeMat.SetOpacity(.30)
-
-	globeMesh := graphic.NewMesh(globe3D, globeMat)
-	globeMesh.SetName("globe")
-	globeMesh.SetPosition(0, 0, 0)
-	gv.scene.Add(globeMesh)
-
-	log.Debug("Beginning routerRows.Next loop; adding routers to 3D scene.")
-
-	//
-	// Add the routers to the 3D scene
-	//
-	var routers []Router
-	var router Router
-	routerArrayIndex := 0
-	for routerRows.Next() {
-		routerRows.Scan(&RouterID, &Name, &Description, &UpTime, &Contact, &Location, &Services, &GpsLat, &GpsLong, &GpsAlt)
-
-		// Load router struct from DB fields
-		router.System.RouterID = RouterID
-		router.System.UpTime = UpTime
-		router.System.Name = Name
-		router.System.Contact = Contact
-		router.System.Location = Location
-		router.System.Services = Services
-		router.System.GPS.Latitude = GpsLat
-		router.System.GPS.Longitude = GpsLong
-		router.System.GPS.Altitude = GpsAlt
-
-		routers = append(routers, router)
-
-		rtr3D := geometry.NewCylinder(ROUTER_RADIUS, ROUTER_RADIUS, 16, 2, true, true)
-		mat := material.NewStandard(math32.NewColor("DarkBlue"))
-		cylinderMesh := graphic.NewMesh(rtr3D, mat)
-		cylinderMesh.SetName(router.System.Name)
-		cylinderMesh.SetUserData(strconv.Itoa(router.System.RouterID))
-
-		// Set coordinates and altitude
-		x, y, z = calcCoordinates(GpsLat, GpsLong, GpsAlt)
-
-		log.Debug("x = %s", strconv.FormatFloat(float64(x), 'f', 5, 32)+"y = "+strconv.FormatFloat(float64(y), 'f', 5, 32)+"z = "+strconv.FormatFloat(float64(z), 'f', 5, 32))
-		log.Debug("router = %v", routers[routerArrayIndex])
-		log.Debug("router.System.GPS = %s", routers[routerArrayIndex].System.GPS)
-		log.Debug("RouterID= %s", strconv.Itoa(RouterID)+"Name= "+Name)
-
-		// Add Router object to 3D scene.
-		cylinderMesh.SetPosition(x, y, z)
-		log.Debug("cylinderMesh Name= %s", cylinderMesh.Name())
-		log.Debug("cylinderMesh UserData= %s", cylinderMesh.UserData())
-
-		gv.scene.Add(cylinderMesh)
-
-		//
-		// Add router name to scene
-		//
-		fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
-		font, err := text.NewFont(fontfile)
-		if err != nil {
-			databaseForRead.Close()
-			log.Fatal("Error loading font %s" + err.Error() + "\n Insure govisn /data/fonts is copied to GOBIN \n GOBIN env variable must be set.")
-		}
-
-		font.SetLineSpacing(1.0)
-		font.SetPointSize(28)
-		font.SetDPI(72)
-		font.SetFgColor(&math32.Color4{R: 0, G: 0, B: 1, A: 1})
-		font.SetBgColor(&math32.Color4{R: 1, G: 1, B: 0, A: 0.8})
-		canvas := text.NewCanvas(300, 200, &math32.Color4{R: 0, G: 1, B: 0, A: 0.8})
-		rtext := "RouterID: " + strconv.Itoa(routers[routerArrayIndex].System.RouterID) + "\nHostname: " + routers[routerArrayIndex].System.Name
-		swidth, sheight := font.MeasureText(rtext)
-		canvas = text.NewCanvas(swidth, sheight, &math32.Color4{R: 0, G: 1, B: 1, A: 1})
-		canvas.DrawText(0, 0, rtext, font)
-		tex3 := texture.NewTexture2DFromRGBA(canvas.RGBA)
-		mat3 := material.NewStandard(&math32.Color{R: 1, G: 1, B: 1})
-		mat3.AddTexture(tex3)
-		aspect := float32(swidth) / float32(sheight)
-		mesh3 := graphic.NewSprite(aspect, 1, mat3)
-		mesh3.SetPosition(x, y+1.0, z)
-		gv.scene.Add(mesh3)
-
-		queryErr = routerRows.Err()
-		if queryErr != nil {
-			databaseForRead.Close()
-			log.Fatal(queryErr.Error())
-		}
-
-		routerArrayIndex++
-	}
-	defer routerRows.Close()
-
-	log.Debug("Beginning linkRows.Next loop; adding links to the 3D scene")
-	//
-	// Add the links to the 3D scene
-	//
-	var FromRouterX, FromRouterY, FromRouterZ, ToRouterX, ToRouterY, ToRouterZ string
-	for linkRows.Next() {
-		err := linkRows.Scan(&LinkID, &FromRouterName, &FromRouterIP, &ToRouterName, &ToRouterIP)
-		if err != nil {
-			databaseForRead.Close()
-			log.Fatal(err.Error())
-		}
-
-		// Exclude false routes
-		if FromRouterIP == "127.0.0.0" || FromRouterIP == "127.0.0.1" || FromRouterIP == "224.0.0.0" || FromRouterIP == "0.0.0.0" || ToRouterIP == "127.0.0.0" || ToRouterIP == "127.0.0.1" || ToRouterIP == "224.0.0.0" || ToRouterIP == "0.0.0.0" {
-			continue
-		}
-
-		// Load link struct from DB fields
-		link.LinkID = LinkID
-		link.FromRouterName = FromRouterName
-		link.FromRouterIP = FromRouterIP
-		link.ToRouterName = ToRouterName
-		link.ToRouterIP = ToRouterIP
-
-		// retrieve FromRouter coordinates
-		log.Debug("link = %v", link)
-		log.Debug("FromRouterName= %s", link.FromRouterName)
-		log.Debug("FromRouterIP= %s", link.FromRouterIP)
-
-		//  Query database for FromRouter GPS coordinates
-
-		routerGpsRows, err := databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = $1", FromRouterName)
-		if err != nil {
-			databaseForRead.Close()
-			log.Fatal("databaseForRead Query error %s", err.Error())
-		}
-		log.Debug("Successful Query for FromRouter GPS Coordinates")
-
-		defer routerGpsRows.Close()
-		var linksFromRouterName string
-		var linksFromRouterGpsLat, linksFromRouterGpsLong, linksFromRouterGpsAlt string
-		for routerGpsRows.Next() {
-			routerGpsRows.Scan(&linksFromRouterName, &linksFromRouterGpsLat, &linksFromRouterGpsLong, &linksFromRouterGpsAlt)
-		}
-
-		FromRouterX = linksFromRouterGpsLat
-		FromRouterY = linksFromRouterGpsLong
-		FromRouterZ = linksFromRouterGpsAlt
-		log.Debug("returned from getRouterCoordinatesName func: FromRouterX= %s", FromRouterX+" FromRouterY= "+FromRouterY+" FromRouterZ= "+FromRouterZ)
-
-		//  Query database for FromRouter GPS coordinates
-		log.Debug("ToRouterName= %s", link.ToRouterName)
-		log.Debug("ToRouterIP= %s", link.ToRouterIP)
-
-		routerGpsRows, err = databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = $1", ToRouterName)
-		if err != nil {
-			databaseForRead.Close()
-			log.Fatal("databaseForRead Query error %v", err)
-		}
-		log.Debug("Successful Query for ToRouter GPS Coordinates")
-
-		var linksToRouterName string
-		var linksToRouterGpsLat, linksToRouterGpsLong, linksToRouterGpsAlt string
-		for routerGpsRows.Next() {
-			routerGpsRows.Scan(&linksToRouterName, &linksToRouterGpsLat, &linksToRouterGpsLong, &linksToRouterGpsAlt)
-		}
-		ToRouterX = linksToRouterGpsLat
-		ToRouterY = linksToRouterGpsLong
-		ToRouterZ = linksToRouterGpsAlt
-
-		//		log.Debug("router %s", Name+" GPS coordinates = %s, %s, %s"+GpsLat+GpsLong+GpsAlt)
-		log.Debug("router %s, GPS coordinates = %s, %s, %s", Name, GpsLat, GpsLong, GpsAlt)
-		//		log.Debug("returned from getRouterCoordinatesIP func: ToRouterX= %s", ToRouterX+"ToRouterY= %s"+ToRouterY+"ToRouterZ= %s"+ToRouterZ)
-		log.Debug("returned from getRouterCoordinatesIP func: ToRouterX= %s, ToRouterY= %s, ToRouterZ= %s", ToRouterX, ToRouterY, ToRouterZ)
-
-		// Add link object to the 3D scene
-		fromX, fromY, fromZ := calcCoordinates(FromRouterX, FromRouterY, FromRouterZ)
-		toX, toY, toZ := calcCoordinates(ToRouterX, ToRouterY, ToRouterZ)
-		log.Debug("fromX= %s", strconv.FormatFloat(float64(fromX), 'f', 5, 64)+
-			" fromY= %s"+strconv.FormatFloat(float64(fromY), 'f', 5, 64)+
-			" fromZ= %s"+strconv.FormatFloat(float64(fromZ), 'f', 5, 64))
-		log.Debug("toX= %s", strconv.FormatFloat(float64(toX), 'f', 5, 64)+
-			" toY= %s"+strconv.FormatFloat(float64(toY), 'f', 5, 64)+
-			" toZ="+strconv.FormatFloat(float64(toZ), 'f', 5, 64))
-
-		// Build Link using glLine - BEGIN
-		linkGeom := geometry.NewGeometry()
-		vertices := math32.NewArrayF32(0, 0)
-		vertices.Append(
-			fromX, fromY, fromZ,
-			toX, toY, toZ,
-		)
-		log.Debug("link vertices= %v", vertices)
-		log.Debug("")
-
-		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
-
-		mat := material.NewStandard(math32.NewColor("grey"))
-
-		// Check Runtime environment.
-		// OpenGL Implementation on MacOS will only accept Line width of 1.0
-		if runtime.GOOS == "darwin" {
-			mat.SetLineWidth(1.0)
-			log.Info("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept lineWidth of 1.0 ***")
-		}
-		link3D := graphic.NewLines(linkGeom, mat)
-		link3D.SetName(strconv.Itoa(link.LinkID))
-		// Build Link using glLine - END
-
-		// Build Link using Polygon
-		//posA := math32.NewVector3(fromX, fromY, fromZ)
-		//		posB := math32.NewVector3(toX, toY, toZ)
-		//		vertices, normals, indices := calcLinkVBOs(debugFlag, gv.camPos, *posA, *posB, float32(1.00))
-		//		if debugFlag {
-		//			fmt.Println("calcLinkVBOs returned: ", vertices, normals, indices)
-		//		}
-		//		linkGeom.SetIndices(indices)
-		//		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
-		//		linkGeom.AddVBO(gls.NewVBO(normals).AddAttrib(gls.VertexNormal))
-
-		// Creates basic material
-		//		mat := material.NewStandard(math32.NewColor("White"))
-		//		mat.SetSide(material.SideDouble)
-		//		link3D := graphic.NewMesh(linkGeom, mat)
-		//		link3D.SetVisible(true)
-		// Build Link using Polygon - END
-
-		// Build Link using Cylinder - BEGIN
-		//vertices := math32.NewArrayF32(0, 0)
-		//vertices.Append(
-		//			fromX, fromY, fromZ,
-		//			toX, toY, toZ,
-		//		)
-		//		if debugFlag {
-		//			fmt.Println("link vertices=", vertices)
-		//			fmt.Println()
-		//		}
-
-		//		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
-
-		//posA := math32.NewVector3(fromX, fromY, fromZ)
-		//posB := math32.NewVector3(toX, toY, toZ)
-		//cylHeight := calcDistance(debugFlag, posA, posB)
-		//linkGeom := geometry.NewCylinder(1.0, cylHeight, 16, 2, true, true)
-		//mat := material.NewStandard(math32.NewColor("White"))
-		// Check Runtime environment.
-		// OpenGL Implementation on MacOS will only accept Line width of 1.0
-		//		if runtime.GOOS == "darwin" {
-		//			mat.SetLineWidth(1.0)
-		//			fmt.Println("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept 1.0 ***")
-		//		} else {
-		//			mat.SetLineWidth(3.0)
-		//		}
-		//link3D := graphic.NewMesh(linkGeom, mat)
-		//link3D.SetName(string(link.LinkID))
-		// Build Link using Cylinder - END
-
-		// Creates lines with the specified geometry and material
-
-		gv.scene.Add(link3D)
-
-		err = linkRows.Err()
-		if err != nil {
-			databaseForRead.Close()
-			log.Fatal(err.Error())
-		}
-	}
-
-	// Creating a 60 second timer for auto link update feature
-	linkUpdateTimer := time.NewTimer(60 * time.Second)
-	updateLinksOK := false // default
-	//updateLinksOK := true // TESTING ONLY
-
-	// Run the application
-	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
-		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
-		renderer.Render(gv.scene, gv.cam)
-
-		// Notifying channel under go function
-		go func() {
-			<-linkUpdateTimer.C
-
-			// set NetPollingEnabled switch when timer is fired
-			//NetPollingEnabled = true
-			if NetPollingEnabled {
-				updateLinksOK = true
-			}
-
-			// Reset the linkUpdateTimer to 60 seconds
-			linkUpdateTimer.Reset(60 * time.Second)
-			log.Info("linkUpdateTimer Reset")
-		}()
-
-		//		if NetPollingEnabled {
-		if updateLinksOK {
-			//gv = updateLinks(log, gv, databaseForRead, snmpTarget, community, params)
-			gv = updateLinks(log, gv, databaseForRead, snmpTarget, params)
-			//			NetPollingEnabled = false
-			updateLinksOK = false
-		}
-	})
-
-	log.Debug("func visualizeNetwork %s ending.", VISUALIZE_NETWORK_VERSION)
-
-	return databaseForRead
-
 }
 
 func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, float32, float32) {
@@ -1144,4 +726,422 @@ func addTitle(log *logger.Logger, gv *gvapp) *gvapp {
 	gv.scene.Add(title)
 
 	return gv
+}
+
+/*
+ * func visualizeNetwork uses G3N to create and display a 3D model of the discovered network.
+ */
+func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP) *sql.DB {
+	log.Debug("visualizeNetwork %s", VISUALIZE_NETWORK_VERSION+" started")
+
+	// Retrieve the Routers table
+	routerRows, queryErr := databaseForRead.Query("SELECT RouterID, Name, Description, UpTime, Contact, Location, Services, GpsLat, GpsLong, GpsAlt FROM Routers")
+	if queryErr != nil {
+		databaseForRead.Close()
+		log.Error("databaseForRead Query error %v", queryErr)
+		os.Exit(1)
+	}
+	log.Debug("Successful Routers table Select")
+
+	// Retrieve the Links table
+	linkRows, queryErr := databaseForRead.Query("SELECT LinkID, FromRouterName, FromRouterIP, ToRouterName, ToRouterIP FROM Links")
+	if queryErr != nil {
+		databaseForRead.Close()
+		log.Error("databaseForRead Query error %v", queryErr)
+		os.Exit(1)
+	}
+	log.Debug("Successful Links table Select")
+
+	// Initialize the 3D space
+
+	// Create application and scene
+	gv := new(gvapp)
+	a := app.App()
+	gv.Application = a
+	gv.scene = core.NewNode()
+	gv.scene.SetName("GoVisnScene")
+
+	// Create perspective camera
+	gv.camPos = math32.Vector3{X: 0, Y: 0, Z: (float32)(GLOBE_RADIUS * 2.0)}
+	gv.cam = camera.New(1) // perspective camera with defaults
+	gv.cam.SetName("camera")
+	gv.cam.SetPosition(0, 0, (float32)(GLOBE_RADIUS*2.0))
+
+	// Setup orbit control for the camera
+	gv.orbit = camera.NewOrbitControl(gv.cam)
+
+	gv.scene.Add(gv.cam)
+
+	// Set up callback to update viewport and camera aspect ratio when the window is resized
+	onResize := func(evname string, ev interface{}) {
+		// Get framebuffer size and update viewport accordingly
+		width, height := a.GetSize()
+		a.Gls().Viewport(0, 0, int32(width), int32(height))
+		// Update the camera's aspect ratio
+		gv.cam.SetAspect(float32(width) / float32(height))
+	}
+	a.Subscribe(window.OnWindowSize, onResize)
+	onResize("", nil)
+
+	// Create and Add lights to the scene
+	ambientLight := light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1.0)
+	ambientLight.SetName("ambient")
+	gv.scene.Add(ambientLight)
+
+	//	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
+	//  pointLight.SetName("pointLight")
+	//	pointLight.SetPosition((float32)(globeRadius+10), (float32)(globeRadius+10), (float32)(globeRadius+20))
+	//	gv.scene.Add(pointLight)
+
+	//	dirLight := light.NewDirectional(math32.NewColor("white"), 0.8)
+	//	dirLight.SetPosition((float32)(globeRadius+100), 0, 0)
+	//	gv.scene.Add(dirLight)
+
+	// Add an axis helper to the scene
+	if *debugFlag {
+		axes := helper.NewAxes(1)
+		axes.SetName("helperAxes")
+		gv.scene.Add(axes)
+	}
+
+	// Set background color to black
+	a.Gls().ClearColor(0.0, 0.0, 0.0, 0.0)
+
+	gv = addTitle(log, gv)
+
+	// Build Menus
+	buildMenus(gv, a)
+
+	var RouterID int
+	var Name string
+	var Description string
+	var UpTime uint32
+	var Contact string
+	var Location string
+	var Services int
+	var GpsLat string
+	var GpsLong string
+	var GpsAlt string
+	var link Link
+	var LinkID int
+	var FromRouterName, FromRouterIP, ToRouterName, ToRouterIP string
+	var x float32
+	var y float32 = 1.0
+	var z float32 = 1.0
+
+	// Setup Mouse clicking of objects within the 3D scene
+	var t Raycast
+	//	t.Initialize(debugFlag, gv.scene, gv.cam, gv, a, databaseForRead)
+	t.Initialize(gv.scene, gv.cam, gv, a, databaseForRead)
+
+	// Create Globe texture
+	gobinDir := os.Getenv("GOBIN")
+	texfile := gobinDir + "/data/images/earth_clouds_big.jpg"
+	globeTex, err := texture.NewTexture2DFromImage(texfile)
+	if err != nil {
+		databaseForRead.Close()
+		log.Fatal("Error loading texture.\n Insure govisn /data/images is copied to GOBIN \n GOBIN env variable must be set.")
+	}
+	globeTex.SetFlipY(false)
+
+	// Create a sphere representing the globe
+	globe3D := geometry.NewSphere(GLOBE_RADIUS, 16, 16)
+	globeMat := material.NewStandard(math32.NewColor("grey"))
+	globeMat.SetTransparent(true)
+	globeMat.SetOpacity(.30)
+
+	globeMesh := graphic.NewMesh(globe3D, globeMat)
+	globeMesh.SetName("globe")
+	globeMesh.SetPosition(0, 0, 0)
+	gv.scene.Add(globeMesh)
+
+	log.Debug("Beginning routerRows.Next loop; adding routers to 3D scene.")
+
+	//
+	// Add the routers to the 3D scene
+	//
+	var routers []Router
+	var router Router
+	routerArrayIndex := 0
+	for routerRows.Next() {
+		routerRows.Scan(&RouterID, &Name, &Description, &UpTime, &Contact, &Location, &Services, &GpsLat, &GpsLong, &GpsAlt)
+
+		// Load router struct from DB fields
+		router.System.RouterID = RouterID
+		router.System.UpTime = UpTime
+		router.System.Name = Name
+		router.System.Contact = Contact
+		router.System.Location = Location
+		router.System.Services = Services
+		router.System.GPS.Latitude = GpsLat
+		router.System.GPS.Longitude = GpsLong
+		router.System.GPS.Altitude = GpsAlt
+
+		routers = append(routers, router)
+
+		rtr3D := geometry.NewCylinder(ROUTER_RADIUS, ROUTER_RADIUS, 16, 2, true, true)
+		mat := material.NewStandard(math32.NewColor("DarkBlue"))
+		cylinderMesh := graphic.NewMesh(rtr3D, mat)
+		cylinderMesh.SetName(router.System.Name)
+		cylinderMesh.SetUserData(strconv.Itoa(router.System.RouterID))
+
+		// Set coordinates and altitude
+		x, y, z = calcCoordinates(GpsLat, GpsLong, GpsAlt)
+
+		log.Debug("x = %s", strconv.FormatFloat(float64(x), 'f', 5, 32)+"y = "+strconv.FormatFloat(float64(y), 'f', 5, 32)+"z = "+strconv.FormatFloat(float64(z), 'f', 5, 32))
+		log.Debug("router = %v", routers[routerArrayIndex])
+		log.Debug("router.System.GPS = %s", routers[routerArrayIndex].System.GPS)
+		log.Debug("RouterID= %s", strconv.Itoa(RouterID)+"Name= "+Name)
+
+		// Add Router object to 3D scene.
+		cylinderMesh.SetPosition(x, y, z)
+		log.Debug("cylinderMesh Name= %s", cylinderMesh.Name())
+		log.Debug("cylinderMesh UserData= %s", cylinderMesh.UserData())
+
+		gv.scene.Add(cylinderMesh)
+
+		//
+		// Add router name to scene
+		//
+		fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
+		font, err := text.NewFont(fontfile)
+		if err != nil {
+			databaseForRead.Close()
+			log.Fatal("Error loading font %s" + err.Error() + "\n Insure govisn /data/fonts is copied to GOBIN \n GOBIN env variable must be set.")
+		}
+
+		font.SetLineSpacing(1.0)
+		font.SetPointSize(28)
+		font.SetDPI(72)
+		font.SetFgColor(&math32.Color4{R: 0, G: 0, B: 1, A: 1})
+		font.SetBgColor(&math32.Color4{R: 1, G: 1, B: 0, A: 0.8})
+		canvas := text.NewCanvas(300, 200, &math32.Color4{R: 0, G: 1, B: 0, A: 0.8})
+		rtext := "RouterID: " + strconv.Itoa(routers[routerArrayIndex].System.RouterID) + "\nHostname: " + routers[routerArrayIndex].System.Name
+		swidth, sheight := font.MeasureText(rtext)
+		canvas = text.NewCanvas(swidth, sheight, &math32.Color4{R: 0, G: 1, B: 1, A: 1})
+		canvas.DrawText(0, 0, rtext, font)
+		tex3 := texture.NewTexture2DFromRGBA(canvas.RGBA)
+		mat3 := material.NewStandard(&math32.Color{R: 1, G: 1, B: 1})
+		mat3.AddTexture(tex3)
+		aspect := float32(swidth) / float32(sheight)
+		mesh3 := graphic.NewSprite(aspect, 1, mat3)
+		mesh3.SetPosition(x, y+1.0, z)
+		gv.scene.Add(mesh3)
+
+		queryErr = routerRows.Err()
+		if queryErr != nil {
+			databaseForRead.Close()
+			log.Fatal(queryErr.Error())
+		}
+
+		routerArrayIndex++
+	}
+	defer routerRows.Close()
+
+	log.Debug("Beginning linkRows.Next loop; adding links to the 3D scene")
+	//
+	// Add the links to the 3D scene
+	//
+	var FromRouterX, FromRouterY, FromRouterZ, ToRouterX, ToRouterY, ToRouterZ string
+	for linkRows.Next() {
+		err := linkRows.Scan(&LinkID, &FromRouterName, &FromRouterIP, &ToRouterName, &ToRouterIP)
+		if err != nil {
+			databaseForRead.Close()
+			log.Fatal(err.Error())
+		}
+
+		// Exclude false routes
+		if FromRouterIP == "127.0.0.0" || FromRouterIP == "127.0.0.1" || FromRouterIP == "224.0.0.0" || FromRouterIP == "0.0.0.0" || ToRouterIP == "127.0.0.0" || ToRouterIP == "127.0.0.1" || ToRouterIP == "224.0.0.0" || ToRouterIP == "0.0.0.0" {
+			continue
+		}
+
+		// Load link struct from DB fields
+		link.LinkID = LinkID
+		link.FromRouterName = FromRouterName
+		link.FromRouterIP = FromRouterIP
+		link.ToRouterName = ToRouterName
+		link.ToRouterIP = ToRouterIP
+
+		// retrieve FromRouter coordinates
+		log.Debug("link = %v", link)
+		log.Debug("FromRouterName= %s", link.FromRouterName)
+		log.Debug("FromRouterIP= %s", link.FromRouterIP)
+
+		//  Query database for FromRouter GPS coordinates
+
+		routerGpsRows, err := databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = $1", FromRouterName)
+		if err != nil {
+			databaseForRead.Close()
+			log.Fatal("databaseForRead Query error %s", err.Error())
+		}
+		log.Debug("Successful Query for FromRouter GPS Coordinates")
+
+		defer routerGpsRows.Close()
+		var linksFromRouterName string
+		var linksFromRouterGpsLat, linksFromRouterGpsLong, linksFromRouterGpsAlt string
+		for routerGpsRows.Next() {
+			routerGpsRows.Scan(&linksFromRouterName, &linksFromRouterGpsLat, &linksFromRouterGpsLong, &linksFromRouterGpsAlt)
+		}
+
+		FromRouterX = linksFromRouterGpsLat
+		FromRouterY = linksFromRouterGpsLong
+		FromRouterZ = linksFromRouterGpsAlt
+		log.Debug("returned from getRouterCoordinatesName func: FromRouterX= %s", FromRouterX+" FromRouterY= "+FromRouterY+" FromRouterZ= "+FromRouterZ)
+
+		//  Query database for FromRouter GPS coordinates
+		log.Debug("ToRouterName= %s", link.ToRouterName)
+		log.Debug("ToRouterIP= %s", link.ToRouterIP)
+
+		routerGpsRows, err = databaseForRead.Query("SELECT Name, GpsLat, GpsLong, GpsAlt FROM Routers WHERE Name = $1", ToRouterName)
+		if err != nil {
+			databaseForRead.Close()
+			log.Fatal("databaseForRead Query error %v", err)
+		}
+		log.Debug("Successful Query for ToRouter GPS Coordinates")
+
+		var linksToRouterName string
+		var linksToRouterGpsLat, linksToRouterGpsLong, linksToRouterGpsAlt string
+		for routerGpsRows.Next() {
+			routerGpsRows.Scan(&linksToRouterName, &linksToRouterGpsLat, &linksToRouterGpsLong, &linksToRouterGpsAlt)
+		}
+		ToRouterX = linksToRouterGpsLat
+		ToRouterY = linksToRouterGpsLong
+		ToRouterZ = linksToRouterGpsAlt
+
+		//		log.Debug("router %s", Name+" GPS coordinates = %s, %s, %s"+GpsLat+GpsLong+GpsAlt)
+		log.Debug("router %s, GPS coordinates = %s, %s, %s", Name, GpsLat, GpsLong, GpsAlt)
+		//		log.Debug("returned from getRouterCoordinatesIP func: ToRouterX= %s", ToRouterX+"ToRouterY= %s"+ToRouterY+"ToRouterZ= %s"+ToRouterZ)
+		log.Debug("returned from getRouterCoordinatesIP func: ToRouterX= %s, ToRouterY= %s, ToRouterZ= %s", ToRouterX, ToRouterY, ToRouterZ)
+
+		// Add link object to the 3D scene
+		fromX, fromY, fromZ := calcCoordinates(FromRouterX, FromRouterY, FromRouterZ)
+		toX, toY, toZ := calcCoordinates(ToRouterX, ToRouterY, ToRouterZ)
+		log.Debug("fromX= %s", strconv.FormatFloat(float64(fromX), 'f', 5, 64)+
+			" fromY= %s"+strconv.FormatFloat(float64(fromY), 'f', 5, 64)+
+			" fromZ= %s"+strconv.FormatFloat(float64(fromZ), 'f', 5, 64))
+		log.Debug("toX= %s", strconv.FormatFloat(float64(toX), 'f', 5, 64)+
+			" toY= %s"+strconv.FormatFloat(float64(toY), 'f', 5, 64)+
+			" toZ="+strconv.FormatFloat(float64(toZ), 'f', 5, 64))
+
+		// Build Link using glLine - BEGIN
+		linkGeom := geometry.NewGeometry()
+		vertices := math32.NewArrayF32(0, 0)
+		vertices.Append(
+			fromX, fromY, fromZ,
+			toX, toY, toZ,
+		)
+		log.Debug("link vertices= %v", vertices)
+		log.Debug("")
+
+		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
+
+		mat := material.NewStandard(math32.NewColor("grey"))
+
+		// Check Runtime environment.
+		// OpenGL Implementation on MacOS will only accept Line width of 1.0
+		if runtime.GOOS == "darwin" {
+			mat.SetLineWidth(1.0)
+			log.Info("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept lineWidth of 1.0 ***")
+		}
+		link3D := graphic.NewLines(linkGeom, mat)
+		link3D.SetName(strconv.Itoa(link.LinkID))
+		// Build Link using glLine - END
+
+		// Build Link using Polygon
+		//posA := math32.NewVector3(fromX, fromY, fromZ)
+		//		posB := math32.NewVector3(toX, toY, toZ)
+		//		vertices, normals, indices := calcLinkVBOs(debugFlag, gv.camPos, *posA, *posB, float32(1.00))
+		//		if debugFlag {
+		//			fmt.Println("calcLinkVBOs returned: ", vertices, normals, indices)
+		//		}
+		//		linkGeom.SetIndices(indices)
+		//		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
+		//		linkGeom.AddVBO(gls.NewVBO(normals).AddAttrib(gls.VertexNormal))
+
+		// Creates basic material
+		//		mat := material.NewStandard(math32.NewColor("White"))
+		//		mat.SetSide(material.SideDouble)
+		//		link3D := graphic.NewMesh(linkGeom, mat)
+		//		link3D.SetVisible(true)
+		// Build Link using Polygon - END
+
+		// Build Link using Cylinder - BEGIN
+		//vertices := math32.NewArrayF32(0, 0)
+		//vertices.Append(
+		//			fromX, fromY, fromZ,
+		//			toX, toY, toZ,
+		//		)
+		//		if debugFlag {
+		//			fmt.Println("link vertices=", vertices)
+		//			fmt.Println()
+		//		}
+
+		//		linkGeom.AddVBO(gls.NewVBO(vertices).AddAttrib(gls.VertexPosition))
+
+		//posA := math32.NewVector3(fromX, fromY, fromZ)
+		//posB := math32.NewVector3(toX, toY, toZ)
+		//cylHeight := calcDistance(debugFlag, posA, posB)
+		//linkGeom := geometry.NewCylinder(1.0, cylHeight, 16, 2, true, true)
+		//mat := material.NewStandard(math32.NewColor("White"))
+		// Check Runtime environment.
+		// OpenGL Implementation on MacOS will only accept Line width of 1.0
+		//		if runtime.GOOS == "darwin" {
+		//			mat.SetLineWidth(1.0)
+		//			fmt.Println("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept 1.0 ***")
+		//		} else {
+		//			mat.SetLineWidth(3.0)
+		//		}
+		//link3D := graphic.NewMesh(linkGeom, mat)
+		//link3D.SetName(string(link.LinkID))
+		// Build Link using Cylinder - END
+
+		// Creates lines with the specified geometry and material
+
+		gv.scene.Add(link3D)
+
+		err = linkRows.Err()
+		if err != nil {
+			databaseForRead.Close()
+			log.Fatal(err.Error())
+		}
+	}
+
+	// Creating a 60 second timer for auto link update feature
+	linkUpdateTimer := time.NewTimer(60 * time.Second)
+	updateLinksOK := false // default
+	//updateLinksOK := true // TESTING ONLY
+
+	// Run the application
+	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
+		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
+		renderer.Render(gv.scene, gv.cam)
+
+		// Notifying channel under go function
+		go func() {
+			<-linkUpdateTimer.C
+
+			// set NetPollingEnabled switch when timer is fired
+			//NetPollingEnabled = true
+			if NetPollingEnabled {
+				updateLinksOK = true
+			}
+
+			// Reset the linkUpdateTimer to 60 seconds
+			linkUpdateTimer.Reset(60 * time.Second)
+			log.Info("linkUpdateTimer Reset")
+		}()
+
+		//		if NetPollingEnabled {
+		if updateLinksOK {
+			//gv = updateLinks(log, gv, databaseForRead, snmpTarget, community, params)
+			gv = updateLinks(log, gv, databaseForRead, snmpTarget, params)
+			//			NetPollingEnabled = false
+			updateLinksOK = false
+		}
+	})
+
+	log.Debug("func visualizeNetwork %s ending.", VISUALIZE_NETWORK_VERSION)
+
+	return databaseForRead
+
 }
