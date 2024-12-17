@@ -80,6 +80,9 @@ type Raycast struct {
 	rayCast *collision.Raycaster
 }
 
+// Create channel for inter-goroutine communication
+var channel = make(chan *gvapp)
+
 func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, float32, float32) {
 	var x, y, z float32
 
@@ -654,6 +657,7 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 
 	log.Info("Links Updated.")
 
+	channel <- gv
 	return (gv)
 }
 
@@ -1117,24 +1121,29 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		renderer.Render(gv.scene, gv.cam)
 
 		// Notifying channel under go function
-		go func() {
-			<-linkUpdateTimer.C
+		/*		go func() {
+				<-linkUpdateTimer.C
 
-			// set NetPollingEnabled switch when timer is fired
-			//NetPollingEnabled = true
-			if NetPollingEnabled {
-				updateLinksOK = true
-			}
+				// set NetPollingEnabled switch when timer is fired
+				//NetPollingEnabled = true
+		*/
+		if NetPollingEnabled {
+			updateLinksOK = true
+		}
 
-			// Reset the linkUpdateTimer to 60 seconds
-			linkUpdateTimer.Reset(60 * time.Second)
-			log.Info("linkUpdateTimer Reset")
-		}()
+		// Reset the linkUpdateTimer to 60 seconds
+		linkUpdateTimer.Reset(60 * time.Second)
+		log.Info("linkUpdateTimer Reset")
+		/*		}()
 
-		//		if NetPollingEnabled {
+				//		if NetPollingEnabled {
+		*/
 		if updateLinksOK {
 			//gv = updateLinks(log, gv, databaseForRead, snmpTarget, community, params)
-			gv = updateLinks(log, gv, databaseForRead, snmpTarget, params)
+			//			gv = go updateLinks(log, gv, databaseForRead, snmpTarget, params)
+			channel <- gv
+			go updateLinks(log, gv, databaseForRead, snmpTarget, params)
+			gv = <-channel
 			//			NetPollingEnabled = false
 			updateLinksOK = false
 		}
