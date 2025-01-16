@@ -1112,7 +1112,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 	// Creating a 60 second timer for auto link update feature
 	linkUpdateTimer := time.NewTimer(60 * time.Second)
-	updateLinksOK := false // default
+	//updateLinksOK := false // default
 	//updateLinksOK := true // TESTING ONLY
 
 	// Run the application
@@ -1127,9 +1127,9 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 				// set NetPollingEnabled switch when timer is fired
 				//NetPollingEnabled = true
 		*/
-		if NetPollingEnabled {
-			updateLinksOK = true
-		}
+		//if NetPollingEnabled {
+		//	updateLinksOK = true
+		//}
 
 		// Reset the linkUpdateTimer to 60 seconds
 		linkUpdateTimer.Reset(60 * time.Second)
@@ -1138,14 +1138,16 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 				//		if NetPollingEnabled {
 		*/
-		if updateLinksOK {
+		//		if updateLinksOK {
+		if NetPollingEnabled {
 			//gv = updateLinks(log, gv, databaseForRead, snmpTarget, community, params)
 			//			gv = go updateLinks(log, gv, databaseForRead, snmpTarget, params)
-			channel <- gv
+			//channel <- gv
 			go updateLinks(log, gv, databaseForRead, snmpTarget, params)
 			gv = <-channel
 			//			NetPollingEnabled = false
-			updateLinksOK = false
+			//updateLinksOK = false
+			NetPollingEnabled = false
 		}
 	})
 
