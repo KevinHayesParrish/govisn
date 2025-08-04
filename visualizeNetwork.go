@@ -147,7 +147,7 @@ func buildMenus(gv *gvapp, a *app.Application) *app.Application {
 			}
 		case "Print":
 			{
-				Dump3dScene(gv)
+				Dump3dScene(gv.scene, 0)
 			}
 		case "Exit":
 			{
@@ -342,7 +342,7 @@ func (t *Raycast) onMouse(scene *core.Node, cam *camera.Camera, gv *gvapp, app *
 /*
  * func Dump3dScene writes the Collada file representing the 3D Scene
  */
-func Dump3dScene(gv *gvapp) {
+func Dump3dScene(node core.INode, depth int) {
 	//	fmt.Println("Dumping 3D Scene")
 	log.Debug("Dumping 3D Scene")
 	//var decoder collada.Decoder
@@ -350,6 +350,44 @@ func Dump3dScene(gv *gvapp) {
 	//decoder.Dump(out, 4)
 	//var scene = gv.scene
 	//scene.Dump(out, 4)
+
+	// Indent based on depth
+	indent := ""
+	for i := 0; i < depth; i++ {
+		indent += "  "
+	}
+
+	// Print node details
+	fmt.Printf("%sNode: %s (Type: %T)\n", indent, node.Name(), node)
+
+	// Print node-specific details
+	switch n := node.(type) {
+	case *core.Node:
+		fmt.Printf("%s  Position: %v\n", indent, n.Position())
+		fmt.Printf("%s  Rotation: %v\n", indent, n.Rotation())
+		fmt.Printf("%s  Scale: %v\n", indent, n.Scale())
+
+	case *graphic.Mesh:
+		fmt.Printf("%s  Geometry: %v\n", indent, n.GetGeometry())
+		fmt.Printf("%s  Material: %v\n", indent, n.GetMaterial(int(n.Position().X)))
+
+	case *camera.Camera:
+		fmt.Printf("%s  Projection Type: %T\n", indent, n)
+
+	case *light.Point:
+		fmt.Printf("%s  Point Light Type: %T\n", indent, n)
+
+	case *light.Ambient:
+		fmt.Printf("%s  Ambient Light Type: %T\n", indent, n)
+
+	case *light.Directional:
+		fmt.Printf("%s  Directional Light Type: %T\n", indent, n)
+	}
+
+	// Recursively dump child nodes
+	for _, child := range node.Children() {
+		Dump3dScene(child, depth+1)
+	}
 }
 
 /*
