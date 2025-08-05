@@ -363,25 +363,41 @@ func Dump3dScene(node core.INode, depth int) {
 	// Print node-specific details
 	switch n := node.(type) {
 	case *core.Node:
+		fmt.Printf("%s  Name: %s\n", indent, n.Name())
 		fmt.Printf("%s  Position: %v\n", indent, n.Position())
 		fmt.Printf("%s  Rotation: %v\n", indent, n.Rotation())
 		fmt.Printf("%s  Scale: %v\n", indent, n.Scale())
+		fmt.Printf("%s  UserData: %v\n", indent, n.UserData())
 
 	case *graphic.Mesh:
 		fmt.Printf("%s  Geometry: %v\n", indent, n.GetGeometry())
 		fmt.Printf("%s  Material: %v\n", indent, n.GetMaterial(int(n.Position().X)))
 
 	case *camera.Camera:
-		fmt.Printf("%s  Projection Type: %T\n", indent, n)
+		//fmt.Printf("%s  Projection Type: %T\n", indent, n.Projection())
+		fmt.Printf("%s  Aspect Ratio: %f\n", indent, n.Aspect())
+		fmt.Printf("%s  Near Plane: %f\n", indent, n.Near())
+		fmt.Printf("%s  Far Plane: %f\n", indent, n.Far())
+		fmt.Printf("%s  Axis: %v\n", indent, n.Axis())
+		fmt.Printf("%s  Field of View: %f\n", indent, n.Fov())
+		fmt.Printf("%s  Size: %f\n", indent, n.Size())
 
 	case *light.Point:
-		fmt.Printf("%s  Point Light Type: %T\n", indent, n)
+		//fmt.Printf("%s  Point Light Type: %T\n", indent, n)
+		fmt.Printf("%s  Position: %v\n", indent, n.Position())
+		fmt.Printf("%s  Color: %v\n", indent, n.Color())
+		fmt.Printf("%s  Intensity: %f\n", indent, n.Intensity())
 
 	case *light.Ambient:
-		fmt.Printf("%s  Ambient Light Type: %T\n", indent, n)
+		//fmt.Printf("%s  Ambient Light Type: %T\n", indent, n)
+		fmt.Printf("%s  Color: %v\n", indent, n.Color())
+		fmt.Printf("%s  Intensity: %f\n", indent, n.Intensity())
 
 	case *light.Directional:
-		fmt.Printf("%s  Directional Light Type: %T\n", indent, n)
+		//fmt.Printf("%s  Directional Light Type: %T\n", indent, n)
+		fmt.Printf("%s  Direction: %v\n", indent, n.Direction())
+		fmt.Printf("%s  Color: %v\n", indent, n.Color())
+		fmt.Printf("%s  Intensity: %f\n", indent, n.Intensity())
 	}
 
 	// Recursively dump child nodes
