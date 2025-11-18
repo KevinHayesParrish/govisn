@@ -147,7 +147,13 @@ func buildMenus(gv *gvapp, a *app.Application) *app.Application {
 			}
 		case "Print":
 			{
-				Dump3dScene(gv.scene, 0)
+				//Dump3dScene(gv.scene, 0)
+				err := dumpSceneToFile(gv.scene, "scene_dump.txt")
+				if err != nil {
+					log.Error("Failed to dump scene: %v", err)
+				} else {
+					log.Info("Scene dumped to scene_dump.txt")
+				}
 			}
 		case "Exit":
 			{

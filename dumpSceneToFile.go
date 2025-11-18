@@ -10,8 +10,6 @@ import (
 	"github.com/g3n/engine/light"
 
 	"github.com/g3n/engine/core"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func dumpSceneToFile(scene core.INode, filename string) error {
@@ -54,7 +52,7 @@ func dumpNodeToFile(file *os.File, node core.INode, depth int) {
 
 	case *graphic.Mesh:
 		fmt.Fprintf(file, "%s  Geometry: %v\n", indent, n.GetGeometry())
-		fmt.Fprintf(file, "%s  Material Count: %d\n", indent, n.MaterialCount())
+		//fmt.Fprintf(file, "%s  Material Count: %d\n", indent, n.MaterialCount())
 
 	case *camera.Camera:
 		fmt.Fprintf(file, "%s  Aspect Ratio: %.3f\n", indent, n.Aspect())
