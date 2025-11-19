@@ -1,10 +1,12 @@
 # **GoVisn**  
+
 Copyright 2020 [Kevin Hayes Parrish](mailto:govisn@mycci.net). All rights reserved.  
 Please review the LICENSE file before using the application.
 
 A 3D network visualization tool written in golang.
 
 ## Prerequisites
+
 1. All routers to be discovered must support SNMP to properly discover the network.
 2. All routers to be discovered must have DNS TXT records providing GPS Lat, Long and Altitude. This allows for proper placement of the router object on the surface of a sphere, which represents the Earth. Example:  
       1. router.domain.home. TXT 86400 "Lat=38.889847"  
@@ -12,11 +14,13 @@ A 3D network visualization tool written in golang.
       3. router.domain.home. TXT 86400 "Alt=100"  
 
 ## History of the Project
+
 This project is a continuation of the work that started with Java application **vrmlNet**, which was developed in 1998. vrmlNet created VRML code that could be rendered by a VRML Browser Plug-in.
 
 In the early 2000's VRML technology had sunset. A second generation of the project, **V15N** (pronounced *vi-zn*), was developed beginning in the Fall of 2003. This was a complete re-write of vrmlNet . Unlike vrmlNet, which used the Virtual Reality Modeling Language (VRML), V15N used the Java 3D API for rendering a 3D visualization of a network. The application took as input a seed IP Address and used SNMP to walk the routing tables of routers within a network. It then used Java3D to visualize that network in a virtual 3D space.
 
 **GoVisn** is the third generation of this 3D network visualization tool. By the Fall of 2018, 3D visualization technology had left Java3D behind. I was looking to continue the 3D network visualization concept, plus learn a new coding language. It was time to again re-write the application. Rather than develop a multi-tiered web-based application, I chose to keep with the original pinciples of the project:  
+
 1. Free Open Source Software.  
 1. Build something a network engineer could deploy, without requiring complicated systems engineering or administation tasks.  
   
@@ -29,19 +33,23 @@ GoVisn will export the discovered network from the sqlite3 database to a KML fil
 ## Attributions
 
 GoVisn is written in the go language and uses [go-sqlite3](https://github.com/mattn/go-sqlite3), [gosnmp](https://github.com/soniah/gosnmp) and [G3N](https://github.com/g3n/engine) libraries for the database, SNMP and 3D rendering capabilities. Many thanks to the authors of these libraries for the use of their work.  
+
 1. Yasuhiro Matsumoto (a.k.a mattn) and G.J.R. Timmer for [go-sqlite3](https://github.com/mattn/go-sqlite3)  
-2. Sonia Hamilton, sonia@snowfrog.net for [gosnmp](https://github.com/soniah/gosnmp)  
+2. Sonia Hamilton, <sonia@snowfrog.net> for [gosnmp](https://github.com/soniah/gosnmp)  
 3. Daniel Salvadori and leonsal for [G3N](https://github.com/g3n/engine)  
 4. Tom Payne for [go-kml](https://github.com/twpayne/go-kml)  
 
 I stand on the shoulders of giants.
   
 ## Caveats  
+
 1. The Apple MacOS implementation of G3N only allows a linewidth of 1. Therefore, on MacOS implementations of GoVisn, the network links will always be a linewidth of 1, regardless of the link utilization percentage.  
 2. When executing GoVisn on a monitor with 16x10 aspect ratio (a laptop, for instance), G3N may not properly support the menu bars and items. Mouse clicking may also not be accurate. There may be a bug in the G3N implementation, or I may not be properly utilizing G3N.
 
-## Usage of GoVisn:
+## Usage of GoVisn
+
 ### Options  
+
 * **-a**  
       Test opening an ArangoDB database  
       **(DEPRECATED)**  
@@ -76,7 +84,7 @@ I stand on the shoulders of giants.
       The export filename must be supplied as part of the option.
 
 * **-m** *string*
-      Scope of discovery. Maximum number of Hops away from seed router. 
+      Scope of discovery. Maximum number of Hops away from seed router.
       *(default: "10")*
 
 * **-s** *string*  
@@ -92,6 +100,7 @@ will be queried and their information added to the database.
       Visualize the Network with a 3D model, using G3N.
 
 ### Execution Examples  
+
 1. Scan a subnet, create a database, then visualize the Layer 3 network.  
       govisn -s 192.168.1.0/24 -f test.db -vi -co public
 
@@ -105,5 +114,4 @@ will be queried and their information added to the database.
       govisn -vi -f test.db -co public -de
 
 5. Export the database to a KML file.  
-      govisn -k test.kml -f test.db   
-      
+      govisn -k test.kml -f test.db
