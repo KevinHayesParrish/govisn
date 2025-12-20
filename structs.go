@@ -235,3 +235,12 @@ type gvapp struct {
 	cam              *camera.Camera
 	orbit            *camera.OrbitControl
 }
+
+// LinkUpdate contains link visualization data to be applied in the main thread
+type LinkUpdate struct {
+	LinkID   int
+	Color    math32.Color
+	Width    float32
+	FromName string
+	ToName   string
+}

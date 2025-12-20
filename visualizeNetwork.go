@@ -82,6 +82,7 @@ type Raycast struct {
 
 // Create channel for inter-goroutine communication
 var channel = make(chan *gvapp)
+var linkUpdatesChan = make(chan map[int]LinkUpdate, 1)
 
 func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, float32, float32) {
 	var x, y, z float32
@@ -553,7 +554,7 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
  * updateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
  *	lineWidth and color to visually reflect the amount of traffic flowing over each link.
  */
-func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP) *gvapp {
+func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP, resultsChan chan map[int]LinkUpdate) {
 	log.Info("Updating Links")
 	// TODO
 	//	1) Add RouterID to Links DB table - DONE
@@ -564,6 +565,9 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 
 	var LinkID int
 	var FromRouterID, FromRouterName, FromRouterIfIndex, ToRouterName string
+
+	// Collect results to send through channel
+	results := make(map[int]LinkUpdate)
 
 	//
 	// Retrieve the links from the database
@@ -657,68 +661,27 @@ func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTar
 				log.Debug("linkColor = %v", linkColor)
 				log.Debug("linkWidth = %f", linkWidth)
 
-				//
-				// Update Link lineWidth and color, depending on link utilization
-				//
-
-				// Find 3D line object
-				sceneChildren := gv.scene.Children()
-				log.Debug("scene.Name %s", gv.scene.Name())
-				log.Debug("sceneChildren: %v", sceneChildren)
-
-				// loop: parse scene Children getting each node
-				link := getRouterFromScene(log, sceneChildren, LinkID)
-				log.Debug("link found: %v", link)
-				if link == nil {
-					log.Warn("updateLinks: link not found in 3D scene.")
-					continue
+				// Store result to be applied in main thread
+				results[LinkID] = LinkUpdate{
+					LinkID:   LinkID,
+					Color:    linkColor,
+					Width:    linkWidth,
+					FromName: FromRouterName,
+					ToName:   ToRouterName,
 				}
-
-				//
-				// Set line object color
-				//
-				// Convert INode to IGraphic
-				ig, ok := link.(graphic.IGraphic)
-				if !ok {
-					databaseForRead.Close()
-					log.Fatal("Error when converting link INode to IGraphic")
-				}
-				// Get graphic object
-				gr := ig.GetGraphic()
-				imat := gr.GetMaterial(0)
-
-				type matI interface {
-					EmissiveColor() math32.Color
-					SetEmissiveColor(*math32.Color)
-					//AmientColor() math32.Color
-					//SetAmbientColor(*math32.Color)
-					SetLineWidth(float32)
-				}
-				v := imat.(matI)
-				//v.SetEmissiveColor(&math32.Color{R: 0, G: 1, B: 0})
-				v.SetEmissiveColor(&linkColor)
-				//v.SetAmbientColor(&linkColor)
-
-				// Set line object width
-				// Check Runtime environment.
-				// OpenGL Implementation on MacOS will only accept Line width of 1.0
-				if runtime.GOOS == "darwin" {
-					v.SetLineWidth(1.0)
-					log.Info("*** Link SetLineWidth() request ignored. OpenGL Implementation on MacOS will only accept lineWidth of 1.0 ***")
-				} else {
-					v.SetLineWidth(linkWidth)
-				}
-
-				gr.SetChanged(true)
-				gr.Render(gv.Application.Gls())
 			}
 		}
 	}
 
 	log.Info("Links Updated.")
 
-	channel <- gv
-	return (gv)
+	// Send results through channel (non-blocking with buffered channel)
+	select {
+	case resultsChan <- results:
+		log.Debug("Link update results sent through channel")
+	default:
+		log.Warn("Link update results channel full, skipping update")
+	}
 }
 
 func getRouterFromScene(log *logger.Logger, sceneChildren []core.INode, LinkID int) core.INode {
@@ -1180,6 +1143,54 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(gv.scene, gv.cam)
 
+		// Check for pending link updates from background goroutine
+		select {
+		case results := <-linkUpdatesChan:
+			log.Debug("Received link update results, applying %d updates", len(results))
+			// Apply link updates in main thread (thread-safe)
+			sceneChildren := gv.scene.Children()
+			for linkID, update := range results {
+				link := getRouterFromScene(log, sceneChildren, linkID)
+				if link == nil {
+					log.Warn("Link %d not found in scene for update", linkID)
+					continue
+				}
+
+				// Convert INode to IGraphic
+				ig, ok := link.(graphic.IGraphic)
+				if !ok {
+					log.Error("Error converting link %d INode to IGraphic", linkID)
+					continue
+				}
+
+				// Get graphic object and apply updates
+				gr := ig.GetGraphic()
+				imat := gr.GetMaterial(0)
+
+				type matI interface {
+					EmissiveColor() math32.Color
+					SetEmissiveColor(*math32.Color)
+					SetLineWidth(float32)
+				}
+				v := imat.(matI)
+				v.SetEmissiveColor(&update.Color)
+
+				// Set line width (respecting macOS OpenGL limitation)
+				if runtime.GOOS == "darwin" {
+					v.SetLineWidth(1.0)
+				} else {
+					v.SetLineWidth(update.Width)
+				}
+
+				gr.SetChanged(true)
+				gr.Render(gv.Application.Gls())
+				log.Debug("Updated link %d (%s -> %s) color=%v width=%.1f",
+					update.LinkID, update.FromName, update.ToName, update.Color, update.Width)
+			}
+		default:
+			// No pending updates
+		}
+
 		// Notifying channel under go function
 		/*		go func() {
 				<-linkUpdateTimer.C
@@ -1200,13 +1211,8 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		*/
 		//		if updateLinksOK {
 		if NetPollingEnabled {
-			//gv = updateLinks(log, gv, databaseForRead, snmpTarget, community, params)
-			//			gv = go updateLinks(log, gv, databaseForRead, snmpTarget, params)
-			//channel <- gv
-			go updateLinks(log, gv, databaseForRead, snmpTarget, params)
-			gv = <-channel
-			//			NetPollingEnabled = false
-			//updateLinksOK = false
+			// Spawn link update in background (doesn't block main thread)
+			go updateLinks(log, gv, databaseForRead, snmpTarget, params, linkUpdatesChan)
 			NetPollingEnabled = false
 		}
 	})
