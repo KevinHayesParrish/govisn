@@ -1204,7 +1204,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 		// Reset the linkUpdateTimer to 60 seconds
 		linkUpdateTimer.Reset(60 * time.Second)
-		log.Debug("linkUpdateTimer Reset")
+		//log.Debug("linkUpdateTimer Reset")
 		/*		}()
 
 				//		if NetPollingEnabled {
