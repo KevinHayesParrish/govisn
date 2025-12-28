@@ -273,51 +273,8 @@ func (t *Raycast) onMouse(scene *core.Node, cam *camera.Camera, gv *gvapp, app *
 	router := RetrieveRouter(router3DName, databaseForRead, app)
 	log.Debug("router= %v", router)
 
-	// Add Router info to 3D scene
-	fontfile := os.Getenv("GOBIN") + "/data/fonts/FreeSans.ttf"
-	font, err := text.NewFont(fontfile)
-	if err != nil {
-		log.Fatal("Error loading font.\n Insure govisn /data/fonts is copied to GOBIN. \n GOBIN env variable must be set.")
-	}
-
-	font.SetLineSpacing(1.0)
-	font.SetPointSize(28)
-	font.SetDPI(72)
-	font.SetFgColor(&math32.Color4{R: 0, G: 0, B: 1, A: 1})
-	font.SetBgColor(&math32.Color4{R: 1, G: 1, B: 0, A: 0.8})
-	canvas := text.NewCanvas(300, 200, &math32.Color4{R: 0, G: 1, B: 0, A: 0.8})
-
-	x, y, z := calcCoordinates(router.System.GPS.Latitude, router.System.GPS.Longitude, router.System.GPS.Altitude)
-
-	for i := 0; i < len(router.Addresses.NetworkAddresses.IPAddress); i++ {
-
-		rtext := "\nIP Address: " + router.Addresses.NetworkAddresses.IPAddress[i]
-		swidth, sheight := font.MeasureText(rtext)
-		canvas = text.NewCanvas(swidth, sheight, &math32.Color4{R: 0, G: 1, B: 1, A: 1})
-		canvas.DrawText(0, 0, rtext, font)
-		tex3 := texture.NewTexture2DFromRGBA(canvas.RGBA)
-		mat3 := material.NewStandard(&math32.Color{R: 1, G: 1, B: 1})
-		mat3.AddTexture(tex3)
-		aspect := float32(swidth) / float32(sheight)
-		mesh3 := graphic.NewSprite(aspect, 1, mat3)
-
-		mesh3.SetPosition(x-3.0, y-1.0-float32(i), z)
-		gv.scene.Add(mesh3)
-	}
-	for j := 0; j < len(router.Addresses.NetworkAddresses.IPAddress); j++ {
-		rtext := "\nMAC Address: " + router.Addresses.MediaAddresses.MediaAddress[j]
-		swidth, sheight := font.MeasureText(rtext)
-		canvas = text.NewCanvas(swidth, sheight, &math32.Color4{R: 0, G: 1, B: 1, A: 1})
-		canvas.DrawText(0, 0, rtext, font)
-		tex3 := texture.NewTexture2DFromRGBA(canvas.RGBA)
-		mat3 := material.NewStandard(&math32.Color{R: 1, G: 1, B: 1})
-		mat3.AddTexture(tex3)
-		aspect := float32(swidth) / float32(sheight)
-		mesh3 := graphic.NewSprite(aspect, 1, mat3)
-
-		mesh3.SetPosition(x+3.0, y-1.0-float32(j), z)
-		gv.scene.Add(mesh3)
-	}
+	// Show router details in a new window
+	showRouterWindow(log, gv, router)
 
 	// TESTING ONLY - BEGIN
 	// Convert INode to IGraphic
