@@ -81,7 +81,7 @@ type Raycast struct {
 }
 
 // Create channel for inter-goroutine communication
-var channel = make(chan *gvapp)
+// var channel = make(chan *gvapp)
 var linkUpdatesChan = make(chan map[int]LinkUpdate, 1)
 
 func calcCoordinates(GpsLat string, GpsLong string, GpsAlt string) (float32, float32, float32) {
