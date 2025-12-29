@@ -11,93 +11,102 @@ import (
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/math32"
 	"github.com/g3n/engine/util/logger"
+	"github.com/g3n/engine/window"
 )
 
 func showRouterWindow(log *logger.Logger, gv *gvapp, router Router) {
 	log.Debug("Showing router window for: %s", router.System.Name)
 
-	// Create a modal panel window
-	routerWindow := gui.NewWindow(400, 600)
-	routerWindow.SetTitle("Router Details: " + router.System.Name)
-	routerWindow.SetPosition(100, 50)
+	// Create a panel as a window (use Panel instead of gui.NewWindow to avoid type conflicts)
+	routerPanel := gui.NewPanel(600, 700)
+	routerPanel.SetPosition(100, 50)
+	routerPanel.SetBordersColor(math32.NewColor("darkblue"))
+	routerPanel.SetBorders(2, 2, 2, 2)
+	routerPanel.SetPaddings(10, 10, 10, 10)
+
+	routerPanel.SetColor(math32.NewColor("grey")) // Set background color to grey
+
+	// Create a title label at the top
+	titleLabel := gui.NewLabel("Router Details: " + router.System.Name)
+	titleLabel.SetFontSize(16)
+	titleLabel.SetColor(math32.NewColor("white"))
 
 	// Create a vertical layout container for the content
 	vbox := gui.NewVBoxLayout()
-	vbox.SetSpacing(5)
-	contentPanel := gui.NewPanel(580, 650)
-	contentPanel.SetLayout(vbox)
-	contentPanel.SetBordersColor(math32.NewColor("grey"))
-	contentPanel.SetBorders(1, 1, 1, 1)
-	contentPanel.SetPaddings(10, 10, 10, 10)
+	vbox.SetSpacing(3)
+	routerPanel.SetLayout(vbox)
+
+	// Add title as first element
+	routerPanel.Add(titleLabel)
 
 	// System Information Section
 	systemTitle := gui.NewLabel("=== SYSTEM INFORMATION ===")
 	systemTitle.SetFontSize(14)
 	systemTitle.SetColor(math32.NewColor("lightblue"))
-	contentPanel.Add(systemTitle)
+	routerPanel.Add(systemTitle)
 
 	// Router ID
 	routerIDLabel := gui.NewLabel("Router ID: " + strconv.Itoa(router.System.RouterID))
-	contentPanel.Add(routerIDLabel)
+	routerPanel.Add(routerIDLabel)
 
 	// Router Name/Hostname
 	nameLabel := gui.NewLabel("Hostname: " + router.System.Name)
-	contentPanel.Add(nameLabel)
+	routerPanel.Add(nameLabel)
 
 	// Description
 	if router.System.Description != "" {
 		descLabel := gui.NewLabel("Description: " + router.System.Description)
-		contentPanel.Add(descLabel)
+		routerPanel.Add(descLabel)
 	}
 
 	// Location
 	if router.System.Location != "" {
 		locLabel := gui.NewLabel("Location: " + router.System.Location)
-		contentPanel.Add(locLabel)
+		routerPanel.Add(locLabel)
 	}
 
 	// Contact
 	if router.System.Contact != "" {
 		contactLabel := gui.NewLabel("Contact: " + router.System.Contact)
-		contentPanel.Add(contactLabel)
+		routerPanel.Add(contactLabel)
 	}
 
 	// Uptime
 	uptimeLabel := gui.NewLabel("Uptime: " + formatUptime(router.System.UpTime))
-	contentPanel.Add(uptimeLabel)
+	routerPanel.Add(uptimeLabel)
 
 	// Services
 	servicesLabel := gui.NewLabel("Services: " + strconv.Itoa(router.System.Services))
-	contentPanel.Add(servicesLabel)
+	routerPanel.Add(servicesLabel)
 
 	// GPS/Location Information Section
 	gpsTitle := gui.NewLabel("=== GPS COORDINATES ===")
 	gpsTitle.SetFontSize(14)
 	gpsTitle.SetColor(math32.NewColor("lightgreen"))
-	contentPanel.Add(gpsTitle)
+	routerPanel.Add(gpsTitle)
 
 	// Latitude
 	latLabel := gui.NewLabel("Latitude: " + router.System.GPS.Latitude)
-	contentPanel.Add(latLabel)
+	routerPanel.Add(latLabel)
 
 	// Longitude
 	longLabel := gui.NewLabel("Longitude: " + router.System.GPS.Longitude)
-	contentPanel.Add(longLabel)
+	routerPanel.Add(longLabel)
 
 	// Altitude
 	altLabel := gui.NewLabel("Altitude: " + router.System.GPS.Altitude + " meters")
-	contentPanel.Add(altLabel)
+	routerPanel.Add(altLabel)
 
 	// IP Addresses Section
 	if len(router.Addresses.NetworkAddresses.IPAddress) > 0 {
 		ipTitle := gui.NewLabel("=== IP ADDRESSES ===")
 		ipTitle.SetFontSize(14)
 		ipTitle.SetColor(math32.NewColor("lightyellow"))
-		contentPanel.Add(ipTitle)
+		routerPanel.Add(ipTitle)
 
 		for i, ip := range router.Addresses.NetworkAddresses.IPAddress {
 			ipLabel := gui.NewLabel(fmt.Sprintf("[%d] %s", i+1, ip))
-			contentPanel.Add(ipLabel)
+			routerPanel.Add(ipLabel)
 		}
 	}
 
@@ -106,11 +115,11 @@ func showRouterWindow(log *logger.Logger, gv *gvapp, router Router) {
 		macTitle := gui.NewLabel("=== MAC ADDRESSES ===")
 		macTitle.SetFontSize(14)
 		macTitle.SetColor(math32.NewColor("lightcoral"))
-		contentPanel.Add(macTitle)
+		routerPanel.Add(macTitle)
 
 		for i, mac := range router.Addresses.MediaAddresses.MediaAddress {
 			macLabel := gui.NewLabel(fmt.Sprintf("[%d] %s", i+1, mac))
-			contentPanel.Add(macLabel)
+			routerPanel.Add(macLabel)
 		}
 	}
 
@@ -119,44 +128,59 @@ func showRouterWindow(log *logger.Logger, gv *gvapp, router Router) {
 		neighborTitle := gui.NewLabel("=== NEIGHBORS ===")
 		neighborTitle.SetFontSize(14)
 		neighborTitle.SetColor(math32.NewColor("lightgrey"))
-		contentPanel.Add(neighborTitle)
+		routerPanel.Add(neighborTitle)
 
 		for i, neighbor := range router.Neighbors.Neighbor {
 			destLabel := gui.NewLabel(fmt.Sprintf("[%d] Dest: %s -> Via: %s",
 				i+1, neighbor.DestinationAddress, neighbor.NextHop))
-			contentPanel.Add(destLabel)
+			routerPanel.Add(destLabel)
 		}
 	}
 
 	// Add spacing before close button
 	spacer := gui.NewLabel("")
-	contentPanel.Add(spacer)
+	routerPanel.Add(spacer)
 
-	contentPanel.SetColor(math32.NewColor("grey"))
+	// Close button
+	closeBtn := gui.NewButton("Close")
+	closeBtn.SetWidth(100)
+	closeBtn.Subscribe(gui.OnClick, func(name string, ev interface{}) {
+		routerPanel.SetVisible(false)
+		gv.scene.Remove(routerPanel)
+		log.Debug("Router panel closed for: %s", router.System.Name)
+	})
+	routerPanel.Add(closeBtn)
 
-	routerWindow.Add(contentPanel)
-	/*
-		// Create a footer panel for the close button
-		footerPanel := gui.NewPanel(600, 40)
-		footerLayout := gui.NewHBoxLayout()
-		footerLayout.SetSpacing(5)
-		footerPanel.SetLayout(footerLayout)
+	// Make the panel draggable with mouse events
+	var dragStartX, dragStartY float32
+	var panelDragging bool
 
-		// Close button
-		closeBtn := gui.NewButton("Close")
-		closeBtn.SetWidth(100)
-		closeBtn.Subscribe(gui.OnClick, func(name string, ev interface{}) {
-			routerWindow.SetVisible(false)
-			gv.scene.Remove(routerWindow)
-			log.Debug("Router window closed for: %s", router.System.Name)
-		})
-		//footerPanel.Add(closeBtn)
+	routerPanel.Subscribe(gui.OnMouseDown, func(name string, ev interface{}) {
+		mev := ev.(*window.MouseEvent)
+		dragStartX = mev.Xpos
+		dragStartY = mev.Ypos
+		panelDragging = true
+	})
 
-		routerWindow.Add(footerPanel)
-	*/
-	// Add the window to the scene
-	gv.scene.Add(routerWindow)
-	log.Debug("Router window added to scene for: %s", router.System.Name)
+	routerPanel.Subscribe(gui.OnMouseUp, func(name string, ev interface{}) {
+		panelDragging = false
+	})
+
+	routerPanel.Subscribe(gui.OnCursor, func(name string, ev interface{}) {
+		if panelDragging {
+			cev := ev.(*window.CursorEvent)
+			deltaX := cev.Xpos - dragStartX
+			deltaY := cev.Ypos - dragStartY
+			pos := routerPanel.Position()
+			routerPanel.SetPosition(pos.X+deltaX, pos.Y+deltaY)
+			dragStartX = cev.Xpos
+			dragStartY = cev.Ypos
+		}
+	})
+
+	// Add the panel to the scene
+	gv.scene.Add(routerPanel)
+	log.Debug("Router panel added to scene for: %s", router.System.Name)
 }
 
 // formatUptime converts uptime in centiseconds to a human-readable format
