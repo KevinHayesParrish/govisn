@@ -132,26 +132,28 @@ func showRouterWindow(log *logger.Logger, gv *gvapp, router Router) {
 	spacer := gui.NewLabel("")
 	contentPanel.Add(spacer)
 
+	contentPanel.SetColor(math32.NewColor("grey"))
+
 	routerWindow.Add(contentPanel)
+	/*
+		// Create a footer panel for the close button
+		footerPanel := gui.NewPanel(600, 40)
+		footerLayout := gui.NewHBoxLayout()
+		footerLayout.SetSpacing(5)
+		footerPanel.SetLayout(footerLayout)
 
-	// Create a footer panel for the close button
-	footerPanel := gui.NewPanel(600, 40)
-	footerLayout := gui.NewHBoxLayout()
-	footerLayout.SetSpacing(5)
-	footerPanel.SetLayout(footerLayout)
+		// Close button
+		closeBtn := gui.NewButton("Close")
+		closeBtn.SetWidth(100)
+		closeBtn.Subscribe(gui.OnClick, func(name string, ev interface{}) {
+			routerWindow.SetVisible(false)
+			gv.scene.Remove(routerWindow)
+			log.Debug("Router window closed for: %s", router.System.Name)
+		})
+		//footerPanel.Add(closeBtn)
 
-	// Close button
-	closeBtn := gui.NewButton("Close")
-	closeBtn.SetWidth(100)
-	closeBtn.Subscribe(gui.OnClick, func(name string, ev interface{}) {
-		routerWindow.SetVisible(false)
-		gv.scene.Remove(routerWindow)
-		log.Debug("Router window closed for: %s", router.System.Name)
-	})
-	footerPanel.Add(closeBtn)
-
-	routerWindow.Add(footerPanel)
-
+		routerWindow.Add(footerPanel)
+	*/
 	// Add the window to the scene
 	gv.scene.Add(routerWindow)
 	log.Debug("Router window added to scene for: %s", router.System.Name)
