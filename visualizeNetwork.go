@@ -511,7 +511,8 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
  * updateLinks queries the router objects' interfaces and calculates the bitsPerSec. It then updates the links'
  *	lineWidth and color to visually reflect the amount of traffic flowing over each link.
  */
-func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP, resultsChan chan map[int]LinkUpdate) {
+//func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP, resultsChan chan map[int]LinkUpdate) {
+func updateLinks(log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP, resultsChan chan map[int]LinkUpdate) {
 	log.Info("Updating Links")
 	// TODO
 	//	1) Add RouterID to Links DB table - DONE
@@ -1174,7 +1175,8 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		//		if updateLinksOK {
 		if NetPollingEnabled {
 			// Spawn link update in background (doesn't block main thread)
-			go updateLinks(log, gv, databaseForRead, snmpTarget, params, linkUpdatesChan)
+			//go updateLinks(log, gv, databaseForRead, snmpTarget, params, linkUpdatesChan)
+			go updateLinks(log, databaseForRead, snmpTarget, params, linkUpdatesChan)
 			NetPollingEnabled = false
 		}
 	})
