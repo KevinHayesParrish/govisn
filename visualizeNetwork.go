@@ -44,7 +44,7 @@ import (
 )
 
 // VISUALIZE_NETWORK_VERSION is the version number of the visualizeNetwork func
-const VISUALIZE_NETWORK_VERSION = "0.3.4"
+const VISUALIZE_NETWORK_VERSION = "0.3.5"
 
 // App contains the application state
 type App struct {
@@ -741,6 +741,11 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 	// Create application and scene
 	gv := new(gvapp)
 	a := app.App()
+
+	glfwWin := window.Get().(*window.GlfwWindow)
+	glfwWin.SetSize(800, 800)
+	glfwWin.SetTitle("GoVisn Network Visualization in 3D - version " + VISUALIZE_NETWORK_VERSION)
+
 	gv.Application = a
 	gv.scene = core.NewNode()
 	gv.scene.SetName("GoVisnScene")
