@@ -514,12 +514,6 @@ func RetrieveRouter(router3DName string, databaseForRead *sql.DB, app *app.Appli
 //func updateLinks(log *logger.Logger, gv *gvapp, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP, resultsChan chan map[int]LinkUpdate) {
 func updateLinks(log *logger.Logger, databaseForRead *sql.DB, snmpTarget string, params *g.GoSNMP, resultsChan chan map[int]LinkUpdate) {
 	log.Info("Updating Links")
-	// TODO
-	//	1) Add RouterID to Links DB table - DONE
-	//	2) For each Link in Links DB table - DONE
-	//		2.1) query the From Routers applicable interfaces outbound traffic - DONE
-	//		2.2) calculate bitsPerSec on the interface - DONE
-	//	3) Update the link lineWidth and color to indicate the calculated link Utilization
 
 	var LinkID int
 	var FromRouterID, FromRouterName, FromRouterIfIndex, ToRouterName string
