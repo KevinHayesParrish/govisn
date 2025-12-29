@@ -332,7 +332,10 @@ func main() {
 			Logger:    g.Default.Logger,
 			MaxOids:   6,
 		}
-		_ = visualizeNetwork(log, databaseForRead, snmpTarget, params)
+		err := visualizeNetwork(log, databaseForRead, snmpTarget, params)
+		if err != nil {
+			log.Fatal("visualizeNetwork.main() err: %v", err)
+		}
 	}
 	log.Info("GoVisn version %s", GOVISN_VERSION+" ending.")
 }
