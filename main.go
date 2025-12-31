@@ -20,7 +20,7 @@ import (
 )
 
 // GOVISN_VERSION is the file version number
-const GOVISN_VERSION = "0.22.3"
+const GOVISN_VERSION = "0.22.4"
 
 // ROUTER_RADIUS is the radius of the 3D object representing a network router
 const ROUTER_RADIUS float64 = 0.5
@@ -332,10 +332,7 @@ func main() {
 			Logger:    g.Default.Logger,
 			MaxOids:   6,
 		}
-		err := visualizeNetwork(log, databaseForRead, snmpTarget, params)
-		if err != nil {
-			log.Fatal("visualizeNetwork.main() err: %v", err)
-		}
+		databaseForRead = visualizeNetwork(log, databaseForRead, snmpTarget, params)
 	}
 	log.Info("GoVisn version %s", GOVISN_VERSION+" ending.")
 }
