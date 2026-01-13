@@ -89,7 +89,6 @@ func buildLinks(log *logger.Logger, database *sql.DB) *sql.DB {
 		}
 
 	}
-	routeTableRows.Close()
 
 	for i := 0; i < len(links); i++ {
 		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterID, FromRouterName, FromRouterIP, FromRouterIfIndex, ToRouterID, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
@@ -108,7 +107,7 @@ func buildLinks(log *logger.Logger, database *sql.DB) *sql.DB {
 
 			}
 		}
-		defer statement.Close()
+		statement.Close()
 	}
 
 	log.Debug(fmt.Sprintf("func buildLinks version %s ending", BUILD_LINKS_VERSION))
@@ -127,11 +126,11 @@ func getRtrID(log *logger.Logger, Name string, database *sql.DB) int {
 	if queryErr != nil {
 		log.Fatal("databaseForRead Query Router error %v", queryErr)
 	}
+	defer routerRows.Close()
 	log.Debug("Successful Routers table Select")
 	for routerRows.Next() {
 		routerRows.Scan(&RouterID, &Name)
 		return RouterID
 	}
-	defer routerRows.Close()
 	return RouterID
 }
