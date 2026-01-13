@@ -132,5 +132,6 @@ func getRtrID(log *logger.Logger, Name string, database *sql.DB) int {
 		routerRows.Scan(&RouterID, &Name)
 		return RouterID
 	}
+	defer routerRows.Close()
 	return RouterID
 }
