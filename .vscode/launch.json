@@ -25,7 +25,6 @@
                 "${userHome}/tmp/govisn.db",
                 "-co",
                 "idontknow",
-                "-de",
                 "-m",
                 "30"
             ]
