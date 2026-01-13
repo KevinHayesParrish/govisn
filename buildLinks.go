@@ -6,6 +6,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"hash/crc32"
 	"os"
 
@@ -19,7 +20,7 @@ import (
 )
 
 // BUILD_LINKS_VERSION is the file version sequence number
-const BUILD_LINKS_VERSION = "0.0.6"
+const BUILD_LINKS_VERSION = "0.0.7"
 
 /*
  * This function reads the database for Routers and their info, then build the links Table
@@ -71,8 +72,9 @@ func buildLinks(log *logger.Logger, database *sql.DB) *sql.DB {
 			link.ToRouterName = ""
 		} else {
 			link.ToRouterName = rtrNames[0]
-			rtrID := getRtrID(log, link.ToRouterName, database)
-			link.ToRouterID = rtrID
+			//rtrID := getRtrID(log, link.ToRouterName, database)
+			//link.ToRouterID = rtrID
+			link.ToRouterID = getRtrID(log, link.ToRouterName, database)
 		}
 
 		link.ToRouterIP = NextHop
@@ -92,20 +94,24 @@ func buildLinks(log *logger.Logger, database *sql.DB) *sql.DB {
 	for i := 0; i < len(links); i++ {
 		statement, err := database.Prepare("INSERT INTO Links (LinkID, FromRouterID, FromRouterName, FromRouterIP, FromRouterIfIndex, ToRouterID, ToRouterName, ToRouterIP) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 		if err != nil {
-			log.Fatal("Links Insert Prepare err %v", err)
+			//log.Fatal("Links Insert Prepare err %v", err)
+			log.Fatal(fmt.Sprintf("Links Insert Prepare err %v", err))
 		}
 		_, err = statement.Exec(links[i].LinkID, links[i].FromRouterID, links[i].FromRouterName, links[i].FromRouterIP, links[i].FromRouterIfIndex, links[i].ToRouterID, links[i].ToRouterName, links[i].ToRouterIP)
 		if err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 				log.Info("Link already exists. Continue building links.")
 			} else {
-				log.Fatal("Link INSERT error %v", err)
+				//log.Fatal("Link INSERT error %v", err, "\n"+"Link Info: ", links[i])
+				//log.Fatal(fmt.Sprintf("Link INSERT error %v \n- Link Info: %+v", err, links[i]))
+				log.Warn(fmt.Sprintf("Link INSERT error %v \n- Link Info: %+v", err, links[i]))
+
 			}
 		}
 		defer statement.Close()
 	}
 
-	log.Debug("func buildLinks version %s", BUILD_LINKS_VERSION+" ending")
+	log.Debug(fmt.Sprintf("func buildLinks version %s ending", BUILD_LINKS_VERSION))
 
 	return database
 }
@@ -116,7 +122,8 @@ func buildLinks(log *logger.Logger, database *sql.DB) *sql.DB {
 func getRtrID(log *logger.Logger, Name string, database *sql.DB) int {
 	// Retrive Router from the database
 	var RouterID int
-	routerRows, queryErr := database.Query("SELECT RouterID, Name FROM Routers WHERE RouterID = ?", Name)
+	//routerRows, queryErr := database.Query("SELECT RouterID, Name FROM Routers WHERE RouterID = ?", Name)
+	routerRows, queryErr := database.Query("SELECT RouterID, Name FROM Routers WHERE Name = ?", Name)
 	if queryErr != nil {
 		log.Fatal("databaseForRead Query Router error %v", queryErr)
 	}
