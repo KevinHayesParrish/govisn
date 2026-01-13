@@ -162,8 +162,8 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 		}
 	} else {
 		routerSupportsSNMP = true
-		//router.System.Name = fqdn[0]
-		router.System.Name = string(result.Variables[0].Value.([]byte))
+		router.System.Name = fqdn[0]
+		//router.System.Name = string(result.Variables[0].Value.([]byte))
 		router.System.Description = string(result.Variables[1].Value.([]byte))
 		router.System.UpTime = result.Variables[2].Value.(uint32)
 		router.System.Contact = string(result.Variables[3].Value.([]byte))
