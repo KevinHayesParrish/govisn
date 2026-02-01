@@ -21,8 +21,8 @@ In the early 2000's VRML technology had sunset. A second generation of the proje
 
 **GoVisn** is the third generation of this 3D network visualization tool. By the Fall of 2018, 3D visualization technology had left Java3D behind. I was looking to continue the 3D network visualization concept, plus learn a new coding language. It was time to again re-write the application. Rather than develop a multi-tiered web-based application, I chose to keep with the original pinciples of the project:  
 
-1. Free Open Source Software.  
-1. Build something a network engineer could deploy, without requiring complicated systems engineering or administation tasks.  
+1. Free Open Source Software.
+2. Build something a network engineer could deploy, without requiring complicated systems engineering or administation tasks.  
   
 GoVisn is a single executable application. The command line executable takes startup options to scan a subnet for routers. It then queries those routers using SNMP to create a sqlite3 database. The database is used to render the 3D scene containing the router objects and the network links between them.  
   
