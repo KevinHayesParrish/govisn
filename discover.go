@@ -674,13 +674,25 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 	}
 	log.Debug("\nipRouteNextHopPDU PDU= %v", ipRouteNextHopPDU)
 
+	ipRouteTypePDU, err := params.WalkAll(IP_ROUTE_TYPE_OID)
+	if err != nil {
+		database.Close()
+		log.Fatal("Get(ipRouteTypePDU) err")
+	}
+
 	// Parse Dest and NextHop PDUs, adding row to ipRouteTable for each PDU element.
+	// Include only direct(3) routes.
 	var ipRouteTab ipRouteTable
 
 	for i := 0; i < (len(ipRouteDestPDU)); i++ {
 		ipRouteTab.ipRouteEntry.ipRouteDest = ipRouteDestPDU[i].Value.(string)
 		ipRouteTab.ipRouteEntry.ipRouteIfIndex = ipRouteIfIndexPDU[i].Value.(int)
 		ipRouteTab.ipRouteEntry.ipRouteNextHop = ipRouteNextHopPDU[i].Value.(string)
+
+		ipRouteTab.ipRouteEntry.ipRouteType = ipRouteTypePDU[i].Value.(int)
+		if ipRouteTab.ipRouteEntry.ipRouteType != 3 { // direct(3) route
+			continue
+		}
 
 		log.Debug("ipRouteDest= %s", ipRouteTab.ipRouteEntry.ipRouteDest)
 		log.Debug("ipRouteIfIndex= %d", ipRouteTab.ipRouteEntry.ipRouteIfIndex)
