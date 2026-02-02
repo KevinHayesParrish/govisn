@@ -179,7 +179,7 @@ type ipRouteTable struct {
 		ipRouteMetric3 int
 		ipRouteMetric4 int
 		ipRouteNextHop string
-		ipRouteType    string
+		ipRouteType    int
 		ipRouteProto   string
 		ipRouteAge     int
 		ipRouteMask    string
