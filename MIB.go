@@ -26,6 +26,7 @@ const (
 	IP_ROUTE_DEST_OID        string = "1.3.6.1.2.1.4.21.1.1"
 	IP_ROUTE_IF_INDEX_OID    string = "1.3.6.1.2.1.4.21.1.2"
 	IP_ROUTE_NEXT_HOP_OID    string = "1.3.6.1.2.1.4.21.1.7"
+	IP_ROUTE_TYPE_OID        string = "1.3.6.1.2.1.4.21.1.8"
 	IF_SPEED                 string = "1.3.6.1.2.1.2.2.1.5"
 	IF_OUT_OCTETS            string = "1.3.6.1.2.1.2.2.1.16"
 	IF_PHYS_ADDRESS_OID      string = ".1.3.6.1.2.1.2.2.1.6"
