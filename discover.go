@@ -150,7 +150,7 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 				"\n Router "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
 
 			router.System.Name = fqdn[0]
-			router.System.Description = ""
+			router.System.Description = "Unknown. No SNMP Response from Router."
 			router.System.UpTime = 0
 			router.System.Contact = ""
 			router.System.Location = ""
