@@ -19,6 +19,7 @@
             "program": "${fileDirname}",
             "env": {},
             "args": [
+                "-de",
                 "-di",
                 "192.168.1.1",
                 "-f",
