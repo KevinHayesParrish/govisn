@@ -72,9 +72,8 @@ func buildLinks(log *logger.Logger, database *sql.DB) *sql.DB {
 			link.ToRouterName = ""
 		} else {
 			link.ToRouterName = rtrNames[0]
-			//rtrID := getRtrID(log, link.ToRouterName, database)
-			//link.ToRouterID = rtrID
-			link.ToRouterID = getRtrID(log, link.ToRouterName, database)
+			//link.ToRouterID = getRtrIDByName(log, link.ToRouterName, database)
+			link.ToRouterID = getRtrIDByIP(log, link.ToRouterIP, database)
 		}
 
 		link.ToRouterIP = NextHop
@@ -115,22 +114,44 @@ func buildLinks(log *logger.Logger, database *sql.DB) *sql.DB {
 	return database
 }
 
+/*-------------------------------------------------------------------------------------------------------------*/
+/*                                                                                                             */
+/*  * getRtrIDByName retrieves the RouteID from the database, given a Router Name                              */
+/*                                                                                                             */
+/* func getRtrIDByName(log *logger.Logger, Name string, database *sql.DB) int {                                */
+/*        Retrive Router from the database                                                                     */
+/*     var RouterID int                                                                                        */
+/*       routerRows, queryErr := database.Query("SELECT RouterID, Name FROM Routers WHERE RouterID = ?", Name) */
+/*     routerRows, queryErr := database.Query("SELECT RouterID, Name FROM Routers WHERE Name = ?", Name)       */
+/*     if queryErr != nil {                                                                                    */
+/*         log.Fatal("databaseForRead Query Router error %v", queryErr)                                        */
+/*     }                                                                                                       */
+/*     defer routerRows.Close()                                                                                */
+/*     log.Debug("Successful Routers table Select")                                                            */
+/*     for routerRows.Next() {                                                                                 */
+/*         routerRows.Scan(&RouterID)                                                                          */
+/*         return RouterID                                                                                     */
+/*     }                                                                                                       */
+/*     return RouterID                                                                                         */
+/* }                                                                                                           */
+/*-------------------------------------------------------------------------------------------------------------*/
+
 /*
- * getRtrID retrieves the RouteID from the database, given a Router Name
+ * getRtrIDByIP retrieves the RouterID from the database, given a Router IP address
  */
-func getRtrID(log *logger.Logger, Name string, database *sql.DB) int {
+func getRtrIDByIP(log *logger.Logger, IP string, database *sql.DB) int {
 	// Retrive Router from the database
 	var RouterID int
-	//routerRows, queryErr := database.Query("SELECT RouterID, Name FROM Routers WHERE RouterID = ?", Name)
-	routerRows, queryErr := database.Query("SELECT RouterID, Name FROM Routers WHERE Name = ?", Name)
+	routerRows, queryErr := database.Query("SELECT RouterID FROM RouterIp WHERE IpAddr = ?", IP)
 	if queryErr != nil {
 		log.Fatal("databaseForRead Query Router error %v", queryErr)
 	}
 	defer routerRows.Close()
-	log.Debug("Successful Routers table Select")
+	log.Debug("Successful RouterIp table Select")
 	for routerRows.Next() {
-		routerRows.Scan(&RouterID, &Name)
+		routerRows.Scan(&RouterID)
 		return RouterID
 	}
+
 	return RouterID
 }
