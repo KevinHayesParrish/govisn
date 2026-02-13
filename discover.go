@@ -162,8 +162,8 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 		}
 	} else {
 		routerSupportsSNMP = true
-		router.System.Name = fqdn[0]
-		//router.System.Name = string(result.Variables[0].Value.([]byte))
+		//router.System.Name = fqdn[0]
+		router.System.Name = string(result.Variables[0].Value.([]byte))
 		router.System.Description = string(result.Variables[1].Value.([]byte))
 		router.System.UpTime = result.Variables[2].Value.(uint32)
 		router.System.Contact = string(result.Variables[3].Value.([]byte))
@@ -232,16 +232,20 @@ func getRouterInfo(log *logger.Logger, snmpTarget string, params *g.GoSNMP, rout
 
 	Name := router.System.Name
 
-	ifPhysAddress1, err := getIfPhysAddress(log, snmpTarget, params)
+	//ifPhysAddress1, err := getIfPhysAddress(log, snmpTarget, params)
 	var RouterIDUint32 uint32
-	if err != nil {
-		log.Warn("Router %s has no ifPhysAddress.1", snmpTarget)
-		RouterIDUint32 = crc32.ChecksumIEEE([]byte(Name))
-		log.Debug("Calculated RouterID using %s as: %d", Name, RouterIDUint32)
-	} else {
-		RouterIDUint32 = crc32.ChecksumIEEE([]byte(ifPhysAddress1))
-		log.Debug("Calculated RouterID using %s as: %d", ifPhysAddress1, RouterIDUint32)
-	}
+	/*--------------------------------------------------------------------------------------*/
+	/* if err != nil {                                                                      */
+	/*     log.Warn("Router %s has no ifPhysAddress.1", snmpTarget)                         */
+	/*     RouterIDUint32 = crc32.ChecksumIEEE([]byte(Name))                                */
+	/*     log.Debug("Calculated RouterID using %s as: %d", Name, RouterIDUint32)           */
+	/* } else {                                                                             */
+	/*     RouterIDUint32 = crc32.ChecksumIEEE([]byte(ifPhysAddress1))                      */
+	/*     log.Debug("Calculated RouterID using %s as: %d", ifPhysAddress1, RouterIDUint32) */
+	/* }                                                                                    */
+	/*                                                                                      */
+	/*--------------------------------------------------------------------------------------*/
+	RouterIDUint32 = crc32.ChecksumIEEE([]byte(Name))
 
 	router.System.RouterID = int(RouterIDUint32)
 	Description := router.System.Description
@@ -652,6 +656,8 @@ func getIPAddresses(log *logger.Logger, params *g.GoSNMP, router Router, databas
  */
 func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, database *sql.DB) {
 
+	log.Debug("Starting getIPRouteTable.")
+
 	// get ipRouteTable
 	ipRouteDestPDU, err := params.WalkAll(IP_ROUTE_DEST_OID)
 	if err != nil {
@@ -705,16 +711,18 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 			log.Fatal("RouterTable Prepare Insert Exec err")
 		}
 
-		ifPhysAddress1, err := getIfPhysAddress(log, params.Target, params)
-		var RouterID uint32
-		if err != nil {
-			log.Warn("Router %s has no ifPhysAddress.1", params.Target)
-			RouterID = crc32.ChecksumIEEE([]byte(router.System.Name))
-		} else {
-			RouterID = crc32.ChecksumIEEE([]byte(ifPhysAddress1))
-		}
+		/*---------------------------------------------------------------------*/
+		/* ifPhysAddress1, err := getIfPhysAddress(log, params.Target, params) */
+		/* var RouterID uint32                                                 */
+		/* if err != nil {                                                     */
+		/*     log.Warn("Router %s has no ifPhysAddress.1", params.Target)     */
+		/*     RouterID = crc32.ChecksumIEEE([]byte(router.System.Name))       */
+		/* } else {                                                            */
+		/*     RouterID = crc32.ChecksumIEEE([]byte(ifPhysAddress1))           */
+		/* }                                                                   */
+		/*---------------------------------------------------------------------*/
 
-		//RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
+		RouterID := crc32.ChecksumIEEE([]byte(router.System.Name))
 
 		_, err = statement.Exec(RouterID, ipRouteTab.ipRouteEntry.ipRouteDest, ipRouteTab.ipRouteEntry.ipRouteIfIndex, ipRouteTab.ipRouteEntry.ipRouteNextHop)
 		if err != nil {
@@ -724,31 +732,35 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 		defer statement.Close()
 	}
 
-}
-
-func getIfPhysAddress(log *logger.Logger, snmpTarget string, params *g.GoSNMP) (string, error) {
-	log.Debug("getIfPhysAddress for %s", snmpTarget)
-
-	oids := []string{
-		IF_PHYS_ADDRESS_OID + ".1",
-	}
-	result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS
-	if err != nil {
-		if strings.Contains(err.Error(), "timeout") || strings.Contains(err.Error(), "refused") {
-			log.Warn("Get() err %s", err.Error()+
-				"\n Router "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.")
-
-			return "", err
-		} else {
-			log.Fatal("Router %s has no ifPhysAddress.1", snmpTarget)
-		}
-	}
-
-	ifPhysAddress1 := string(result.Variables[0].Value.([]byte))
-
-	return ifPhysAddress1, err
+	log.Debug("Ended getIPRouteTable.")
 
 }
+
+/*------------------------------------------------------------------------------------------------------------*/
+/* func getIfPhysAddress(log *logger.Logger, snmpTarget string, params *g.GoSNMP) (string, error) {           */
+/*     log.Debug("getIfPhysAddress for %s", snmpTarget)                                                       */
+/*                                                                                                            */
+/*     oids := []string{                                                                                      */
+/*         IF_PHYS_ADDRESS_OID + ".1",                                                                        */
+/*     }                                                                                                      */
+/*     result, err := params.Get(oids) // Get() accepts up to g.MAX_OIDS                                      */
+/*     if err != nil {                                                                                        */
+/*         if strings.Contains(err.Error(), "timeout") || strings.Contains(err.Error(), "refused") {          */
+/*             log.Warn("Get() err %s", err.Error()+                                                          */
+/*                 "\n Router "+snmpTarget+" not responding to SNMP Get. Continuing with network discovery.") */
+/*                                                                                                            */
+/*             return "", err                                                                                 */
+/*         } else {                                                                                           */
+/*             log.Fatal("Router %s has no ifPhysAddress.1", snmpTarget)                                      */
+/*         }                                                                                                  */
+/*     }                                                                                                      */
+/*                                                                                                            */
+/*     ifPhysAddress1 := string(result.Variables[0].Value.([]byte))                                           */
+/*                                                                                                            */
+/*     return ifPhysAddress1, err                                                                             */
+/*                                                                                                            */
+/* }                                                                                                          */
+/*------------------------------------------------------------------------------------------------------------*/
 
 /*
  * func writeMactoDB writes the router's MAC address information to the RouterMac table
