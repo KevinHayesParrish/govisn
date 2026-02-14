@@ -20,7 +20,7 @@ import (
 )
 
 // BUILD_LINKS_VERSION is the file version sequence number
-const BUILD_LINKS_VERSION = "0.0.7"
+const BUILD_LINKS_VERSION = "0.0.8"
 
 /*
  * This function reads the database for Routers and their info, then build the links Table
