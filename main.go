@@ -20,10 +20,10 @@ import (
 )
 
 // GOVISN_VERSION is the file version number
-const GOVISN_VERSION = "0.22.8"
+const GOVISN_VERSION = "0.22.9"
 
 // ROUTER_RADIUS is the radius of the 3D object representing a network router
-const ROUTER_RADIUS float64 = 0.5
+const ROUTER_RADIUS float64 = 1.2
 
 // GLOBE_RADIUS is the radius of the 3D object representing the earth
 const GLOBE_RADIUS float64 = 63.7
