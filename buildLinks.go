@@ -66,16 +66,34 @@ func buildLinks(log *logger.Logger, database *sql.DB) *sql.DB {
 			link.FromRouterIP = fromIPs[0]
 		}
 
-		rtrNames := getRtrName(NextHop)
-		if len(rtrNames) < 1 {
-			log.Warn("No Router Name for Route Destination %s", NextHop)
-			link.ToRouterName = ""
-		} else {
-			link.ToRouterName = rtrNames[0]
-			//link.ToRouterID = getRtrIDByName(log, link.ToRouterName, database)
-			link.ToRouterID = getRtrIDByIP(log, link.ToRouterIP, database)
+		//! TODO: change from getRtrName function to getRtrIDByIP function,
+		//! since some routers may not have a name or DNS entry,
+		//! but should have an IP address. This will also allow us to build
+		//! links to routers that are not directly connected to the current
+		//! router, but are reachable through other routers. We can use the
+		//! NextHop IP address to find the RouterID and Name of the next hop
+		//! router in the database, and then use that information to build
+		//! the link.
+		/*--------------------------------------------------------------------------*/
+		/* rtrNames := getRtrName(NextHop)                                          */
+		/*                                                                          */
+		/* if len(rtrNames) < 1 {                                                   */
+		/*     log.Warn("No Router Name for Route Destination %s", NextHop)         */
+		/*     link.ToRouterName = ""                                               */
+		/* } else {                                                                 */
+		/*     link.ToRouterName = rtrNames[0]                                      */
+		/*       link.ToRouterID = getRtrIDByName(log, link.ToRouterName, database) */
+		/*     link.ToRouterID = getRtrIDByIP(log, link.ToRouterIP, database)       */
+		/* }                                                                        */
+		/*                                                                          */
+		/*--------------------------------------------------------------------------*/
+		link.ToRouterID = getRtrIDByIP(log, NextHop, database)
+		if link.ToRouterID == 0 {
+			log.Warn("No Router ID for Route Destination %s. Link not added to database.", NextHop)
+			continue
 		}
 
+		link.ToRouterName = getRtrNameByID(log, link.ToRouterID, database)
 		link.ToRouterIP = NextHop
 
 		// calculate LinkID
@@ -154,4 +172,24 @@ func getRtrIDByIP(log *logger.Logger, IP string, database *sql.DB) int {
 	}
 
 	return RouterID
+}
+
+/*
+ * getRtrNameByID retrieves the Router Name from the database, given a RouterID
+ */
+func getRtrNameByID(log *logger.Logger, RouterID int, database *sql.DB) string {
+	// Retrive Router from the database
+	var Name string
+	routerRows, queryErr := database.Query("SELECT Name FROM Routers WHERE RouterID = ?", RouterID)
+	if queryErr != nil {
+		log.Fatal("databaseForRead Query Router error %v", queryErr)
+	}
+	defer routerRows.Close()
+	log.Debug("Successful Routers table Select")
+	for routerRows.Next() {
+		routerRows.Scan(&Name)
+		return Name
+	}
+
+	return Name
 }
