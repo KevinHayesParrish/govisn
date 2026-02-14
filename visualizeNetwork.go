@@ -44,7 +44,7 @@ import (
 )
 
 // VISUALIZE_NETWORK_VERSION is the version number of the visualizeNetwork func
-const VISUALIZE_NETWORK_VERSION = "0.3.5"
+const VISUALIZE_NETWORK_VERSION = "0.3.6"
 
 // App contains the application state
 type App struct {
@@ -897,7 +897,8 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		}
 
 		font.SetLineSpacing(1.0)
-		font.SetPointSize(28)
+		ptSize := 28.0
+		font.SetPointSize(ptSize)
 		font.SetDPI(72)
 		font.SetFgColor(&math32.Color4{R: 0, G: 0, B: 1, A: 1})
 		font.SetBgColor(&math32.Color4{R: 1, G: 1, B: 0, A: 0.8})
@@ -910,8 +911,14 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 		mat3 := material.NewStandard(&math32.Color{R: 1, G: 1, B: 1})
 		mat3.AddTexture(tex3)
 		aspect := float32(swidth) / float32(sheight)
-		mesh3 := graphic.NewSprite(aspect, 1, mat3)
-		mesh3.SetPosition(x, y+1.0, z)
+		// Compute sprite height from measured text pixel height. The scaling
+		// factor converts pixel height into world units. Adjust `0.02` to
+		// increase/decrease visible text size relative to scene scale.
+		spriteHeight := float32(sheight) * 0.02
+		mesh3 := graphic.NewSprite(aspect, spriteHeight, mat3)
+		// Position label above the router using router radius and half the
+		// sprite height for clean vertical spacing.
+		mesh3.SetPosition(x, y+float32(ROUTER_RADIUS)+spriteHeight/2+0.2, z)
 		gv.scene.Add(mesh3)
 
 		queryErr = routerRows.Err()
