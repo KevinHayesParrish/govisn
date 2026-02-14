@@ -696,10 +696,12 @@ func getIPRouteTable(log *logger.Logger, params *g.GoSNMP, router Router, databa
 		ipRouteTab.ipRouteEntry.ipRouteNextHop = ipRouteNextHopPDU[i].Value.(string)
 
 		ipRouteTab.ipRouteEntry.ipRouteType = ipRouteTypePDU[i].Value.(int)
-		if ipRouteTab.ipRouteEntry.ipRouteType != 3 { // direct(3) route
-			continue
-		}
-
+		/*------------------------------------------------------------------*/
+		/* if ipRouteTab.ipRouteEntry.ipRouteType != 3 { // direct(3) route */
+		/*     continue                                                     */
+		/* }                                                                */
+		/*                                                                  */
+		/*------------------------------------------------------------------*/
 		log.Debug("ipRouteDest= %s", ipRouteTab.ipRouteEntry.ipRouteDest)
 		log.Debug("ipRouteIfIndex= %d", ipRouteTab.ipRouteEntry.ipRouteIfIndex)
 		log.Debug("ipRouteNextHop= %s", ipRouteTab.ipRouteEntry.ipRouteNextHop)
