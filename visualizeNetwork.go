@@ -44,7 +44,7 @@ import (
 )
 
 // VISUALIZE_NETWORK_VERSION is the version number of the visualizeNetwork func
-const VISUALIZE_NETWORK_VERSION = "0.3.6"
+const VISUALIZE_NETWORK_VERSION = "0.4.0"
 
 // App contains the application state
 type App struct {
@@ -133,7 +133,7 @@ var NetPollingEnabled bool = false
 /*
  * func buildmenus creates the Gui menus and menuitems for the application
  */
-func buildMenus(gv *gvapp, a *app.Application) *app.Application {
+func buildMenus(databaseForRead *sql.DB, gv *gvapp, a *app.Application) *app.Application {
 	log.Debug("Starting func buildMenus")
 
 	// Event handler for menu clicks
@@ -145,6 +145,11 @@ func buildMenus(gv *gvapp, a *app.Application) *app.Application {
 				gv.cam.SetPositionVec(&gv.camPos)
 				gv.cam.LookAt(&math32.Vector3{X: 0, Y: 0, Z: 0}, &math32.Vector3{X: 0, Y: 1, Z: 0})
 				gv.orbit.Reset()
+			}
+		case "Show Routers":
+			{
+				log.Debug("Show Routers selected")
+				showRoutersListWindow(log, databaseForRead, gv, gv.Application)
 			}
 		case "Print":
 			{
@@ -186,6 +191,8 @@ func buildMenus(gv *gvapp, a *app.Application) *app.Application {
 	m1 := gui.NewMenu()
 	m1.AddOption("Reset Camera to Initial View").
 		SetId("Reset")
+	m1.AddOption("Show Routers").
+		SetId("Show Routers")
 	m1.AddOption("Print 3D Scene graph").
 		SetId("Print")
 	m1.AddOption("Exit").
@@ -796,7 +803,7 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 	gv = addTitle(log, gv)
 
 	// Build Menus
-	buildMenus(gv, a)
+	buildMenus(databaseForRead, gv, a)
 
 	var RouterID int
 	var Name string
@@ -1188,4 +1195,142 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 
 	return databaseForRead
 
+}
+
+/*
+ * func showRoutersListWindow displays a list of all routers in the database
+ */
+func showRoutersListWindow(log *logger.Logger, databaseForRead *sql.DB, gv *gvapp, app *app.Application) {
+	log.Debug("Showing routers list window")
+
+	// Create a panel as a window
+	routersPanel := gui.NewPanel(1400, 700)
+	routersPanel.SetPosition(50, 50)
+	routersPanel.SetBordersColor(math32.NewColor("darkblue"))
+	routersPanel.SetBorders(2, 2, 2, 2)
+	routersPanel.SetPaddings(10, 10, 10, 10)
+	routersPanel.SetColor(math32.NewColor("grey"))
+
+	// Create a title label
+	titleLabel := gui.NewLabel("Routers in Database")
+	titleLabel.SetFontSize(16)
+	titleLabel.SetColor(math32.NewColor("white"))
+
+	// Create a vertical layout container
+	vbox := gui.NewVBoxLayout()
+	vbox.SetSpacing(1)
+	routersPanel.SetLayout(vbox)
+
+	// Add title
+	routersPanel.Add(titleLabel)
+
+	// Create header row
+	headerLabel := gui.NewLabel(
+		fmt.Sprintf("%-8s | %-40s | %-40s | %-50s",
+			"ID", "Name", "Description", "IP Addresses"))
+	headerLabel.SetColor(math32.NewColor("yellow"))
+	routersPanel.Add(headerLabel)
+
+	// Add separator
+	sepLabel := gui.NewLabel(strings.Repeat("-", 150))
+	routersPanel.Add(sepLabel)
+
+	// Query all routers from database
+	routerRows, queryErr := databaseForRead.Query(
+		"SELECT RouterID, Name, Description FROM Routers ORDER BY RouterID")
+	if queryErr != nil {
+		log.Error("Failed to query routers: %v", queryErr)
+		return
+	}
+	defer routerRows.Close()
+
+	// Process each router
+	for routerRows.Next() {
+		var routerID int
+		var name, description string
+
+		routerRows.Scan(&routerID, &name, &description)
+
+		// Query IP addresses for this router
+		ipRows, _ := databaseForRead.Query(
+			"SELECT IpAddr FROM RouterIp WHERE RouterID = ? ORDER BY IpAddr",
+			routerID)
+
+		var ipAddresses []string
+		for ipRows.Next() {
+			var ipAddr string
+			ipRows.Scan(&ipAddr)
+			ipAddresses = append(ipAddresses, ipAddr)
+		}
+		ipRows.Close()
+
+		// Format IP addresses string
+		ipString := ""
+		if len(ipAddresses) > 0 {
+			ipString = ipAddresses[0]
+			if len(ipAddresses) > 1 {
+				ipString += fmt.Sprintf(" (+%d more)", len(ipAddresses)-1)
+			}
+		}
+
+		// Display router row
+		routerLabel := gui.NewLabel(
+			fmt.Sprintf("%-8d | %-40s | %-40s | %-50s",
+				routerID, truncateString(name, 40),
+				truncateString(description, 40), ipString))
+		routersPanel.Add(routerLabel)
+	}
+
+	// Add spacing before close button
+	spacer := gui.NewLabel("")
+	routersPanel.Add(spacer)
+
+	// Close button
+	closeBtn := gui.NewButton("Close")
+	closeBtn.SetWidth(100)
+	closeBtn.Subscribe(gui.OnClick, func(name string, ev interface{}) {
+		routersPanel.SetVisible(false)
+		gv.scene.Remove(routersPanel)
+		log.Debug("Routers list panel closed")
+	})
+	routersPanel.Add(closeBtn)
+
+	// Make draggable
+	var dragStartX, dragStartY float32
+	var panelDragging bool
+
+	routersPanel.Subscribe(gui.OnMouseDown, func(name string, ev interface{}) {
+		mev := ev.(*window.MouseEvent)
+		dragStartX = mev.Xpos
+		dragStartY = mev.Ypos
+		panelDragging = true
+	})
+
+	routersPanel.Subscribe(gui.OnMouseUp, func(name string, ev interface{}) {
+		panelDragging = false
+	})
+
+	routersPanel.Subscribe(gui.OnCursor, func(name string, ev interface{}) {
+		if panelDragging {
+			cev := ev.(*window.CursorEvent)
+			deltaX := cev.Xpos - dragStartX
+			deltaY := cev.Ypos - dragStartY
+			pos := routersPanel.Position()
+			routersPanel.SetPosition(pos.X+deltaX, pos.Y+deltaY)
+			dragStartX = cev.Xpos
+			dragStartY = cev.Ypos
+		}
+	})
+
+	// Add to scene
+	gv.scene.Add(routersPanel)
+	log.Debug("Routers list panel added to scene")
+}
+
+// Helper function to truncate strings for display
+func truncateString(s string, maxLen int) string {
+	if len(s) > maxLen {
+		return s[:maxLen-3] + "..."
+	}
+	return s
 }
