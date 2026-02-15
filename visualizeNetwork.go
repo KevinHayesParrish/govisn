@@ -44,7 +44,7 @@ import (
 )
 
 // VISUALIZE_NETWORK_VERSION is the version number of the visualizeNetwork func
-const VISUALIZE_NETWORK_VERSION = "0.4.0"
+const VISUALIZE_NETWORK_VERSION = "0.4.1"
 
 // App contains the application state
 type App struct {
@@ -149,7 +149,8 @@ func buildMenus(databaseForRead *sql.DB, gv *gvapp, a *app.Application) *app.App
 		case "Show Routers":
 			{
 				log.Debug("Show Routers selected")
-				showRoutersListWindow(log, databaseForRead, gv, gv.Application)
+				//showRoutersListWindow(log, databaseForRead, gv, gv.Application)
+				showRoutersListWindow(log, databaseForRead, gv)
 			}
 		case "Print":
 			{
@@ -1200,12 +1201,13 @@ func visualizeNetwork(log *logger.Logger, databaseForRead *sql.DB, snmpTarget st
 /*
  * func showRoutersListWindow displays a list of all routers in the database
  */
-func showRoutersListWindow(log *logger.Logger, databaseForRead *sql.DB, gv *gvapp, app *app.Application) {
+//func showRoutersListWindow(log *logger.Logger, databaseForRead *sql.DB, gv *gvapp, app *app.Application) {
+func showRoutersListWindow(log *logger.Logger, databaseForRead *sql.DB, gv *gvapp) {
 	log.Debug("Showing routers list window")
 
 	// Create a panel as a window
-	routersPanel := gui.NewPanel(1400, 700)
-	routersPanel.SetPosition(50, 50)
+	routersPanel := gui.NewPanel(1000, 700)
+	routersPanel.SetPosition(25, 50)
 	routersPanel.SetBordersColor(math32.NewColor("darkblue"))
 	routersPanel.SetBorders(2, 2, 2, 2)
 	routersPanel.SetPaddings(10, 10, 10, 10)
@@ -1266,12 +1268,23 @@ func showRoutersListWindow(log *logger.Logger, databaseForRead *sql.DB, gv *gvap
 
 		// Format IP addresses string
 		ipString := ""
-		if len(ipAddresses) > 0 {
+		if len(ipAddresses) > 2 {
+			ipString = fmt.Sprintf("%s, %s, +%d more", ipAddresses[0], ipAddresses[1], len(ipAddresses)-2)
+		} else if len(ipAddresses) == 2 {
+			ipString = fmt.Sprintf("%s, %s", ipAddresses[0], ipAddresses[1])
+		} else if len(ipAddresses) == 1 {
 			ipString = ipAddresses[0]
-			if len(ipAddresses) > 1 {
-				ipString += fmt.Sprintf(" (+%d more)", len(ipAddresses)-1)
-			}
+		} else {
+			ipString = "No IP Addresses"
 		}
+		/*--------------------------------------------------------------------*/
+		/* if len(ipAddresses) > 0 {                                          */
+		/*     ipString = ipAddresses[0]                                      */
+		/*     if len(ipAddresses) > 1 {                                      */
+		/*         ipString += fmt.Sprintf(" (+%d more)", len(ipAddresses)-1) */
+		/*     }                                                              */
+		/* }                                                                  */
+		/*--------------------------------------------------------------------*/
 
 		// Display router row
 		routerLabel := gui.NewLabel(
