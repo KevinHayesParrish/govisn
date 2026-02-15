@@ -46,6 +46,11 @@ I stand on the shoulders of giants.
 1. The Apple MacOS implementation of G3N only allows a linewidth of 1. Therefore, on MacOS implementations of GoVisn, the network links will always be a linewidth of 1, regardless of the link utilization percentage.  
 2. When executing GoVisn on a monitor with 16x10 aspect ratio (a laptop, for instance), G3N may not properly support the menu bars and items. Mouse clicking may also not be accurate. There may be a bug in the G3N implementation, or I may not be properly utilizing G3N.
 
+## Installation Notes
+
+1. Fonts and Images must be copied to a folder in the same folder as the govisn executable. govisn reads the font and image files during execution. These files are located in the govisn source repository. Simply copy the govisn/data folder into your GOBIN folder/directory. 
+   1. For example, 'copy -r /home/user/govisn/data /home/user/.local/bin/data'.
+
 ## Usage of GoVisn
 
 ### Options  
