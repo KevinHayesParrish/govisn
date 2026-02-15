@@ -18,8 +18,8 @@ func showRouterWindow(log *logger.Logger, gv *gvapp, router Router) {
 	log.Debug("Showing router window for: %s", router.System.Name)
 
 	// Create a panel as a window (use Panel instead of gui.NewWindow to avoid type conflicts)
-	routerPanel := gui.NewPanel(600, 700)
-	routerPanel.SetPosition(100, 50)
+	routerPanel := gui.NewPanel(400, 700)
+	routerPanel.SetPosition(15, 50)
 	routerPanel.SetBordersColor(math32.NewColor("darkblue"))
 	routerPanel.SetBorders(2, 2, 2, 2)
 	routerPanel.SetPaddings(10, 10, 10, 10)
