@@ -48,8 +48,8 @@ I stand on the shoulders of giants.
 
 ## Installation Notes
 
-1. Fonts and Images must be copied to a folder in the same folder as the govisn executable. govisn reads the font and image files during execution. These files are located in the govisn source repository. Simply copy the govisn/data folder into your GOBIN folder/directory. 
-   1. For example, 'copy -r /home/user/govisn/data /home/user/.local/bin/data'.
+1. Fonts and Images must be copied to a folder in the same folder as the govisn executable. govisn reads the font and image files during execution. These files are located in the govisn source repository. Simply copy the dist/govisn-*x.x.x*-*OS*-*arch*/data folder into your GOBIN folder/directory.  
+   1. For example, 'copy -r .../govisn/dist/govisn-0.24.0-linux-amd64/data /home/user/go/bin/data'.
 
 ## Usage of GoVisn
 
