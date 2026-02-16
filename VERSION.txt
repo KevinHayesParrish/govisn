@@ -1,0 +1,2 @@
+# Version file
+0.24.0
