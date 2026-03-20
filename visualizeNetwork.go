@@ -168,16 +168,18 @@ func buildMenus(databaseForRead *sql.DB, gv *gvapp, a *app.Application) *app.App
 				log.Info("GoVisn terminating. File/Exit selected.")
 				gv.Exit()
 			}
-		case "Enable Polling":
+		case "Update Links":
 			{
 				NetPollingEnabled = true
-				log.Debug("Network Traffic Polling %t", NetPollingEnabled)
+				log.Debug("Update Links %t", NetPollingEnabled)
 			}
-		case "Disable Polling":
-			{
-				NetPollingEnabled = false
-				log.Debug("Network Traffic Polling %t", NetPollingEnabled)
-			}
+			/*------------------------------------------------------------------------*/
+			/*     case "Disable Polling":                                            */
+			/*         {                                                              */
+			/*             NetPollingEnabled = false                                  */
+			/*             log.Debug("Network Traffic Polling %t", NetPollingEnabled) */
+			/*         }                                                              */
+			/*------------------------------------------------------------------------*/
 		}
 	}
 
@@ -204,13 +206,16 @@ func buildMenus(databaseForRead *sql.DB, gv *gvapp, a *app.Application) *app.App
 
 	// Create linksMenu and add it to the menu bar
 	m2 := gui.NewMenu()
-	m2.AddOption("Enable Auto-Update Links").
-		SetId("Enable Polling")
-	m2.AddOption("Disable Auto-Update Links").
-		SetId("Disable Polling")
+	m2.AddOption("Update Links").
+		SetId("Update Links").
+		SetShortcut(window.ModAlt, window.Key2)
+	/*--------------------------------------------*/
+	/* m2.AddOption("Disable Auto-Update Links"). */
+	/*     SetId("Disable Polling")               */
+	/*--------------------------------------------*/
+
 	mb.AddMenu("Links", m2).
-		SetId("Enable").
-		SetShortcut(window.ModAlt, window.Key1)
+		SetId("Enable")
 
 	mb.Subscribe(gui.OnClick, func(name string, ev interface{}) {
 		material.NewStandard(math32.NewColor("DarkRed"))
@@ -601,7 +606,7 @@ func updateLinks(log *logger.Logger, databaseForRead *sql.DB, snmpTarget string,
 				// Calculate differnce of ifOutOctets 2 and ifOutOctets 1) and multiply by 8.
 				// This is the approx. number of bits per second.
 				bitsPerSec := (ifOutOctets2 - ifOutOctets1) * 8
-				log.Debug("LinkID %s", strconv.Itoa(LinkID)+" (From "+FromRouterName+"To "+ToRouterName+"): bps= "+strconv.FormatInt(int64(bitsPerSec), 10))
+				log.Debug("LinkID %s", strconv.Itoa(LinkID)+" (From "+FromRouterName+" To "+ToRouterName+"): bps= "+strconv.FormatInt(int64(bitsPerSec), 10))
 
 				// set linkColor and linkWidth, depending on linkUtilization
 				var linkUtil = float32(bitsPerSec / ifSpeed1)
