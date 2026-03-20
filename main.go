@@ -20,7 +20,7 @@ import (
 )
 
 // GOVISN_VERSION is the file version number
-const GOVISN_VERSION = "0.24.0"
+const GOVISN_VERSION = "0.24.1"
 
 // ROUTER_RADIUS is the radius of the 3D object representing a network router
 const ROUTER_RADIUS float64 = 1.2
@@ -71,7 +71,8 @@ func connectToSNMP(target string, community string) (*g.GoSNMP, error) {
 		Community: community,
 		Version:   g.Version2c,
 		//		Timeout:   10,
-		Timeout: time.Duration(2) * time.Second,
+		Timeout: time.Duration(3) * time.Second,
+		Retries: 5,
 	}
 	err := client.Connect()
 	if err != nil {
@@ -155,8 +156,8 @@ func main() {
 		Port:      uint16(port),
 		Community: *community,
 		Version:   g.Version2c,
-		Timeout:   time.Duration(2) * time.Second,
-		Retries:   2,
+		Timeout:   time.Duration(3) * time.Second,
+		Retries:   5,
 		Logger:    g.Default.Logger,
 		MaxOids:   6,
 	}
@@ -262,7 +263,8 @@ func main() {
 			Port:      uint16(port),
 			Community: *community,
 			Version:   g.Version2c,
-			Timeout:   time.Duration(2) * time.Second,
+			Timeout:   time.Duration(3) * time.Second,
+			Retries:   5,
 			Logger:    g.Default.Logger,
 			MaxOids:   6,
 		}
@@ -328,7 +330,8 @@ func main() {
 			Port:      uint16(port),
 			Community: *community,
 			Version:   g.Version2c,
-			Timeout:   time.Duration(2) * time.Second,
+			Timeout:   time.Duration(3) * time.Second,
+			Retries:   5,
 			Logger:    g.Default.Logger,
 			MaxOids:   6,
 		}
